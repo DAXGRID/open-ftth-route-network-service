@@ -108,7 +108,7 @@ workflows:
             - test-app
           filters:
             tags:
-              only: /^[0-9].*/
+              only: /^v.*/
             branches:
               ignore: /.*/
       - docker-publish-image:
