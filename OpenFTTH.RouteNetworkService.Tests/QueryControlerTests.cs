@@ -150,8 +150,5 @@ namespace OpenFTTH.RouteNetworkService.Tests
             // Assert
             Assert.True(result is BadRequestObjectResult);
         }
-
-
-      
     }
 }
