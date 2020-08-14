@@ -78,7 +78,7 @@ jobs:
       - run:
           name: Push to NuGet
           command: |
-            dotnet pack ./OpenFTTH.RouteNetworkService.Queries.OpenFTTH.RouteNetworkService.Queries.csproj --output ./publish --configuration Release -p:PackageVersion=${CIRCLE_TAG:1}
+            dotnet pack ./OpenFTTH.RouteNetworkService.Queries/OpenFTTH.RouteNetworkService.Queries.csproj --output ./publish --configuration Release -p:PackageVersion=${CIRCLE_TAG:1}
             dotnet nuget push --source "${NUGET_FEED_URL}" --api-key="${NUGET_KEY}" "./publish/*.nupkg"
 
 workflows:
