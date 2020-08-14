@@ -1,0 +1,122 @@
+version: 2.1
+
+executors:
+  dotnet-core-sdk:
+    docker:
+    - image: mcr.microsoft.com/dotnet/core/sdk:3.1
+  docker-publisher:
+    environment:
+      image_name: openftth/route-network-service
+    docker:
+      - image: circleci/buildpack-deps:stretch
+
+jobs:
+  build-app:
+    executor: dotnet-core-sdk
+    steps:
+      - checkout
+      - run:
+          name: apt update
+          command: apt-get update;
+      - run:
+          name: restore
+          command: dotnet restore
+      - run:
+          name: build
+          command: dotnet build -c release
+
+  test-app:
+    executor: dotnet-core-sdk
+    steps:
+      - checkout
+      - run:
+          name: apt update
+          command: apt-get update;
+      - run:
+          name: test
+          command: dotnet test
+
+  build-docker-image:
+    executor: docker-publisher
+    steps:
+     - checkout
+     - setup_remote_docker
+     - run:
+         name: build docker image
+         command: |
+            docker build -t $image_name:latest .
+     - run:
+         name: archive docker image
+         command: docker save -o image.tar $image_name
+     - persist_to_workspace:
+         root: .
+         paths:
+          - ./image.tar
+
+  docker-publish-image:
+    executor: docker-publisher
+    steps:
+     - attach_workspace:
+         at: /tmp/workspace
+     - setup_remote_docker
+     - run:
+         name: load archived docker image
+         command: docker load -i /tmp/workspace/image.tar
+     - run:
+         name: publish docker image to docker hub
+         command: |
+           echo "$docker_accesstoken" | docker login -u $docker_login --password-stdin
+           image_tag=${circle_tag}
+           docker tag $image_name:latest $image_name:$image_tag
+           docker push $image_name:latest
+           docker push $image_name:$image_tag
+
+  publish-nuget:
+    executor: dotnet-core-sdk
+    steps:
+      - checkout
+      - run:
+          name: Push to NuGet
+          command: |
+            dotnet pack ./OpenFTTH.RouteNetworkService.Queries.OpenFTTH.RouteNetworkService.Queries.csproj --output ./publish --configuration Release -p:PackageVersion=${CIRCLE_TAG}
+            dotnet nuget push --source "${NUGET_FEED_URL}" --api-key="${NUGET_KEY}" "./publish/*.nupkg"
+
+workflows:
+  build-test-upload_image:
+    jobs:
+      - build-app:
+          filters:
+            tags:
+              only: /.*/
+      - test-app:
+          requires:
+            - build-app
+          filters:
+            tags:
+              only: /.*/
+      - build-docker-image:
+          requires:
+            - test-app
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - publish-nuget:
+          context: nuget
+          requires:
+            - test-app
+          filters:
+            tags:
+              only: /^[0-9].*/
+            branches:
+              ignore: /.*/
+      - docker-publish-image:
+          context: docker
+          requires:
+           - build-docker-image
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
