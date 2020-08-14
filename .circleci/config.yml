@@ -65,7 +65,7 @@ jobs:
      - run:
          name: publish docker image to docker hub
          command: |
-           echo "$docker_accesstoken" | docker login -u $docker_login --password-stdin
+           echo "$DOCKER_ACCESSTOKEN" | docker login -u $docker_login --password-stdin
            image_tag=${circle_tag}
            docker tag $image_name:latest $image_name:$image_tag
            docker push $image_name:latest
