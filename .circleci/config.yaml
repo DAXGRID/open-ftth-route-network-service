@@ -102,19 +102,19 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
-      - publish-nuget:
-          context: nuget
+      - docker-publish-image:
+          context: docker
           requires:
-            - test-app
+           - build-docker-image
           filters:
             tags:
               only: /^v.*/
             branches:
               ignore: /.*/
-      - docker-publish-image:
-          context: docker
+      - publish-nuget:
+          context: nuget
           requires:
-           - build-docker-image
+            - test-app
           filters:
             tags:
               only: /^v.*/
