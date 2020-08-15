@@ -6,7 +6,7 @@ executors:
     - image: mcr.microsoft.com/dotnet/core/sdk:3.1
   docker-publisher:
     environment:
-      image_name: openftth/route-network-service
+      IMAGE_NAME: openftth/route-network-service
     docker:
       - image: circleci/buildpack-deps:stretch
 
@@ -23,7 +23,7 @@ jobs:
           command: dotnet restore
       - run:
           name: build
-          command: dotnet build -c release
+          command: dotnet build -c Release
 
   test-app:
     executor: dotnet-core-sdk
