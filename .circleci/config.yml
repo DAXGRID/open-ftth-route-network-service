@@ -42,12 +42,12 @@ jobs:
      - checkout
      - setup_remote_docker
      - run:
-         name: build docker image
+         name: Build docker image
          command: |
-            docker build -t $image_name:latest .
+            docker build -t $IMAGE_NAME:latest .
      - run:
-         name: archive docker image
-         command: docker save -o image.tar $image_name
+         name: Archive docker image
+         command: docker save -o image.tar $IMAGE_NAME
      - persist_to_workspace:
          root: .
          paths:
