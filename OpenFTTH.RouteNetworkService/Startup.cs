@@ -26,10 +26,6 @@ namespace OpenFTTH.RouteNetworkService
         {
             services.AddControllers();
 
-            services.AddAuthentication(
-                CertificateAuthenticationDefaults.AuthenticationScheme)
-                .AddCertificate();
-
             // MediatR
             var routeNetworkService = AppDomain.CurrentDomain.Load("OpenFTTH.RouteNetworkService");
             services.AddMediatR(new Assembly[] { routeNetworkService });
@@ -46,7 +42,6 @@ namespace OpenFTTH.RouteNetworkService
             }
 
             app.UseHttpsRedirection();
-            app.UseAuthentication();
 
             app.UseRouting();
 
