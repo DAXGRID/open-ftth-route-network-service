@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace OpenFTTH.RouteNetworkService.Queries
 {
-    public class RouteNodeQueryResult
+    public class RouteSegmentQueryResult
     {
-        public Guid RouteNodeId { get; set; }
-        public RouteNodeInfo RouteNodeInfo { get; set; }
+        public Guid RouteSegmentId { get; set; }
+        public RouteSegmentInfo RouteSegmentInfo { get; set; }
         public NamingInfo NamingInfo { get; set; }
         public LifecycleInfo LifecycleInfo { get; set; }
         public SafetyInfo SafetyInfo { get; set; }
