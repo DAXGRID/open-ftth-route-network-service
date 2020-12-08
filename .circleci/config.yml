@@ -3,7 +3,7 @@ version: 2.1
 executors:
   dotnet-core-sdk:
     docker:
-    - image: mcr.microsoft.com/dotnet/core/sdk:3.1
+    - image: mcr.microsoft.com/dotnet/sdk:5.0
   docker-publisher:
     environment:
       IMAGE_NAME: openftth/route-network-service
@@ -11,7 +11,7 @@ executors:
       - image: cimg/base:2020.09
   alpine-git:
     environment:
-      IMAGE_NAME: openftth/gdb-integrator
+      IMAGE_NAME: openftth/route-network-service
     docker:
     - image: alpine/git
 
@@ -112,9 +112,8 @@ jobs:
       - run:
           name: Push to NuGet
           command: |
-            dotnet pack ./OpenFTTH.RouteNetworkService.Queries/OpenFTTH.RouteNetworkService.Queries.csproj --output ./publish --configuration Release -p:PackageVersion=${CIRCLE_TAG:1}
+            dotnet pack --output ./publish --configuration Release -p:PackageVersion=${CIRCLE_TAG:1}
             dotnet nuget push --source "${NUGET_FEED_URL}" --api-key="${NUGET_KEY}" "./publish/*.nupkg"
-
 workflows:
   build-test-upload_image:
     jobs:
@@ -140,14 +139,6 @@ workflows:
           context: docker
           requires:
            - build-docker-image
-          filters:
-            tags:
-              only: /^v.*/
-            branches:
-              ignore: /.*/
-      - update-helm-chart:
-          requires:
-           - docker-publish-image
           filters:
             tags:
               only: /^v.*/
