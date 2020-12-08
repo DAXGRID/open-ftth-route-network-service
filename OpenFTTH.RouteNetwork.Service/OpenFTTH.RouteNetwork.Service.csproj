@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\OpenFTTH.RouteNetwork.API\OpenFTTH.RouteNetwork.API.csproj" />
+    <ProjectReference Include="..\OpenFTTH.RouteNetwork.Business\OpenFTTH.RouteNetwork.Business.csproj" />
   </ItemGroup>
 
 

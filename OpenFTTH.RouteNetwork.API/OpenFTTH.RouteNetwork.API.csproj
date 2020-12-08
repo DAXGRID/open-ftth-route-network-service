@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="OpenFTTH.CQRS" Version="0.0.1" />
     <PackageReference Include="OpenFTTH.Events" Version="1.0.1-alpha" />
   </ItemGroup>
 

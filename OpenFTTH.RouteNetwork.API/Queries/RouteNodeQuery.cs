@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using OpenFTTH.CQRS;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace OpenFTTH.RouteNetworkService.Queries
     /// <summary>
     /// Request used to query a route node
     /// </summary>
-    public class RouteNodeQuery : IRequest<RouteNodeQueryResult>
+    public class RouteNodeQuery : IQuery<RouteNodeQueryResult>
     {
         public string RequestName => typeof(RouteNodeQuery).Name;
 

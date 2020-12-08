@@ -4,4 +4,20 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="DAX.ObjectVersioning.Graph" Version="1.0.6" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+    <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="2.0.4" />
+    <PackageReference Include="OpenFTTH.CQRS" Version="0.0.1" />
+    <PackageReference Include="OpenFTTH.Events" Version="2.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OpenFTTH.RouteNetwork.API\OpenFTTH.RouteNetwork.API.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="EventHandling\" />
+  </ItemGroup>
+
 </Project>

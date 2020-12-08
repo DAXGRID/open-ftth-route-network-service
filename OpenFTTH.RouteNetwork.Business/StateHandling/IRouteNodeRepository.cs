@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace OpenFTTH.RouteNetworkService.Repositories
+namespace OpenFTTH.RouteNetworkService.Business.StateHandling
 {
     public interface IRouteNodeRepository
     {
