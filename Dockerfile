@@ -1,11 +1,11 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build-env
 WORKDIR /app
 
 COPY ./*sln ./
 
-COPY ./OpenFTTH.RouteNetworkService/*.csproj ./OpenFTTH.RouteNetworkService/
-COPY ./OpenFTTH.RouteNetworkService.Queries/*.csproj ./OpenFTTH.RouteNetworkService.Queries/
-
+COPY ./OpenFTTH.RouteNetworkService.Service/*.csproj ./OpenFTTH.RouteNetworkService.Service/
+COPY ./OpenFTTH.RouteNetworkService.API/*.csproj ./OpenFTTH.RouteNetworkService.API/
+COPY ./OpenFTTH.RouteNetworkService.Business/*.csproj ./OpenFTTH.RouteNetworkService.Business/
 COPY ./OpenFTTH.RouteNetworkService.Tests/*.csproj ./OpenFTTH.RouteNetworkService.Tests/
 
 RUN dotnet restore --packages ./packages
@@ -15,7 +15,7 @@ WORKDIR /app/OpenFTTH.RouteNetworkService
 RUN dotnet publish -c Release -o out --packages ./packages
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
+FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
 WORKDIR /app
 
 COPY --from=build-env /app/OpenFTTH.RouteNetworkService/out .

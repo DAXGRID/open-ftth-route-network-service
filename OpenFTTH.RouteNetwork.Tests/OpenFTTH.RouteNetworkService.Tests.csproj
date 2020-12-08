@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -15,8 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OpenFTTH.RouteNetworkService.Queries\OpenFTTH.RouteNetworkService.Queries.csproj" />
-    <ProjectReference Include="..\OpenFTTH.RouteNetworkService\OpenFTTH.RouteNetworkService.csproj" />
+    <ProjectReference Include="..\OpenFTTH.RouteNetwork.API\OpenFTTH.RouteNetwork.API.csproj" />
+    <ProjectReference Include="..\OpenFTTH.RouteNetwork.Business\OpenFTTH.RouteNetwork.Business.csproj" />
+    <ProjectReference Include="..\OpenFTTH.RouteNetwork.Service\OpenFTTH.RouteNetwork.Service.csproj" />
   </ItemGroup>
 
 </Project>
