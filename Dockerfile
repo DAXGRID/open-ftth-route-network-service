@@ -3,10 +3,10 @@ WORKDIR /app
 
 COPY ./*sln ./
 
-COPY ./OpenFTTH.RouteNetworkService.Service/*.csproj ./OpenFTTH.RouteNetworkService.Service/
-COPY ./OpenFTTH.RouteNetworkService.API/*.csproj ./OpenFTTH.RouteNetworkService.API/
-COPY ./OpenFTTH.RouteNetworkService.Business/*.csproj ./OpenFTTH.RouteNetworkService.Business/
-COPY ./OpenFTTH.RouteNetworkService.Tests/*.csproj ./OpenFTTH.RouteNetworkService.Tests/
+COPY ./OpenFTTH.RouteNetwork.Service/*.csproj ./OpenFTTH.RouteNetwork.Service/
+COPY ./OpenFTTH.RouteNetwork.API/*.csproj ./OpenFTTH.RouteNetwork.API/
+COPY ./OpenFTTH.RouteNetwork.Business/*.csproj ./OpenFTTH.RouteNetwork.Business/
+COPY ./OpenFTTH.RouteNetwork.Tests/*.csproj ./OpenFTTH.RouteNetwork.Tests/
 
 RUN dotnet restore --packages ./packages
 
