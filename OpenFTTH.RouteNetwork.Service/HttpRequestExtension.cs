@@ -15,7 +15,7 @@ namespace OpenFTTH.RouteNetworkService
         /// <param name="request">Request instance to apply to</param>
         /// <param name="encoding">Optional - Encoding, defaults to UTF8</param>
         /// <returns></returns>
-        public static async Task<string> GetRawBodyStringAsync(this HttpRequest request, Encoding encoding = null)
+        public static async Task<string> GetRawBodyStringAsync(this HttpRequest request, Encoding? encoding = null)
         {
             if (encoding == null)
                 encoding = Encoding.UTF8;

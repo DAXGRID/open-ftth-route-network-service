@@ -10,10 +10,10 @@ namespace OpenFTTH.RouteNetworkService.Queries
     public class RouteNodeQueryResult
     {
         public Guid RouteNodeId { get; set; }
-        public RouteNodeInfo RouteNodeInfo { get; set; }
-        public NamingInfo NamingInfo { get; set; }
-        public LifecycleInfo LifecycleInfo { get; set; }
-        public SafetyInfo SafetyInfo { get; set; }
-        public MappingInfo MappingInfo { get; set; }
+        public RouteNodeInfo? RouteNodeInfo { get; set; }
+        public NamingInfo? NamingInfo { get; set; }
+        public LifecycleInfo? LifecycleInfo { get; set; }
+        public SafetyInfo? SafetyInfo { get; set; }
+        public MappingInfo? MappingInfo { get; set; }
     }
 }

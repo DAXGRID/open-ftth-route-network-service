@@ -3,11 +3,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Newtonsoft.Json;
-using OpenFTTH.RouteNetworkService.Business.StateHandling;
+using OpenFTTH.RouteNetwork.Business.StateHandling;
 using OpenFTTH.RouteNetworkService.Controllers;
 using OpenFTTH.RouteNetworkService.Queries;
-using OpenFTTH.RouteNetworkService.Repositories;
 using System;
 using System.IO;
 using System.Threading;
@@ -30,7 +28,7 @@ namespace OpenFTTH.RouteNetworkService.Tests
 
             var mockLog = new Mock<ILogger<QueryController>>();
             
-            var mockRepo = new Mock<IRouteNodeRepository>();
+            var mockRepo = new Mock<IRouteNodeNetworkRepository>();
             
             mockRepo.Setup(repo => repo.Query(routeNodeQueryRequest)).Returns(routeNodeQueryResult);
 
@@ -80,7 +78,7 @@ namespace OpenFTTH.RouteNetworkService.Tests
 
             var mockLog = new Mock<ILogger<QueryController>>();
 
-            var mockRepo = new Mock<IRouteNodeRepository>();
+            var mockRepo = new Mock<IRouteNodeNetworkRepository>();
 
             mockRepo.Setup(repo => repo.Query(routeNodeQueryRequest)).Returns(routeNodeQueryResult);
 
@@ -125,7 +123,7 @@ namespace OpenFTTH.RouteNetworkService.Tests
 
             var mockLog = new Mock<ILogger<QueryController>>();
 
-            var mockRepo = new Mock<IRouteNodeRepository>();
+            var mockRepo = new Mock<IRouteNodeNetworkRepository>();
 
             mockRepo.Setup(repo => repo.Query(routeNodeQueryRequest)).Returns(routeNodeQueryResult);
 

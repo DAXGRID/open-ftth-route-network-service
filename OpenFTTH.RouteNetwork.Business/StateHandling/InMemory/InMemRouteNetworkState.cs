@@ -5,12 +5,10 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using OpenFTTH.Events.RouteNetwork;
 using OpenFTTH.RouteNetwork.Business.EventHandling;
-using OpenFTTH.RouteNetworkService.Business.StateHandling;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace OpenFTTH.UtilityGraphService.Query.InMemory
+namespace OpenFTTH.RouteNetwork.Business.StateHandling.InMemory
 {
     /// <summary>
     /// Object to hold on to all the versioned object state

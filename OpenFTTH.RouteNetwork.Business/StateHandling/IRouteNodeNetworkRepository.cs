@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace OpenFTTH.RouteNetworkService.Business.StateHandling
+namespace OpenFTTH.RouteNetwork.Business.StateHandling
 {
-    public interface IRouteNodeRepository
+    public interface IRouteNodeNetworkRepository
     {
         RouteNodeQueryResult Query(RouteNodeQuery query);
     }

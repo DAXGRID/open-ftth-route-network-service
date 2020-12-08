@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using OpenFTTH.CQRS;
 
 namespace OpenFTTH.RouteNetworkService.Controllers
 {
@@ -16,7 +17,7 @@ namespace OpenFTTH.RouteNetworkService.Controllers
     {
         private readonly ILogger<QueryController> _logger;
         private readonly IMediator _mediator;
-        private Dictionary<string, Type> _requestTypes = null;
+        private Dictionary<string, Type> _requestTypes = new Dictionary<string, Type>();
 
         public QueryController(ILogger<QueryController> logger, IMediator mediator)
         {
@@ -39,31 +40,49 @@ namespace OpenFTTH.RouteNetworkService.Controllers
             {
                 var bodyObject = JObject.Parse(bodyString);
 
-                if (!bodyObject.ContainsKey("RequestName"))
+                if (bodyObject == null || !bodyObject.ContainsKey("RequestName"))
                 {
                     _logger.LogWarning("Invalid query request. Request body must contain an attribut: 'RequestName'");
                     return BadRequest("Invalid query request. Request body must contain an attribut: 'RequestName'");
                 }
 
-                var requestName = bodyObject["RequestName"].ToString();
+                JToken? requestToken = "notset";
 
-                _logger.LogDebug($"Query controller recieved request: {requestName}");
-
-
-                if (GetRequestTypes().ContainsKey(requestName.ToLower()))
+                if (bodyObject.TryGetValue("RequestName", out requestToken))
                 {
-                    var eventType = GetRequestTypes()[requestName.ToLower()];
+                    var requestName = requestToken.ToString();
 
-                    var eventObject = JsonConvert.DeserializeObject(bodyString, eventType);
+                    _logger.LogDebug($"Query controller recieved request: {requestName}");
 
-                    var result = _mediator.Send(eventObject).Result;
+                    if (GetRequestTypes().ContainsKey(requestName.ToLower()))
+                    {
+                        var eventType = GetRequestTypes()[requestName.ToLower()];
 
-                    return Content(JsonConvert.SerializeObject(result), "application/json");
+                        var eventObject = JsonConvert.DeserializeObject(bodyString, eventType);
+
+                        if (eventObject != null)
+                        {
+                            var result = _mediator.Send(eventObject).Result;
+                            return Content(JsonConvert.SerializeObject(result), "application/json");
+                        }
+                        else
+                        {
+                            var errTxt = $"Null result from request: {requestName}";
+                            _logger.LogWarning(errTxt);
+                            return BadRequest(errTxt);
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"Invalid query request. No class for: {requestName} found.");
+                        return BadRequest($"Invalid query request. No class for: {requestName} found.");
+                    }
                 }
                 else
                 {
-                    _logger.LogWarning($"Invalid query request. No class for: {requestName} found.");
-                    return BadRequest($"Invalid query request. No class for: {requestName} found.");
+                    var errTxt = $"Cannot find RequestName in body: {bodyString}";
+                    _logger.LogWarning(errTxt);
+                    return BadRequest(errTxt);
                 }
 
             }
@@ -77,7 +96,7 @@ namespace OpenFTTH.RouteNetworkService.Controllers
 
         private Dictionary<string, Type> GetRequestTypes()
         {
-            if (_requestTypes != null)
+            if (_requestTypes.Count != 0)
                 return _requestTypes;
 
             _requestTypes = new Dictionary<string, Type>();
@@ -86,7 +105,7 @@ namespace OpenFTTH.RouteNetworkService.Controllers
 
             var requestTypes =
                 assemblies
-                .SelectMany(x => x.GetTypes().Where(a => a.GetInterfaces().Contains(typeof(IRequest)) || a.Name.Contains("Query")))
+                .SelectMany(x => x.GetTypes().Where(a => a.Name.Contains("Query")))
                 .ToList();
 
             foreach (var type in requestTypes)

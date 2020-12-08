@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OpenFTTH.RouteNetworkService.Business.StateHandling
+namespace OpenFTTH.RouteNetwork.Business.StateHandling
 {
     public interface IRouteNetworkState
     {

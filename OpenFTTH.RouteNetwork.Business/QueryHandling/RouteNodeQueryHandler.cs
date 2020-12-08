@@ -1,12 +1,7 @@
-﻿using MediatR;
-using OpenFTTH.CQRS;
-using OpenFTTH.RouteNetworkService.Business.StateHandling;
+﻿using OpenFTTH.CQRS;
+using OpenFTTH.RouteNetwork.Business.StateHandling;
 using OpenFTTH.RouteNetworkService.Queries;
-using OpenFTTH.RouteNetworkService.Repositories;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace OpenFTTH.RouteNetworkService.QueryHandlers
@@ -15,9 +10,9 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
         IQueryHandler<RouteNodeQuery, RouteNodeQueryResult>,
         IQueryHandler<RouteSegmentQuery, RouteSegmentQueryResult>
     {
-        private readonly IRouteNodeRepository _routeNodeRepository;
+        private readonly IRouteNodeNetworkRepository _routeNodeRepository;
 
-        public RouteNetworkQueryHandler(IRouteNodeRepository routeNodeRepository)
+        public RouteNetworkQueryHandler(IRouteNodeNetworkRepository routeNodeRepository)
         {
             _routeNodeRepository = routeNodeRepository;
         }

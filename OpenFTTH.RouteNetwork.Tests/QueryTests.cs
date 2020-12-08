@@ -1,7 +1,4 @@
-﻿using OpenFTTH.RouteNetworkService.Repositories.InMemoryImpl;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using OpenFTTH.RouteNetwork.Business.StateHandling.InMemory;
 using Xunit;
 
 namespace OpenFTTH.RouteNetworkService.Tests
@@ -11,7 +8,7 @@ namespace OpenFTTH.RouteNetworkService.Tests
         [Fact]
         public void TestRouteNodeQuery()
         {
-            var repo = new InMemRouteNodeRepository();
+            var repo = new InMemRouteNetworkRepository();
         }
     }
 }

@@ -1,14 +1,13 @@
-using System;
-using System.Reflection;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using OpenFTTH.RouteNetworkService.Business.StateHandling;
-using OpenFTTH.RouteNetworkService.Repositories;
-using OpenFTTH.RouteNetworkService.Repositories.InMemoryImpl;
+using OpenFTTH.RouteNetwork.Business.StateHandling;
+using OpenFTTH.RouteNetwork.Business.StateHandling.InMemory;
+using System;
+using System.Reflection;
 
 namespace OpenFTTH.RouteNetworkService
 {
@@ -26,11 +25,7 @@ namespace OpenFTTH.RouteNetworkService
         {
             services.AddControllers();
 
-            // MediatR
-            var routeNetworkService = AppDomain.CurrentDomain.Load("OpenFTTH.RouteNetworkService");
-            services.AddMediatR(new Assembly[] { routeNetworkService });
-
-            services.AddSingleton<IRouteNodeRepository, InMemRouteNodeRepository>();
+            services.AddSingleton<IRouteNodeNetworkRepository, InMemRouteNetworkRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

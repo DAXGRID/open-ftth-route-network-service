@@ -2,8 +2,8 @@
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using OpenFTTH.Events.RouteNetwork;
+using OpenFTTH.RouteNetwork.Business.StateHandling;
 using OpenFTTH.RouteNetworkService.Business.Model.RouteNetwork;
-using OpenFTTH.RouteNetworkService.Business.StateHandling;
 using System;
 using System.Collections.Generic;
 
