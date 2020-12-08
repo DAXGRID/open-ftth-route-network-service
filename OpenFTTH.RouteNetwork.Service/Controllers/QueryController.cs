@@ -101,7 +101,7 @@ namespace OpenFTTH.RouteNetworkService.Controllers
 
             _requestTypes = new Dictionary<string, Type>();
 
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(a => !a.GetName().Name.ToLower().StartsWith("microsoft") && !a.GetName().Name.ToLower().StartsWith("system"));
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(a => !a.GetName().Name!.ToLower().StartsWith("microsoft") && !a.GetName().Name!.ToLower().StartsWith("system"));
 
             var requestTypes =
                 assemblies

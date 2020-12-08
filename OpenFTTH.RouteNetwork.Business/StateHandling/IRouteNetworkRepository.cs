@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace OpenFTTH.RouteNetwork.Business.StateHandling
 {
-    public interface IRouteNodeNetworkRepository
+    public interface IRouteNetworkRepository
     {
-        RouteNodeQueryResult Query(RouteNodeQuery query);
+        RouteNodeQueryResult NodeQuery(RouteNodeQuery query);
+
+
     }
 }

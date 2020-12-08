@@ -10,16 +10,16 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
         IQueryHandler<RouteNodeQuery, RouteNodeQueryResult>,
         IQueryHandler<RouteSegmentQuery, RouteSegmentQueryResult>
     {
-        private readonly IRouteNodeNetworkRepository _routeNodeRepository;
+        private readonly IRouteNetworkRepository _routeNodeRepository;
 
-        public RouteNetworkQueryHandler(IRouteNodeNetworkRepository routeNodeRepository)
+        public RouteNetworkQueryHandler(IRouteNetworkRepository routeNodeRepository)
         {
             _routeNodeRepository = routeNodeRepository;
         }
 
         public Task<RouteNodeQueryResult> HandleAsync(RouteNodeQuery query)
         {
-            return Task.FromResult(_routeNodeRepository.Query(query));
+            return Task.FromResult(_routeNodeRepository.NodeQuery(query));
         }
 
         public Task<RouteSegmentQueryResult> HandleAsync(RouteSegmentQuery query)

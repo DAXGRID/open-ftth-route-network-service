@@ -2,7 +2,7 @@
 
 namespace OpenFTTH.RouteNetwork.Business.StateHandling.InMemory
 {
-    public class InMemRouteNetworkRepository : IRouteNodeNetworkRepository
+    public class InMemRouteNetworkRepository : IRouteNetworkRepository
     {
 
         public InMemRouteNetworkRepository()
@@ -10,7 +10,7 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.InMemory
 
         }
 
-        public RouteNodeQueryResult Query(RouteNodeQuery query)
+        public RouteNodeQueryResult NodeQuery(RouteNodeQuery query)
         {
             return new RouteNodeQueryResult()
             {

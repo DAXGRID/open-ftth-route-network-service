@@ -28,9 +28,9 @@ namespace OpenFTTH.RouteNetworkService.Tests
 
             var mockLog = new Mock<ILogger<QueryController>>();
             
-            var mockRepo = new Mock<IRouteNodeNetworkRepository>();
+            var mockRepo = new Mock<IRouteNetworkRepository>();
             
-            mockRepo.Setup(repo => repo.Query(routeNodeQueryRequest)).Returns(routeNodeQueryResult);
+            mockRepo.Setup(repo => repo.NodeQuery(routeNodeQueryRequest)).Returns(routeNodeQueryResult);
 
             var mockMediator = new Mock<IMediator>();
 
@@ -78,9 +78,9 @@ namespace OpenFTTH.RouteNetworkService.Tests
 
             var mockLog = new Mock<ILogger<QueryController>>();
 
-            var mockRepo = new Mock<IRouteNodeNetworkRepository>();
+            var mockRepo = new Mock<IRouteNetworkRepository>();
 
-            mockRepo.Setup(repo => repo.Query(routeNodeQueryRequest)).Returns(routeNodeQueryResult);
+            mockRepo.Setup(repo => repo.NodeQuery(routeNodeQueryRequest)).Returns(routeNodeQueryResult);
 
             var mockMediator = new Mock<IMediator>();
 
@@ -123,9 +123,9 @@ namespace OpenFTTH.RouteNetworkService.Tests
 
             var mockLog = new Mock<ILogger<QueryController>>();
 
-            var mockRepo = new Mock<IRouteNodeNetworkRepository>();
+            var mockRepo = new Mock<IRouteNetworkRepository>();
 
-            mockRepo.Setup(repo => repo.Query(routeNodeQueryRequest)).Returns(routeNodeQueryResult);
+            mockRepo.Setup(repo => repo.NodeQuery(routeNodeQueryRequest)).Returns(routeNodeQueryResult);
 
             var mockMediator = new Mock<IMediator>();
 
