@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using Microsoft.Extensions.Logging;
-using OpenFTTH.RouteNetworkService.Business.Model.RouteNetwork;
-using OpenFTTH.RouteNetworkService.Queries;
+using OpenFTTH.RouteNetwork.API.Queries;
+using OpenFTTH.RouteNetwork.Service.Business.DomainModel.RouteNetwork;
 using System;
 
 namespace OpenFTTH.RouteNetwork.Business.StateHandling.InMemory

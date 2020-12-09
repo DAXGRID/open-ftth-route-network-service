@@ -9,7 +9,7 @@ using OpenFTTH.RouteNetwork.Business.StateHandling.InMemory;
 using System;
 using System.Reflection;
 
-namespace OpenFTTH.RouteNetworkService
+namespace OpenFTTH.RouteNetwork.Service
 {
     public class Startup
     {

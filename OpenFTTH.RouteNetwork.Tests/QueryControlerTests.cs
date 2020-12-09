@@ -3,15 +3,16 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
+using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.RouteNetwork.Business.StateHandling;
-using OpenFTTH.RouteNetworkService.Controllers;
-using OpenFTTH.RouteNetworkService.Queries;
+using OpenFTTH.RouteNetwork.Service.Controllers;
+using OpenFTTH.RouteNetwork.Tests.Util;
 using System;
 using System.IO;
 using System.Threading;
 using Xunit;
 
-namespace OpenFTTH.RouteNetworkService.Tests
+namespace OpenFTTH.RouteNetwork.Tests
 {
     public class QueryControlerTests
     {

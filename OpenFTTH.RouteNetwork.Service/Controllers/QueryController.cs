@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OpenFTTH.CQRS;
 
-namespace OpenFTTH.RouteNetworkService.Controllers
+namespace OpenFTTH.RouteNetwork.Service.Controllers
 {
     [ApiController]
     [Route("[controller]")]

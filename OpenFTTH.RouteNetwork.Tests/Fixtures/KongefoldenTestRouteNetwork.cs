@@ -2,12 +2,8 @@
 using OpenFTTH.RouteNetwork.Business.StateHandling.InMemory;
 using OpenFTTH.RouteNetworkService.QueryHandlers;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace OpenFTTH.RouteNetworkService.Tests.Fixtures
+namespace OpenFTTH.RouteNetwork.Tests.Fixtures
 {
     public class KongefoldenTestRouteNetwork : IDisposable
     {

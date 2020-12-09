@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OpenFTTH.RouteNetworkService.Business.Model.RouteNetwork
+namespace OpenFTTH.RouteNetwork.Service.Business.DomainModel.RouteNetwork
 {
     public interface IRouteNode : IRouteNetworkElement
     {

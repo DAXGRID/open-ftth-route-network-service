@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OpenFTTH.RouteNetworkService
+namespace OpenFTTH.RouteNetwork.Service
 {
     public static class HttpRequestExtensions
     {

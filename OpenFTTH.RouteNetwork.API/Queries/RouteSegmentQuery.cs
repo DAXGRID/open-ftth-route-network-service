@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace OpenFTTH.RouteNetworkService.Queries
+namespace OpenFTTH.RouteNetwork.API.Queries
 {
     /// <summary>
     /// Request used to query a route segment

@@ -1,8 +1,8 @@
 ﻿using CSharpFunctionalExtensions;
 using Microsoft.Extensions.Logging;
 using OpenFTTH.CQRS;
+using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.RouteNetwork.Business.StateHandling;
-using OpenFTTH.RouteNetworkService.Queries;
 using System;
 using System.Threading.Tasks;
 

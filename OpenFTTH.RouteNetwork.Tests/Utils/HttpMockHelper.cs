@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace OpenFTTH.RouteNetworkService.Tests
+namespace OpenFTTH.RouteNetwork.Tests.Util
 {
     public static class HttpMockHelper
     {
