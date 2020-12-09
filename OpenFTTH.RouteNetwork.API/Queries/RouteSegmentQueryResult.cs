@@ -15,5 +15,6 @@ namespace OpenFTTH.RouteNetworkService.Queries
         public LifecycleInfo? LifecycleInfo { get; set; }
         public SafetyInfo? SafetyInfo { get; set; }
         public MappingInfo? MappingInfo { get; set; }
+        public List<Guid>? WalkOfInterestIds { get; set; }
     }
 }

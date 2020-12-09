@@ -25,7 +25,6 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.InMemory
         private ITransaction? _cmdTransaction;
         private DateTime __lastEventRecievedTimestamp = DateTime.UtcNow;
         private long _numberOfObjectsLoaded = 0;
-        
 
         public InMemoryObjectManager ObjectManager => _objectManager;
         public DateTime LastEventRecievedTimestamp => __lastEventRecievedTimestamp;
@@ -59,7 +58,7 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.InMemory
 
             var editOperationEvents = JsonConvert.DeserializeObject<List<RouteNetworkEditOperationOccuredEvent>>(json);
 
-            var routeNetworkEventHandler = new RouteNetworkEventConsumer(_loggerFactory, this);
+            var routeNetworkEventHandler = new RouteNetworkEventHandler(_loggerFactory, this);
 
             foreach (var editOperationEvent in editOperationEvents)
                 routeNetworkEventHandler.HandleEvent(editOperationEvent);

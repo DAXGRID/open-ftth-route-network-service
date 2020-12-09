@@ -13,7 +13,6 @@ namespace OpenFTTH.RouteNetworkService.Queries
     public class RouteSegmentQuery : IQuery<RouteSegmentQueryResult>
     {
         public string RequestName => typeof(RouteSegmentQuery).Name;
-
         public Guid RouteSegmentId { get; }
 
         public RouteSegmentQuery(Guid routeSegmentId)

@@ -40,15 +40,9 @@ namespace OpenFTTH.RouteNetworkService.Controllers
             {
                 var bodyObject = JObject.Parse(bodyString);
 
-                if (bodyObject == null || !bodyObject.ContainsKey("RequestName"))
-                {
-                    _logger.LogWarning("Invalid query request. Request body must contain an attribut: 'RequestName'");
-                    return BadRequest("Invalid query request. Request body must contain an attribut: 'RequestName'");
-                }
-
                 JToken? requestToken = "notset";
 
-                if (bodyObject.TryGetValue("RequestName", out requestToken))
+                if (bodyObject.TryGetValue("requestName", out requestToken))
                 {
                     var requestName = requestToken.ToString();
 

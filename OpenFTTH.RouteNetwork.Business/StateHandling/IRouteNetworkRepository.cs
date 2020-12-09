@@ -1,4 +1,6 @@
-﻿using OpenFTTH.RouteNetworkService.Queries;
+﻿using CSharpFunctionalExtensions;
+using OpenFTTH.RouteNetworkService.Business.Model.RouteNetwork;
+using OpenFTTH.RouteNetworkService.Queries;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +10,6 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling
 {
     public interface IRouteNetworkRepository
     {
-        RouteNodeQueryResult NodeQuery(RouteNodeQuery query);
-
-
+        Result<RouteNodeQueryResult> QueryNode(RouteNodeQuery query);
     }
 }

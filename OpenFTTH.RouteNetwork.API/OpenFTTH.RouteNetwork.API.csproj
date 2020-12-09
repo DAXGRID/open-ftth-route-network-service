@@ -6,8 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CSharpFunctionalExtensions" Version="2.13.2" />
     <PackageReference Include="OpenFTTH.CQRS" Version="0.0.1" />
     <PackageReference Include="OpenFTTH.Events" Version="1.0.1-alpha" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Mutations\" />
   </ItemGroup>
 
 </Project>

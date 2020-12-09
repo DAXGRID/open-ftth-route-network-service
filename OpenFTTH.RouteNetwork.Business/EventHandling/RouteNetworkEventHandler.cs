@@ -9,22 +9,22 @@ using System.Collections.Generic;
 
 namespace OpenFTTH.RouteNetwork.Business.EventHandling
 {
-    public class RouteNetworkEventConsumer
+    public class RouteNetworkEventHandler
     {
-        private readonly ILogger<RouteNetworkEventConsumer> _logger;
+        private readonly ILogger<RouteNetworkEventHandler> _logger;
 
         private IRouteNetworkState _networkState;
 
         private HashSet<Guid> _alreadyProcessed = new HashSet<Guid>();
 
-        public RouteNetworkEventConsumer(ILoggerFactory loggerFactory, IRouteNetworkState networkState)
+        public RouteNetworkEventHandler(ILoggerFactory loggerFactory, IRouteNetworkState networkState)
         {
             if (null == loggerFactory)
             {
                 throw new ArgumentNullException("loggerFactory is null");
             }
 
-            _logger = loggerFactory.CreateLogger<RouteNetworkEventConsumer>();
+            _logger = loggerFactory.CreateLogger<RouteNetworkEventHandler>();
 
             _networkState = networkState;
         }
