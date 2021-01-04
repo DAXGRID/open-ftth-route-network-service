@@ -9,8 +9,7 @@ using System.Threading.Tasks;
 namespace OpenFTTH.RouteNetworkService.QueryHandlers
 {
     public class RouteNetworkQueryHandler :
-        IQueryHandler<RouteNodeQuery, Result<RouteNodeQueryResult>>,
-        IQueryHandler<RouteSegmentQuery, RouteSegmentQueryResult>
+        IQueryHandler<GetRouteNetworkDetailsQuery, Result<GetRouteNetworkDetailsQueryResult>>
     {
         private readonly ILogger<RouteNetworkQueryHandler> _logger;
         private readonly IRouteNetworkRepository _routeNodeRepository;
@@ -27,16 +26,11 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
             _routeNodeRepository = routeNodeRepository;
         }
 
-        public Task<Result<RouteNodeQueryResult>> HandleAsync(RouteNodeQuery query)
+        public Task<Result<GetRouteNetworkDetailsQueryResult>> HandleAsync(GetRouteNetworkDetailsQuery query)
         {
             return Task.FromResult(
-                _routeNodeRepository.QueryNode(query)
+                _routeNodeRepository.GetRouteElements(query)
             );
-        }
-
-        public Task<RouteSegmentQueryResult> HandleAsync(RouteSegmentQuery query)
-        {
-            throw new NotImplementedException();
         }
     }
 }

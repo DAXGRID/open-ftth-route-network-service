@@ -1,8 +1,10 @@
 ﻿using CSharpFunctionalExtensions;
 using Microsoft.Extensions.Logging;
+using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.RouteNetwork.Service.Business.DomainModel.RouteNetwork;
 using System;
+using System.Collections.Generic;
 
 namespace OpenFTTH.RouteNetwork.Business.StateHandling.InMemory
 {
@@ -24,22 +26,38 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.InMemory
             _routeNetworkState = routeNetworkState;
         }
 
-        public Result<RouteNodeQueryResult> QueryNode(RouteNodeQuery query)
+        public Result<GetRouteNetworkDetailsQueryResult> GetRouteElements(GetRouteNetworkDetailsQuery query)
         {
-            var routeNode = _routeNetworkState.GetObject(query.RouteNodeId);
+            var routeNetworkElementFetched = new List<IRouteNetworkElement>();
 
-            if (routeNode == null)
+            foreach (var routeElementId in query.RouteNetworkElementIdsToQuery)
             {
-                return Result.Failure<RouteNodeQueryResult>($"Cannot find any route node with id: {query.RouteNodeId}");
+                var routeNetworkElement = _routeNetworkState.GetRouteNetworkElement(routeElementId);
+
+                if (routeNetworkElement == null)
+                {
+                    return Result.Failure<GetRouteNetworkDetailsQueryResult>($"Cannot find any route network element with id: {routeElementId}");
+                }
+
+                routeNetworkElementFetched.Add(routeNetworkElement as IRouteNetworkElement);
             }
-            else if (routeNode is not RouteNode)
+
+
+            return Result.Success<GetRouteNetworkDetailsQueryResult>(new GetRouteNetworkDetailsQueryResult(MapRouteElementDomainObjectsToQueryObjects(routeNetworkElementFetched)));
+        }
+
+        private RouteNetworkElement[] MapRouteElementDomainObjectsToQueryObjects(List<IRouteNetworkElement> routeNetworkElements)
+        {
+            var routeNetworkElementDTOs = new List<RouteNetworkElement>();
+
+            foreach (var routeNetworkElement in routeNetworkElements)
             {
-                return Result.Failure<RouteNodeQueryResult>($"Expected a RouteNode, but got a {routeNode.GetType().Name} looking up object by id: {query.RouteNodeId}");
+                routeNetworkElementDTOs.Add(
+                    new RouteNetworkElement(routeNetworkElement.Id, RouteNetworkElementKindEnum.RouteNode)
+                );
             }
-            else
-            {
-                return Result.Success<RouteNodeQueryResult>(((RouteNode)routeNode).GetQueryResult());
-            }
+
+            return routeNetworkElementDTOs.ToArray();
         }
     }
 }

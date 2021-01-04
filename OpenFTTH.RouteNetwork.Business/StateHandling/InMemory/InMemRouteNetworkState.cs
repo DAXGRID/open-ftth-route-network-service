@@ -5,6 +5,7 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using OpenFTTH.Events.RouteNetwork;
 using OpenFTTH.RouteNetwork.Business.EventHandling;
+using OpenFTTH.RouteNetwork.Service.Business.DomainModel.RouteNetwork;
 using System;
 using System.Collections.Generic;
 
@@ -89,18 +90,18 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.InMemory
             }
         }
 
-        public IVersionedObject? GetObject(Guid id)
+        public IRouteNetworkElement? GetRouteNetworkElement(Guid id)
         {
             if (_loadMode && _loadModeTransaction != null)
-                return _loadModeTransaction.GetObject(id);
+                return _loadModeTransaction.GetObject(id) as IRouteNetworkElement;
             else if (_cmdTransaction != null)
             {
                 var transObj = _cmdTransaction.GetObject(id);
 
                 if (transObj != null)
-                    return transObj;
+                    return transObj as IRouteNetworkElement;
                 else
-                    return _objectManager.GetObject(id);
+                    return _objectManager.GetObject(id) as IRouteNetworkElement;
             }
             else
                 return null;

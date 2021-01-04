@@ -1,4 +1,5 @@
 ﻿using DAX.ObjectVersioning.Core;
+using OpenFTTH.RouteNetwork.Service.Business.DomainModel.RouteNetwork;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,6 +10,6 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling
     {
         ITransaction GetTransaction();
         void FinishWithTransaction();
-        IVersionedObject? GetObject(Guid id);
+        IRouteNetworkElement? GetRouteNetworkElement(Guid id);
     }
 }

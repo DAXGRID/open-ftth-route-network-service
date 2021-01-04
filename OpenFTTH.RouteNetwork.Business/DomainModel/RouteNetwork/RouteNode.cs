@@ -25,14 +25,5 @@ namespace OpenFTTH.RouteNetwork.Service.Business.DomainModel.RouteNetwork
             _envelope = envelope;
             _name = name;
         }
-
-        internal RouteNodeQueryResult GetQueryResult()
-        {
-            return new RouteNodeQueryResult()
-            {
-                RouteNodeId = Id,
-                RouteNodeInfo = this.RouteNodeInfo
-            };
-        }
     }
 }

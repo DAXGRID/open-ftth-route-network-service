@@ -5,6 +5,6 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling
 {
     public interface IRouteNetworkRepository
     {
-        Result<RouteNodeQueryResult> QueryNode(RouteNodeQuery query);
+        Result<GetRouteNetworkDetailsQueryResult> GetRouteElements(GetRouteNetworkDetailsQuery query);
     }
 }

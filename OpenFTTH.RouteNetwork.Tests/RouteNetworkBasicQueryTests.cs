@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.RouteNetwork.Tests.Fixtures;
 using System;
@@ -16,45 +17,43 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void Query_RouteNode_ThatDontExists_ShouldReturnFailure()
+        public async void QueryRouteElement_ThatDontExists_ShouldReturnFailure()
         {
-            var routeNodeQuery = new RouteNodeQuery(Guid.NewGuid());
+            // Setup
+            var nonExistingRouteNetworkElementId = Guid.NewGuid();
 
-            Result<RouteNodeQueryResult> routeNodeQueryResult = await testNetwork.QueryApi.HandleAsync(routeNodeQuery);
+            var routeNodeQuery = new GetRouteNetworkDetailsQuery(new RouteNetworkElementIdList() { nonExistingRouteNetworkElementId });
 
-            // Assert that the result is marked as a faliure
+            // Act
+            Result<GetRouteNetworkDetailsQueryResult> routeNodeQueryResult = await testNetwork.QueryApi.HandleAsync(routeNodeQuery);
+
+            // Assert
             Assert.True(routeNodeQueryResult.IsFailure);
 
-            // Assert that the error msg contains the id of the failed lookup
-            Assert.Contains(routeNodeQuery.RouteNodeId.ToString(), routeNodeQueryResult.Error);
+            // Assert that the error msg contains the id of route network element that the service could not lookup
+            Assert.Contains(nonExistingRouteNetworkElementId.ToString(), routeNodeQueryResult.Error);
         }
+        
 
         [Fact]
-        public async void Query_RouteNode_ThatExists_ShouldReturnSuccess()
+        public async void QueryRouteElement_ThatExists_ShouldReturnSuccess()
         {
-            // Query some route node that is part of the test network
-            var routeNodeQuery = new RouteNodeQuery(Guid.Parse("dab2aea2-873c-4c85-8d33-5907f69437fe"));
+            // Setup
+            var existingRouteNodeId = Guid.Parse("dab2aea2-873c-4c85-8d33-5907f69437fe"); // Some route node that exists in the test network
 
-            Result <RouteNodeQueryResult> routeNodeQueryResult = await testNetwork.QueryApi.HandleAsync(routeNodeQuery);
+            var routeNodeQuery = new GetRouteNetworkDetailsQuery(new RouteNetworkElementIdList() { existingRouteNodeId });
 
-            // Assert that the result is marked as success
+            // Act
+            Result<GetRouteNetworkDetailsQueryResult> routeNodeQueryResult = await testNetwork.QueryApi.HandleAsync(routeNodeQuery);
+
+            // Assert
             Assert.True(routeNodeQueryResult.IsSuccess);
+            Assert.Single(routeNodeQueryResult.Value.ElementsInfos);
 
-        }
+            var theRouteNodeObjectReturned = routeNodeQueryResult.Value.ElementsInfos[0];
 
-        [Fact]
-        public async void Query_RouteNode_WithRouteSegmentId_ShouldReturnFailure()
-        {
-            // Let's try specify a route segment id in a route node query - should return failure
-            var routeNodeQuery = new RouteNodeQuery(Guid.Parse("7035f8f6-e965-4d2d-b205-ee4ace7b3485"));
-
-            Result<RouteNodeQueryResult> routeNodeQueryResult = await testNetwork.QueryApi.HandleAsync(routeNodeQuery);
-
-            // Assert that the result is marked as a faliure
-            Assert.True(routeNodeQueryResult.IsFailure);
-
-            // Assert that the error msg contains the id of the failed lookup
-            Assert.Contains(routeNodeQuery.RouteNodeId.ToString(), routeNodeQueryResult.Error);
+            Assert.Equal(existingRouteNodeId, theRouteNodeObjectReturned.Id);
+            Assert.Equal(RouteNetworkElementKindEnum.RouteNode, theRouteNodeObjectReturned.Kind);
         }
     }
 }

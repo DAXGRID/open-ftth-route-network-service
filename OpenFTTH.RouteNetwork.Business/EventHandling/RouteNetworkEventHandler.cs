@@ -95,14 +95,14 @@ namespace OpenFTTH.RouteNetwork.Business.EventHandling
                 return;
 
 
-            if (!(_networkState.GetObject(request.FromNodeId) is RouteNode fromNode))
+            if (!(_networkState.GetRouteNetworkElement(request.FromNodeId) is RouteNode fromNode))
             {
                 _logger.LogError($"Route network event stream seems to be broken! RouteSegmentAdded event with id: {request.EventId} and segment id: {request.SegmentId} has a FromNodeId: {request.FromNodeId} that don't exists in the current state.");
                 return;
             }
 
 
-            if (!(_networkState.GetObject(request.ToNodeId) is RouteNode toNode))
+            if (!(_networkState.GetRouteNetworkElement(request.ToNodeId) is RouteNode toNode))
             {
                 _logger.LogError($"Route network event stream seems to be broken! RouteSegmentAdded event with id: {request.EventId} and segment id: {request.SegmentId} has a ToNodeId: {request.ToNodeId} that don't exists in the current state.");
                 return;
