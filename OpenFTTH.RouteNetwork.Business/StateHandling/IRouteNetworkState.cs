@@ -10,6 +10,8 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling
     {
         ITransaction GetTransaction();
         void FinishWithTransaction();
+        long GetLatestCommitedVersion();
         IRouteNetworkElement? GetRouteNetworkElement(Guid id);
+        IRouteNetworkElement? GetRouteNetworkElement(Guid id, long versionId);
     }
 }

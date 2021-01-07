@@ -90,6 +90,16 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.InMemory
             }
         }
 
+        public void FinishLoadMode()
+        {
+            _loadMode = false;
+
+            if (_loadModeTransaction != null)
+                _loadModeTransaction.Commit();
+
+            _loadModeTransaction = null;
+        }
+
         public IRouteNetworkElement? GetRouteNetworkElement(Guid id)
         {
             if (_loadMode && _loadModeTransaction != null)
@@ -104,7 +114,17 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.InMemory
                     return _objectManager.GetObject(id) as IRouteNetworkElement;
             }
             else
-                return null;
+                return GetRouteNetworkElement(id, GetLatestCommitedVersion());
+        }
+
+        public long GetLatestCommitedVersion()
+        {
+            return _objectManager.GetLatestCommitedVersion();
+        }
+
+        public IRouteNetworkElement? GetRouteNetworkElement(Guid id, long versionId)
+        {
+            return _objectManager.GetObject(id, versionId) as IRouteNetworkElement;
         }
 
         private ITransaction GetLoadModeTransaction()

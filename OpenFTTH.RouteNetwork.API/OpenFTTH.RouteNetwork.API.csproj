@@ -11,8 +11,4 @@
     <PackageReference Include="OpenFTTH.Events" Version="1.0.1-alpha" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Mutations\" />
-  </ItemGroup>
-
 </Project>

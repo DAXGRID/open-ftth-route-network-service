@@ -2,9 +2,11 @@
 using Microsoft.Extensions.Logging;
 using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.API.Queries;
+using OpenFTTH.RouteNetwork.Business.DomainModel.Interest;
 using OpenFTTH.RouteNetwork.Service.Business.DomainModel.RouteNetwork;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenFTTH.RouteNetwork.Business.StateHandling.InMemory
 {
@@ -25,6 +27,8 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.InMemory
 
             _routeNetworkState = routeNetworkState;
         }
+
+        public IRouteNetworkState NetworkState => _routeNetworkState;
 
         public Result<GetRouteNetworkDetailsQueryResult> GetRouteElements(GetRouteNetworkDetailsQuery query)
         {
@@ -59,5 +63,6 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.InMemory
 
             return routeNetworkElementDTOs.ToArray();
         }
+
     }
 }

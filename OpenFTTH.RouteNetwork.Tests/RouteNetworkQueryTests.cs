@@ -7,11 +7,11 @@ using Xunit;
 
 namespace OpenFTTH.RouteNetwork.Tests
 {
-    public class RouteNetworkBasicQueryTests : IClassFixture<KongefoldenTestRouteNetwork>
+    public class RouteNetworkBasicQueryTests : IClassFixture<TestRouteNetwork>
     {
-        readonly KongefoldenTestRouteNetwork testNetwork;
+        readonly TestRouteNetwork testNetwork;
 
-        public RouteNetworkBasicQueryTests(KongefoldenTestRouteNetwork testNetwork)
+        public RouteNetworkBasicQueryTests(TestRouteNetwork testNetwork)
         {
             this.testNetwork = testNetwork;
         }
@@ -39,9 +39,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         public async void QueryRouteElement_ThatExists_ShouldReturnSuccess()
         {
             // Setup
-            var existingRouteNodeId = Guid.Parse("dab2aea2-873c-4c85-8d33-5907f69437fe"); // Some route node that exists in the test network
-
-            var routeNodeQuery = new GetRouteNetworkDetailsQuery(new RouteNetworkElementIdList() { existingRouteNodeId });
+            var routeNodeQuery = new GetRouteNetworkDetailsQuery(new RouteNetworkElementIdList() { testNetwork.CO_1 });
 
             // Act
             Result<GetRouteNetworkDetailsQueryResult> routeNodeQueryResult = await testNetwork.QueryApi.HandleAsync(routeNodeQuery);
@@ -52,7 +50,7 @@ namespace OpenFTTH.RouteNetwork.Tests
 
             var theRouteNodeObjectReturned = routeNodeQueryResult.Value.ElementsInfos[0];
 
-            Assert.Equal(existingRouteNodeId, theRouteNodeObjectReturned.Id);
+            Assert.Equal(testNetwork.CO_1, theRouteNodeObjectReturned.Id);
             Assert.Equal(RouteNetworkElementKindEnum.RouteNode, theRouteNodeObjectReturned.Kind);
         }
     }
