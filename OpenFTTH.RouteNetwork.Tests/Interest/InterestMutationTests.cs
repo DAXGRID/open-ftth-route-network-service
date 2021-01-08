@@ -8,11 +8,11 @@ using Xunit;
 
 namespace OpenFTTH.RouteNetwork.Tests
 {
-    public class CreateInterestTests : IClassFixture<TestRouteNetwork>
+    public class InterestMutationTests : IClassFixture<TestRouteNetwork>
     {
         readonly TestRouteNetwork testNetwork;
 
-        public CreateInterestTests(TestRouteNetwork testNetwork)
+        public InterestMutationTests(TestRouteNetwork testNetwork)
         {
             this.testNetwork = testNetwork;
         }

@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OpenFTTH.RouteNetwork.Business.StateHandling.InMemory
+namespace OpenFTTH.RouteNetwork.Business.StateHandling.Network
 {
     public class InMemRouteNetworkRepository : IRouteNetworkRepository
     {
@@ -30,39 +30,26 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.InMemory
 
         public IRouteNetworkState NetworkState => _routeNetworkState;
 
-        public Result<GetRouteNetworkDetailsQueryResult> GetRouteElements(GetRouteNetworkDetailsQuery query)
+        public Result<List<IRouteNetworkElement>> GetRouteElements(RouteNetworkElementIdList routeNetworkElementIds)
         {
             var routeNetworkElementFetched = new List<IRouteNetworkElement>();
 
-            foreach (var routeElementId in query.RouteNetworkElementIdsToQuery)
+            foreach (var routeElementId in routeNetworkElementIds)
             {
                 var routeNetworkElement = _routeNetworkState.GetRouteNetworkElement(routeElementId);
 
                 if (routeNetworkElement == null)
                 {
-                    return Result.Failure<GetRouteNetworkDetailsQueryResult>($"Cannot find any route network element with id: {routeElementId}");
+                    return Result.Failure<List<IRouteNetworkElement>>($"Cannot find any route network element with id: {routeElementId}");
                 }
 
                 routeNetworkElementFetched.Add(routeNetworkElement as IRouteNetworkElement);
             }
 
-
-            return Result.Success<GetRouteNetworkDetailsQueryResult>(new GetRouteNetworkDetailsQueryResult(MapRouteElementDomainObjectsToQueryObjects(routeNetworkElementFetched)));
+            return Result.Success<List<IRouteNetworkElement>>(routeNetworkElementFetched);
         }
 
-        private RouteNetworkElement[] MapRouteElementDomainObjectsToQueryObjects(List<IRouteNetworkElement> routeNetworkElements)
-        {
-            var routeNetworkElementDTOs = new List<RouteNetworkElement>();
-
-            foreach (var routeNetworkElement in routeNetworkElements)
-            {
-                routeNetworkElementDTOs.Add(
-                    new RouteNetworkElement(routeNetworkElement.Id, RouteNetworkElementKindEnum.RouteNode)
-                );
-            }
-
-            return routeNetworkElementDTOs.ToArray();
-        }
+    
 
     }
 }

@@ -9,7 +9,7 @@ using OpenFTTH.RouteNetwork.Service.Business.DomainModel.RouteNetwork;
 using System;
 using System.Collections.Generic;
 
-namespace OpenFTTH.RouteNetwork.Business.StateHandling.InMemory
+namespace OpenFTTH.RouteNetwork.Business.StateHandling.Network
 {
     /// <summary>
     /// Object to hold on to all the versioned object state

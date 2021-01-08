@@ -24,6 +24,7 @@ namespace OpenFTTH.RouteNetwork.API.Queries
         /// </summary>
         public InterestIdList InterestIdsToQuery { get; }
 
+        public bool IncludeRelatedInterest { get; init; }
 
         /// <summary>
         /// Use this contructor, if you want to query by route network element ids

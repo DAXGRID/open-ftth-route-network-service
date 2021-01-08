@@ -7,11 +7,11 @@ using Xunit;
 
 namespace OpenFTTH.RouteNetwork.Tests
 {
-    public class RouteNetworkBasicQueryTests : IClassFixture<TestRouteNetwork>
+    public class BasicQueryTests : IClassFixture<TestRouteNetwork>
     {
         readonly TestRouteNetwork testNetwork;
 
-        public RouteNetworkBasicQueryTests(TestRouteNetwork testNetwork)
+        public BasicQueryTests(TestRouteNetwork testNetwork)
         {
             this.testNetwork = testNetwork;
         }
@@ -46,9 +46,9 @@ namespace OpenFTTH.RouteNetwork.Tests
 
             // Assert
             Assert.True(routeNodeQueryResult.IsSuccess);
-            Assert.Single(routeNodeQueryResult.Value.ElementsInfos);
+            Assert.Single(routeNodeQueryResult.Value.RouteNetworkElements);
 
-            var theRouteNodeObjectReturned = routeNodeQueryResult.Value.ElementsInfos[0];
+            var theRouteNodeObjectReturned = routeNodeQueryResult.Value.RouteNetworkElements[0];
 
             Assert.Equal(testNetwork.CO_1, theRouteNodeObjectReturned.Id);
             Assert.Equal(RouteNetworkElementKindEnum.RouteNode, theRouteNodeObjectReturned.Kind);

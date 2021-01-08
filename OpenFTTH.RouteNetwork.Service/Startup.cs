@@ -4,10 +4,11 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using OpenFTTH.RouteNetwork.Business.StateHandling;
-using OpenFTTH.RouteNetwork.Business.StateHandling.InMemory;
+using OpenFTTH.RouteNetwork.Business.StateHandling.Network;
+using OpenFTTH.RouteNetwork.Business.StateHandling.Interest;
 using System;
 using System.Reflection;
+using OpenFTTH.RouteNetwork.Business.StateHandling;
 
 namespace OpenFTTH.RouteNetwork.Service
 {

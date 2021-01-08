@@ -1,20 +1,14 @@
-﻿using OpenFTTH.Events.Core.Infos;
-using OpenFTTH.Events.RouteNetwork.Infos;
-using OpenFTTH.RouteNetwork.API.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using OpenFTTH.RouteNetwork.API.Model;
 
 namespace OpenFTTH.RouteNetwork.API.Queries
 {
     public record GetRouteNetworkDetailsQueryResult
     {
-        public RouteNetworkElement[] ElementsInfos { get; }
+        public RouteNetworkElement[] RouteNetworkElements { get; }
 
-        public GetRouteNetworkDetailsQueryResult(RouteNetworkElement[] routeElementInfos)
+        public GetRouteNetworkDetailsQueryResult(RouteNetworkElement[] routeNetworkElements)
         {
-            this.ElementsInfos = routeElementInfos;
+            this.RouteNetworkElements = routeNetworkElements;
         }
     }
 }

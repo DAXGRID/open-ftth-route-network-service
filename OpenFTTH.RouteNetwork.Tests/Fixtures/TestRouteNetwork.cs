@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using OpenFTTH.RouteNetwork.Business.MutationHandling;
-using OpenFTTH.RouteNetwork.Business.StateHandling.InMemory;
+using OpenFTTH.RouteNetwork.Business.StateHandling.Network;
+using OpenFTTH.RouteNetwork.Business.StateHandling.Interest;
 using OpenFTTH.RouteNetworkService.QueryHandlers;
 using System;
 
