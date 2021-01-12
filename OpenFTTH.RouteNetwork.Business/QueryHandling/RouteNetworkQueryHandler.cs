@@ -41,7 +41,7 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
             if (getRouteNetworkElementsResult.IsFailure)
                 return Task.FromResult(Result.Failure<GetRouteNetworkDetailsQueryResult>(getRouteNetworkElementsResult.Error));
 
-            var mappedRouteNetworkElements = MapRouteElementDomainObjectsToQueryObjects(getRouteNetworkElementsResult.Value);
+            var mappedRouteNetworkElements = MapRouteElementDomainObjectsToQueryObjects(query, getRouteNetworkElementsResult.Value);
 
             var queryResult = new GetRouteNetworkDetailsQueryResult(mappedRouteNetworkElements);
 
@@ -114,14 +114,25 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
             return new RouteNetworkInterest(interest.Id, interestKind, interest.RouteNetworkElementIds);
         }
 
-        private static RouteNetworkElement[] MapRouteElementDomainObjectsToQueryObjects(List<IRouteNetworkElement> routeNetworkElements)
+        private static RouteNetworkElement[] MapRouteElementDomainObjectsToQueryObjects(GetRouteNetworkDetailsQuery query, List<IRouteNetworkElement> routeNetworkElements)
         {
             var routeNetworkElementDTOs = new List<RouteNetworkElement>();
 
             foreach (var routeNetworkElement in routeNetworkElements)
             {
+                RouteNetworkElementKindEnum kind = (routeNetworkElement is IRouteNode) ? RouteNetworkElementKindEnum.RouteNode : RouteNetworkElementKindEnum.RouteSegment;
+
                 routeNetworkElementDTOs.Add(
-                    new RouteNetworkElement(routeNetworkElement.Id, RouteNetworkElementKindEnum.RouteNode)
+                    new RouteNetworkElement(routeNetworkElement.Id, kind)
+                    {
+                        Coordinates = query.RouteNetworkElementFilter.IncludeCoordinates ? routeNetworkElement.Coordinates : null,
+                        RouteSegmentInfo = query.RouteNetworkElementFilter.IncludeRouteSegmentInfo && routeNetworkElement is IRouteSegment segment ? segment.RouteSegmentInfo : null,
+                        RouteNodeInfo = query.RouteNetworkElementFilter.IncludeRouteNodeInfo && routeNetworkElement is IRouteNode node ? node.RouteNodeInfo : null,
+                        NamingInfo = query.RouteNetworkElementFilter.IncludeNamingInfo ? routeNetworkElement.NamingInfo : null,
+                        MappingInfo = query.RouteNetworkElementFilter.IncludeMappingInfo ? routeNetworkElement.MappingInfo : null,
+                        LifecycleInfo = query.RouteNetworkElementFilter.IncludeLifecycleInfo ? routeNetworkElement.LifecycleInfo : null,
+                        SafetyInfo = query.RouteNetworkElementFilter.IncludeSafetyInfo ? routeNetworkElement.SafetyInfo : null,
+                    }
                 );
             }
 

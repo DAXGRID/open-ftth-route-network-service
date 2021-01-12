@@ -82,9 +82,16 @@ namespace OpenFTTH.RouteNetwork.Business.EventHandling
             if (AlreadyProcessed(request.EventId))
                 return;
 
-            var envelope = GeoJsonConversionHelper.ConvertFromPointGeoJson(request.Geometry).Envelope.EnvelopeInternal;
+            var routeNode = new RouteNode(request.NodeId, request.Geometry)
+            {
+                RouteNodeInfo = request.RouteNodeInfo,
+                NamingInfo = request.NamingInfo,
+                MappingInfo = request.MappingInfo,
+                LifecycleInfo = request.LifecyleInfo,
+                SafetyInfo = request.SafetyInfo
+            };
 
-            transaction.Add(new RouteNode(request.NodeId, request.RouteNodeInfo?.Function, envelope, request.NamingInfo?.Name), ignoreDublicates: true);
+            transaction.Add(routeNode, ignoreDublicates: true);
         }
 
         private void HandleEvent(RouteSegmentAdded request, ITransaction transaction)
@@ -108,9 +115,16 @@ namespace OpenFTTH.RouteNetwork.Business.EventHandling
                 return;
             }
 
-            var envelope = GeoJsonConversionHelper.ConvertFromLineGeoJson(request.Geometry).Envelope.EnvelopeInternal;
+            var routeSegment = new RouteSegment(request.SegmentId, request.Geometry, fromNode, toNode)
+            {
+                RouteSegmentInfo = request.RouteSegmentInfo,
+                NamingInfo = request.NamingInfo,
+                MappingInfo = request.MappingInfo,
+                LifecycleInfo = request.LifecyleInfo,
+                SafetyInfo = request.SafetyInfo
+            };
 
-            transaction.Add(new RouteSegment(request.SegmentId, fromNode, toNode, envelope), ignoreDublicates: true);
+            transaction.Add(routeSegment, ignoreDublicates: true);
         }
 
         private void HandleEvent(RouteSegmentMarkedForDeletion request, ITransaction transaction)

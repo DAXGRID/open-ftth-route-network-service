@@ -133,9 +133,9 @@ namespace OpenFTTH.RouteNetwork.Tests
 
             // Assert that no route elements got interest relations
             Assert.Null(queryResult.Value.RouteNetworkElements[0].InterestRelations);
-            Assert.Null(queryResult.Value.RouteNetworkElements[0].InterestRelations);
-            Assert.Null(queryResult.Value.RouteNetworkElements[0].InterestRelations);
-            Assert.Null(queryResult.Value.RouteNetworkElements[0].InterestRelations);
+            Assert.Null(queryResult.Value.RouteNetworkElements[1].InterestRelations);
+            Assert.Null(queryResult.Value.RouteNetworkElements[2].InterestRelations);
+            Assert.Null(queryResult.Value.RouteNetworkElements[3].InterestRelations);
         }
     }
 }

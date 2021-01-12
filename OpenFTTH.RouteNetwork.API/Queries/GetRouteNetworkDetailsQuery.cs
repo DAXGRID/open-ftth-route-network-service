@@ -24,13 +24,35 @@ namespace OpenFTTH.RouteNetwork.API.Queries
         /// </summary>
         public InterestIdList InterestIdsToQuery { get; }
 
-        private RelatedInterestFilterOptions _relatedInterestFilterOptions = RelatedInterestFilterOptions.None;
+        #region Related Interest Filter Options
+        private RelatedInterestFilterOptions _relatedInterestFilterOptions = RelatedInterestFilterOptions.ReferencesFromRouteElementOnly;
 
         public RelatedInterestFilterOptions RelatedInterestFilter
         {
             get { return _relatedInterestFilterOptions; }
             init { _relatedInterestFilterOptions = value; }
         }
+        #endregion
+
+        #region Route Network Element Filter Options
+        private RouteNetworkElementFilterOptions _routeNetworkElementFilterOptions = 
+            new RouteNetworkElementFilterOptions()
+                {
+                    IncludeRouteNodeInfo = true,
+                    IncludeRouteSegmentInfo = true,
+                    IncludeCoordinates = true,
+                    IncludeNamingInfo = true,
+                    IncludeMappingInfo = true,
+                    IncludeLifecycleInfo = true,
+                    IncludeSafetyInfo = true
+                };
+
+        public RouteNetworkElementFilterOptions RouteNetworkElementFilter
+        {
+            get { return _routeNetworkElementFilterOptions; }
+            init { _routeNetworkElementFilterOptions = value; }
+        }
+        #endregion
 
         /// <summary>
         /// Use this contructor, if you want to query by route network element ids
