@@ -22,6 +22,7 @@ namespace OpenFTTH.RouteNetwork.API.Model
         public LifecycleInfo? LifecycleInfo { get; init; }
         public SafetyInfo? SafetyInfo { get; init; }
         public MappingInfo? MappingInfo { get; init; }
+        public RouteNetworkElementInterestRelation[]? InterestRelations { get; set; }
 
         public RouteNetworkElement(Guid id, RouteNetworkElementKindEnum kind)
         {

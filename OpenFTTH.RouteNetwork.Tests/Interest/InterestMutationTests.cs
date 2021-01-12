@@ -23,20 +23,20 @@ namespace OpenFTTH.RouteNetwork.Tests
             // Route network subset used in this test:
             // (CO_1) <- (S1) -> (HH_1)
             var interestId = Guid.NewGuid();
-            
+
             var walk = new RouteNetworkElementIdList() { testNetwork.S1 };
 
-            var createInterestCommand = new RegisterWalkOfInterestCommand(interestId, walk);
-
             // Act
-            Result<RegisterWalkOfInterestCommandResult> routeNodeQueryResult = await testNetwork.CommandApi.HandleAsync(createInterestCommand);
+            var registerWalkOfInterestCommand = new RegisterWalkOfInterestCommand(interestId, walk);
 
-            // Assert command success and that the result include all three route network element ids
-            Assert.True(routeNodeQueryResult.IsSuccess);
-            Assert.Equal(3, routeNodeQueryResult.Value.Walk.Count);
-            Assert.Equal(testNetwork.CO_1, routeNodeQueryResult.Value.Walk[0]);
-            Assert.Equal(testNetwork.S1, routeNodeQueryResult.Value.Walk[1]);
-            Assert.Equal(testNetwork.HH_1, routeNodeQueryResult.Value.Walk[2]);
+            Result<RegisterWalkOfInterestCommandResult> registerWalkOfInterestCommandResult = await testNetwork.CommandApi.HandleAsync(registerWalkOfInterestCommand);
+
+            // Assert command success and that the command result include all three route network element ids
+            Assert.True(registerWalkOfInterestCommandResult.IsSuccess);
+            Assert.Equal(3, registerWalkOfInterestCommandResult.Value.Walk.Count);
+            Assert.Equal(testNetwork.CO_1, registerWalkOfInterestCommandResult.Value.Walk[0]);
+            Assert.Equal(testNetwork.S1, registerWalkOfInterestCommandResult.Value.Walk[1]);
+            Assert.Equal(testNetwork.HH_1, registerWalkOfInterestCommandResult.Value.Walk[2]);
         }
 
         [Fact]
@@ -51,18 +51,18 @@ namespace OpenFTTH.RouteNetwork.Tests
             var createInterestCommand = new RegisterWalkOfInterestCommand(interestId, walk);
 
             // Act
-            Result<RegisterWalkOfInterestCommandResult> routeNodeQueryResult = await testNetwork.CommandApi.HandleAsync(createInterestCommand);
+            Result<RegisterWalkOfInterestCommandResult> registerWalkOfInterestCommandResult = await testNetwork.CommandApi.HandleAsync(createInterestCommand);
 
             // Assert command success and that the result include all three route network element ids
-            Assert.True(routeNodeQueryResult.IsSuccess);
-            Assert.Equal(7, routeNodeQueryResult.Value.Walk.Count);
-            Assert.Equal(testNetwork.CO_1, routeNodeQueryResult.Value.Walk[0]);
-            Assert.Equal(testNetwork.S1, routeNodeQueryResult.Value.Walk[1]);
-            Assert.Equal(testNetwork.HH_1, routeNodeQueryResult.Value.Walk[2]);
-            Assert.Equal(testNetwork.S2, routeNodeQueryResult.Value.Walk[3]);
-            Assert.Equal(testNetwork.HH_2, routeNodeQueryResult.Value.Walk[4]);
-            Assert.Equal(testNetwork.S4, routeNodeQueryResult.Value.Walk[5]);
-            Assert.Equal(testNetwork.CC_1, routeNodeQueryResult.Value.Walk[6]);
+            Assert.True(registerWalkOfInterestCommandResult.IsSuccess);
+            Assert.Equal(7, registerWalkOfInterestCommandResult.Value.Walk.Count);
+            Assert.Equal(testNetwork.CO_1, registerWalkOfInterestCommandResult.Value.Walk[0]);
+            Assert.Equal(testNetwork.S1, registerWalkOfInterestCommandResult.Value.Walk[1]);
+            Assert.Equal(testNetwork.HH_1, registerWalkOfInterestCommandResult.Value.Walk[2]);
+            Assert.Equal(testNetwork.S2, registerWalkOfInterestCommandResult.Value.Walk[3]);
+            Assert.Equal(testNetwork.HH_2, registerWalkOfInterestCommandResult.Value.Walk[4]);
+            Assert.Equal(testNetwork.S4, registerWalkOfInterestCommandResult.Value.Walk[5]);
+            Assert.Equal(testNetwork.CC_1, registerWalkOfInterestCommandResult.Value.Walk[6]);
         }
 
         [Fact]
@@ -77,18 +77,18 @@ namespace OpenFTTH.RouteNetwork.Tests
             var createInterestCommand = new RegisterWalkOfInterestCommand(interestId, walk);
 
             // Act
-            Result<RegisterWalkOfInterestCommandResult> routeNodeQueryResult = await testNetwork.CommandApi.HandleAsync(createInterestCommand);
+            Result<RegisterWalkOfInterestCommandResult> registerWalkOfInterestCommandResult = await testNetwork.CommandApi.HandleAsync(createInterestCommand);
 
             // Assert command success and that the result include all three route network element ids
-            Assert.True(routeNodeQueryResult.IsSuccess);
-            Assert.Equal(7, routeNodeQueryResult.Value.Walk.Count);
-            Assert.Equal(testNetwork.CO_1, routeNodeQueryResult.Value.Walk[0]);
-            Assert.Equal(testNetwork.S1, routeNodeQueryResult.Value.Walk[1]);
-            Assert.Equal(testNetwork.HH_1, routeNodeQueryResult.Value.Walk[2]);
-            Assert.Equal(testNetwork.S2, routeNodeQueryResult.Value.Walk[3]);
-            Assert.Equal(testNetwork.HH_2, routeNodeQueryResult.Value.Walk[4]);
-            Assert.Equal(testNetwork.S1, routeNodeQueryResult.Value.Walk[5]);
-            Assert.Equal(testNetwork.CO_1, routeNodeQueryResult.Value.Walk[6]);
+            Assert.True(registerWalkOfInterestCommandResult.IsSuccess);
+            Assert.Equal(7, registerWalkOfInterestCommandResult.Value.Walk.Count);
+            Assert.Equal(testNetwork.CO_1, registerWalkOfInterestCommandResult.Value.Walk[0]);
+            Assert.Equal(testNetwork.S1, registerWalkOfInterestCommandResult.Value.Walk[1]);
+            Assert.Equal(testNetwork.HH_1, registerWalkOfInterestCommandResult.Value.Walk[2]);
+            Assert.Equal(testNetwork.S2, registerWalkOfInterestCommandResult.Value.Walk[3]);
+            Assert.Equal(testNetwork.HH_2, registerWalkOfInterestCommandResult.Value.Walk[4]);
+            Assert.Equal(testNetwork.S1, registerWalkOfInterestCommandResult.Value.Walk[5]);
+            Assert.Equal(testNetwork.CO_1, registerWalkOfInterestCommandResult.Value.Walk[6]);
         }
 
         [Fact]
@@ -103,10 +103,10 @@ namespace OpenFTTH.RouteNetwork.Tests
             var createInterestCommand = new RegisterWalkOfInterestCommand(interestId, walk);
 
             // Act
-            Result<RegisterWalkOfInterestCommandResult> routeNodeQueryResult = await testNetwork.CommandApi.HandleAsync(createInterestCommand);
+            Result<RegisterWalkOfInterestCommandResult> registerWalkOfInterestCommandResult = await testNetwork.CommandApi.HandleAsync(createInterestCommand);
 
             // Assert
-            Assert.True(routeNodeQueryResult.IsFailure);
+            Assert.True(registerWalkOfInterestCommandResult.IsFailure);
         }
 
         [Fact]
@@ -121,10 +121,10 @@ namespace OpenFTTH.RouteNetwork.Tests
             var createInterestCommand = new RegisterWalkOfInterestCommand(interestId, walk);
 
             // Act
-            Result<RegisterWalkOfInterestCommandResult> routeNodeQueryResult = await testNetwork.CommandApi.HandleAsync(createInterestCommand);
+            Result<RegisterWalkOfInterestCommandResult> registerWalkOfInterestCommandResult = await testNetwork.CommandApi.HandleAsync(createInterestCommand);
 
             // Assert
-            Assert.True(routeNodeQueryResult.IsFailure);
+            Assert.True(registerWalkOfInterestCommandResult.IsFailure);
         }
 
 

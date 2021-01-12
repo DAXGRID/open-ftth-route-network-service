@@ -12,21 +12,38 @@ namespace OpenFTTH.RouteNetwork.API.Model
     public record RouteNetworkInterest
     {
         public Guid Id { get; }
-        public RouteNetworkElementKindEnum Kind { get; }
-        public Guid[] RouteNetworkElementIds { get; }
+        public RouteNetworkInterestKindEnum Kind { get; }
+        public RouteNetworkElementIdList RouteNetworkElementRefs { get; }
+
+        public RouteNetworkInterest(Guid id, RouteNetworkInterestKindEnum kind, RouteNetworkElementIdList routeNetworkElementRefs)
+        {
+            this.Id = id;
+            this.Kind = kind;
+            this.RouteNetworkElementRefs = routeNetworkElementRefs;
+        }
     }
 }
 
 /* 
 --------------------------------------------------------------- 
-RouteNetworkDataByIdsQuery QUERY
+RouteNetworkDetailsQuery
 --------------------------------------------------------------- 
+
+IncludeInterestInformation : 
+    None
+    ReferenceFromRouteElementOnly
+    InterestObject
 
 RouteNetworkElements: [
     {
         "Id": "ef8fa1e9-ae6a-4d26-a2bf-4e9902c57237",
         "Kind": "RouteNode",
-        "InterestRelations": ["6587f584-0f0f-47d9-b91d-6dc1c585a720"]
+        "InterestRelations": [
+            {
+                InterestId: "6587f584-0f0f-47d9-b91d-6dc1c585a720",
+                RelationType: "End"
+            }
+        ]
     }
 ]
 

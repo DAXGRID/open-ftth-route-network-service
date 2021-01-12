@@ -34,9 +34,11 @@ namespace OpenFTTH.RouteNetwork.Business.MutationHandling
             if (walkValidationResult.IsFailure)
                 return Task.FromResult(Result.Failure<RegisterWalkOfInterestCommandResult>(walkValidationResult.Error));
 
-            // If we get here everything should be good, so return the result
-            var registerWalkOfInterestCommandResult = new RegisterWalkOfInterestCommandResult(walkValidationResult.Value.WalkIds);
+            // Save the interest
+            _interestRepository.RegisterWalkOfInterest(command.InterestId, walkValidationResult.Value.WalkIds);
 
+            // Return command result
+            var registerWalkOfInterestCommandResult = new RegisterWalkOfInterestCommandResult(walkValidationResult.Value.WalkIds);
             return Task.FromResult(Result.Success<RegisterWalkOfInterestCommandResult>(registerWalkOfInterestCommandResult));
         }
     }

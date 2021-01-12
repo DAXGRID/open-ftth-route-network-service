@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OpenFTTH.RouteNetwork.Business.StateHandling.Interest
+namespace OpenFTTH.RouteNetwork.API.Model
 {
-    public enum InterestRelationKindEnum
+    public enum RouteNetworkInterestRelationKindEnum
     {
         InsideNode,
         Start,

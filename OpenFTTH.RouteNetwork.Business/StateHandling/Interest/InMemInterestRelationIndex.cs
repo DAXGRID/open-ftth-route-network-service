@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 namespace OpenFTTH.RouteNetwork.Business.StateHandling.Interest
 {
     /// <summary>
-    /// Index holding relations from a route network element to the interests that start, end or pass through it.
+    /// Index holding relations from a route network element to the interests that starts, ends or pass through it.
     /// Used for fast lookup of all interests related to a given route network element.
     /// </summary>
     public class InMemInterestRelationIndex
     {
-        private readonly ConcurrentDictionary<Guid, List<(Guid, InterestRelationKindEnum)>> _routeElementInterestRelations = new ConcurrentDictionary<Guid, List<(Guid, InterestRelationKindEnum)>>();
+        private readonly ConcurrentDictionary<Guid, List<(Guid, RouteNetworkInterestRelationKindEnum)>> _routeElementInterestRelations = new ConcurrentDictionary<Guid, List<(Guid, RouteNetworkInterestRelationKindEnum)>>();
 
         /// <summary>
         /// Add interest to index. If already indexed, the index will be updated.
@@ -31,16 +31,16 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.Interest
             {
                 var currentRouteElementId = interest.RouteNetworkElementIds[i];
 
-                InterestRelationKindEnum relKind = InterestRelationKindEnum.Start;
+                RouteNetworkInterestRelationKindEnum relKind = RouteNetworkInterestRelationKindEnum.Start;
 
                 if (interest.RouteNetworkElementIds.Count == 1)
-                    relKind = InterestRelationKindEnum.InsideNode;
+                    relKind = RouteNetworkInterestRelationKindEnum.InsideNode;
                 else if (i == 0)
-                    relKind = InterestRelationKindEnum.Start;
+                    relKind = RouteNetworkInterestRelationKindEnum.Start;
                 else if (i == interest.RouteNetworkElementIds.Count - 1)
-                    relKind = InterestRelationKindEnum.End;
+                    relKind = RouteNetworkInterestRelationKindEnum.End;
                 else
-                    relKind = InterestRelationKindEnum.PassThrough;
+                    relKind = RouteNetworkInterestRelationKindEnum.PassThrough;
 
                 if (_routeElementInterestRelations.TryGetValue(currentRouteElementId, out var interestRelationList))
                 {
@@ -49,7 +49,7 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.Interest
                 }
                 else
                 {
-                    _routeElementInterestRelations[currentRouteElementId] = new List<(Guid, InterestRelationKindEnum)>() { (interest.Id, relKind) };
+                    _routeElementInterestRelations[currentRouteElementId] = new List<(Guid, RouteNetworkInterestRelationKindEnum)>() { (interest.Id, relKind) };
                 }
             }
         }
@@ -59,7 +59,7 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.Interest
             RemoveExistingInterestIdsFromIndex(interestId);
         }
 
-        public List<(Guid, InterestRelationKindEnum)> GetRouteNetworkElementInterestRelations(Guid routeElementId)
+        public List<(Guid, RouteNetworkInterestRelationKindEnum)> GetRouteNetworkElementInterestRelations(Guid routeElementId)
         {
             if (_routeElementInterestRelations.TryGetValue(routeElementId, out var interestRelationList))
             {
@@ -67,7 +67,7 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.Interest
             }
             else
             {
-                return new List<(Guid, InterestRelationKindEnum)>();
+                return new List<(Guid, RouteNetworkInterestRelationKindEnum)>();
             }
         }
 
@@ -89,16 +89,15 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.Interest
 
                 if (routeElementContainsInterestRelation)
                 {
-                    // We need create new interest list, by copying existing one and removing the element, to be thread safe, 
-                    // because only the _routeElementInterestRelations dictionary allows for concurrent access
+                    // We need create new interest list by copying existing one and removing the element, to be thread safe, 
                     _routeElementInterestRelations[interestRelationList.Key] = MakeCopyOfInterestListAndRemovedInterest(interestRelationList.Value, interestId);
                 }
             }
         }
 
-        private static List<(Guid, InterestRelationKindEnum)> MakeCopyOfInterestListAndRemovedInterest(List<(Guid, InterestRelationKindEnum)> listToCopy, Guid interestToRemove)
+        private static List<(Guid, RouteNetworkInterestRelationKindEnum)> MakeCopyOfInterestListAndRemovedInterest(List<(Guid, RouteNetworkInterestRelationKindEnum)> listToCopy, Guid interestToRemove)
         {
-            List<(Guid, InterestRelationKindEnum)> newListWithRemovedInterest = new List<(Guid, InterestRelationKindEnum)>();
+            List<(Guid, RouteNetworkInterestRelationKindEnum)> newListWithRemovedInterest = new List<(Guid, RouteNetworkInterestRelationKindEnum)>();
 
             foreach (var interestRel in listToCopy)
             {
@@ -109,9 +108,9 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.Interest
             return newListWithRemovedInterest;
         }
 
-        private static List<(Guid, InterestRelationKindEnum)> MakeCopyOfInterestListAndAddInterest(List<(Guid, InterestRelationKindEnum)> listToCopy, (Guid, InterestRelationKindEnum) interestRelationToAdd)
+        private static List<(Guid, RouteNetworkInterestRelationKindEnum)> MakeCopyOfInterestListAndAddInterest(List<(Guid, RouteNetworkInterestRelationKindEnum)> listToCopy, (Guid, RouteNetworkInterestRelationKindEnum) interestRelationToAdd)
         {
-            List<(Guid, InterestRelationKindEnum)> newListWithAddedInterest = new List<(Guid, InterestRelationKindEnum)>();
+            List<(Guid, RouteNetworkInterestRelationKindEnum)> newListWithAddedInterest = new List<(Guid, RouteNetworkInterestRelationKindEnum)>();
 
             foreach (var interestRel in listToCopy)
             {

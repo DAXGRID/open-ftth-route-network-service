@@ -44,17 +44,17 @@ namespace OpenFTTH.RouteNetwork.Tests
             // Route element 2 has a start relation to the interest
             Assert.Single(routeElement2InterestRelations);
             Assert.Equal(walkOfInterest.Id, routeElement2InterestRelations[0].Item1);
-            Assert.Equal(InterestRelationKindEnum.Start, routeElement2InterestRelations[0].Item2);
+            Assert.Equal(RouteNetworkInterestRelationKindEnum.Start, routeElement2InterestRelations[0].Item2);
 
             // Route element 3 has a passthroug relation to the interest
             Assert.Single(routeElement3InterestRelations);
             Assert.Equal(walkOfInterest.Id, routeElement3InterestRelations[0].Item1);
-            Assert.Equal(InterestRelationKindEnum.PassThrough, routeElement3InterestRelations[0].Item2);
+            Assert.Equal(RouteNetworkInterestRelationKindEnum.PassThrough, routeElement3InterestRelations[0].Item2);
 
             // Route element 4 has an end relation to the interest
             Assert.Single(routeElement4InterestRelations);
             Assert.Equal(walkOfInterest.Id, routeElement4InterestRelations[0].Item1);
-            Assert.Equal(InterestRelationKindEnum.End, routeElement4InterestRelations[0].Item2);
+            Assert.Equal(RouteNetworkInterestRelationKindEnum.End, routeElement4InterestRelations[0].Item2);
         }
 
         [Fact]
@@ -82,7 +82,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             // Route element 2 has an inside node relation to the interest
             Assert.Single(routeElement2InterestRelations);
             Assert.Equal(nodeOfInterest.Id, routeElement2InterestRelations[0].Item1);
-            Assert.Equal(InterestRelationKindEnum.InsideNode, routeElement2InterestRelations[0].Item2);
+            Assert.Equal(RouteNetworkInterestRelationKindEnum.InsideNode, routeElement2InterestRelations[0].Item2);
         }
 
 
@@ -115,22 +115,22 @@ namespace OpenFTTH.RouteNetwork.Tests
             // Route element 1 has a relation to interest 1 only
             Assert.Single(routeElement1InterestRelations);
             Assert.Equal(walkOfInterest1.Id, routeElement1InterestRelations[0].Item1);
-            Assert.Equal(InterestRelationKindEnum.Start, routeElement1InterestRelations[0].Item2);
+            Assert.Equal(RouteNetworkInterestRelationKindEnum.Start, routeElement1InterestRelations[0].Item2);
 
             // Route element 2 has a relation to both interest 1 and 2
             Assert.Equal(2, routeElement2InterestRelations.Count);
-            Assert.True(routeElement2InterestRelations.Exists(r => r.Item1 == walkOfInterest1.Id && r.Item2 == InterestRelationKindEnum.PassThrough));
-            Assert.True(routeElement2InterestRelations.Exists(r => r.Item1 == walkOfInterest2.Id && r.Item2 == InterestRelationKindEnum.Start));
+            Assert.True(routeElement2InterestRelations.Exists(r => r.Item1 == walkOfInterest1.Id && r.Item2 == RouteNetworkInterestRelationKindEnum.PassThrough));
+            Assert.True(routeElement2InterestRelations.Exists(r => r.Item1 == walkOfInterest2.Id && r.Item2 == RouteNetworkInterestRelationKindEnum.Start));
 
             // Route element 3 has a relation to both interest 1 and 2
             Assert.Equal(2, routeElement3InterestRelations.Count);
-            Assert.True(routeElement3InterestRelations.Exists(r => r.Item1 == walkOfInterest1.Id && r.Item2 == InterestRelationKindEnum.End));
-            Assert.True(routeElement3InterestRelations.Exists(r => r.Item1 == walkOfInterest2.Id && r.Item2 == InterestRelationKindEnum.PassThrough));
+            Assert.True(routeElement3InterestRelations.Exists(r => r.Item1 == walkOfInterest1.Id && r.Item2 == RouteNetworkInterestRelationKindEnum.End));
+            Assert.True(routeElement3InterestRelations.Exists(r => r.Item1 == walkOfInterest2.Id && r.Item2 == RouteNetworkInterestRelationKindEnum.PassThrough));
 
             // Route element 4 has a relation to interest 2 only
             Assert.Single(routeElement4InterestRelations);
             Assert.Equal(walkOfInterest2.Id, routeElement4InterestRelations[0].Item1);
-            Assert.Equal(InterestRelationKindEnum.End, routeElement4InterestRelations[0].Item2);
+            Assert.Equal(RouteNetworkInterestRelationKindEnum.End, routeElement4InterestRelations[0].Item2);
         }
 
         [Fact]
@@ -164,17 +164,17 @@ namespace OpenFTTH.RouteNetwork.Tests
             // Route element 2 has a start relation to the interest
             Assert.Single(routeElement2InterestRelations);
             Assert.Equal(walkOfInterest.Id, routeElement2InterestRelations[0].Item1);
-            Assert.Equal(InterestRelationKindEnum.Start, routeElement2InterestRelations[0].Item2);
+            Assert.Equal(RouteNetworkInterestRelationKindEnum.Start, routeElement2InterestRelations[0].Item2);
 
             // Route element 3 has a passthroug relation to the interest
             Assert.Single(routeElement3InterestRelations);
             Assert.Equal(walkOfInterest.Id, routeElement3InterestRelations[0].Item1);
-            Assert.Equal(InterestRelationKindEnum.PassThrough, routeElement3InterestRelations[0].Item2);
+            Assert.Equal(RouteNetworkInterestRelationKindEnum.PassThrough, routeElement3InterestRelations[0].Item2);
 
             // Route element 4 has an end relation to the interest
             Assert.Single(routeElement4InterestRelations);
             Assert.Equal(walkOfInterest.Id, routeElement4InterestRelations[0].Item1);
-            Assert.Equal(InterestRelationKindEnum.End, routeElement4InterestRelations[0].Item2);
+            Assert.Equal(RouteNetworkInterestRelationKindEnum.End, routeElement4InterestRelations[0].Item2);
         }
 
         [Fact]
@@ -212,17 +212,17 @@ namespace OpenFTTH.RouteNetwork.Tests
             // Route element 2 has a start relation to the interest
             Assert.Single(routeElement2InterestRelations);
             Assert.Equal(walkOfInterest2.Id, routeElement2InterestRelations[0].Item1);
-            Assert.Equal(InterestRelationKindEnum.Start, routeElement2InterestRelations[0].Item2);
+            Assert.Equal(RouteNetworkInterestRelationKindEnum.Start, routeElement2InterestRelations[0].Item2);
 
             // Route element 3 has a passthroug relation to the interest
             Assert.Single(routeElement3InterestRelations);
             Assert.Equal(walkOfInterest2.Id, routeElement3InterestRelations[0].Item1);
-            Assert.Equal(InterestRelationKindEnum.PassThrough, routeElement3InterestRelations[0].Item2);
+            Assert.Equal(RouteNetworkInterestRelationKindEnum.PassThrough, routeElement3InterestRelations[0].Item2);
 
             // Route element 4 has an end relation to the interest
             Assert.Single(routeElement4InterestRelations);
             Assert.Equal(walkOfInterest2.Id, routeElement4InterestRelations[0].Item1);
-            Assert.Equal(InterestRelationKindEnum.End, routeElement4InterestRelations[0].Item2);
+            Assert.Equal(RouteNetworkInterestRelationKindEnum.End, routeElement4InterestRelations[0].Item2);
         }
     }
 }
