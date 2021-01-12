@@ -38,7 +38,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         
 
         [Fact]
-        public async void QueryRouteElement_ThatExists_ShouldReturnSuccess()
+        public async void QueryRouteElement_ThatExists_ShouldReturnSuccessAndAllRouteElementProperties()
         {
             // Setup
             var routeNodeQuery = new GetRouteNetworkDetailsQuery(new RouteNetworkElementIdList() { testNetwork.CO_1 });
@@ -54,6 +54,13 @@ namespace OpenFTTH.RouteNetwork.Tests
 
             Assert.Equal(testNetwork.CO_1, theRouteNodeObjectReturned.Id);
             Assert.Equal(RouteNetworkElementKindEnum.RouteNode, theRouteNodeObjectReturned.Kind);
+
+            Assert.NotNull(theRouteNodeObjectReturned.Coordinates);
+            Assert.NotNull(theRouteNodeObjectReturned.RouteNodeInfo);
+            Assert.NotNull(theRouteNodeObjectReturned.NamingInfo);
+            Assert.NotNull(theRouteNodeObjectReturned.MappingInfo);
+            Assert.NotNull(theRouteNodeObjectReturned.LifecycleInfo);
+            Assert.NotNull(theRouteNodeObjectReturned.SafetyInfo);
         }
 
         [Fact]

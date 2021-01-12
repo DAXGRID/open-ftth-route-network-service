@@ -107,7 +107,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void QueryRequestingInterestInformation_ShouldReturnNoInterestInformation()
+        public async void QueryExplicitlyRequestingNoInterestInformation_ShouldReturnNoInterestInformation()
         {
             // Create interest (CO_1) <- (S1) -> (HH_1) that we can then try query
             var interestId = Guid.NewGuid();
