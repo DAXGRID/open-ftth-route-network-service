@@ -1,6 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using OpenFTTH.CQRS;
-using OpenFTTH.RouteNetwork.API.Mutations;
+using OpenFTTH.RouteNetwork.API.Commands;
 using OpenFTTH.RouteNetwork.Business.StateHandling;
 using System;
 using System.Collections.Generic;

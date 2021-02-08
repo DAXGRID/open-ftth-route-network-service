@@ -10,10 +10,10 @@ using System.Threading.Tasks;
 namespace OpenFTTH.RouteNetwork.Business.StateHandling.Interest
 {
     /// <summary>
-    /// Index holding relations from a route network element to the interests that starts, ends or pass through it.
+    /// In-memory index holding relations from route network elements to the interests that starts, ends or pass through them.
     /// Used for fast lookup of all interests related to a given route network element.
     /// </summary>
-    public class InMemInterestRelationIndex
+    public class InMemoryInterestRelationIndex
     {
         private readonly ConcurrentDictionary<Guid, List<(Guid, RouteNetworkInterestRelationKindEnum)>> _routeElementInterestRelations = new ConcurrentDictionary<Guid, List<(Guid, RouteNetworkInterestRelationKindEnum)>>();
 
@@ -26,6 +26,15 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.Interest
             // Make all existing index entries referencing the interest
             RemoveExistingInterestIdsFromIndex(interest.Id);
 
+            Add(interest);
+        }
+
+        /// <summary>
+        /// Add interest to index. If already indexed, eventually old route element references will *not* be removed.
+        /// </summary>
+        /// <param name="interest"></param>
+        public void Add(IInterest interest)
+        {
             // Create index entries for all route elements ids covered by the interest
             for (int i = 0; i < interest.RouteNetworkElementIds.Count; i++)
             {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OpenFTTH.RouteNetwork.API.Mutations
+namespace OpenFTTH.RouteNetwork.API.Commands
 {
     public class RegisterWalkOfInterestCommandResult
     {

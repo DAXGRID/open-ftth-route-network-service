@@ -3,7 +3,7 @@ using OpenFTTH.CQRS;
 using OpenFTTH.RouteNetwork.API.Model;
 using System;
 
-namespace OpenFTTH.RouteNetwork.API.Mutations
+namespace OpenFTTH.RouteNetwork.API.Commands
 {
 
     /// <summary>

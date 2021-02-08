@@ -1,6 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using OpenFTTH.RouteNetwork.API.Model;
-using OpenFTTH.RouteNetwork.API.Mutations;
+using OpenFTTH.RouteNetwork.API.Commands;
 using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.RouteNetwork.Business.DomainModel.Interest;
 using OpenFTTH.RouteNetwork.Business.StateHandling.Interest;
@@ -17,7 +17,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         public void TestIndexingSingleWalkOfInterest()
         {
             // Create a walk of interest spanning 3 route elements out of 4
-            InMemInterestRelationIndex index = new InMemInterestRelationIndex();
+            InMemoryInterestRelationIndex index = new InMemoryInterestRelationIndex();
 
             var routeElement1 = Guid.NewGuid();
             var routeElement2 = Guid.NewGuid();
@@ -61,7 +61,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         public void TestIndexingSingleNodeOfInterest()
         {
             // Create a walk of interest spanning 3 route elements out of 4
-            InMemInterestRelationIndex index = new InMemInterestRelationIndex();
+            InMemoryInterestRelationIndex index = new InMemoryInterestRelationIndex();
 
             var routeElement1 = Guid.NewGuid();
             var routeElement2 = Guid.NewGuid();
@@ -90,7 +90,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         public void TestIndexingMultipleWalkOfInterest()
         {
             // Setup
-            InMemInterestRelationIndex index = new InMemInterestRelationIndex();
+            InMemoryInterestRelationIndex index = new InMemoryInterestRelationIndex();
 
             var routeElement1 = Guid.NewGuid();
             var routeElement2 = Guid.NewGuid();
@@ -136,7 +136,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         [Fact]
         public void TestUpdatingIndex()
         {
-            InMemInterestRelationIndex index = new InMemInterestRelationIndex();
+            InMemoryInterestRelationIndex index = new InMemoryInterestRelationIndex();
 
             var routeElement1 = Guid.NewGuid();
             var routeElement2 = Guid.NewGuid();
@@ -181,7 +181,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         public void TestRemoveWalkOfInterestFromIndex()
         {
             // Setup
-            InMemInterestRelationIndex index = new InMemInterestRelationIndex();
+            InMemoryInterestRelationIndex index = new InMemoryInterestRelationIndex();
 
             var routeElement1 = Guid.NewGuid();
             var routeElement2 = Guid.NewGuid();

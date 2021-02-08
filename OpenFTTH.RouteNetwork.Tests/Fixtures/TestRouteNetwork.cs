@@ -64,7 +64,7 @@ namespace OpenFTTH.RouteNetwork.Tests.Fixtures
 
             var routeNetworkRepo = new InMemRouteNetworkRepository(loggerFactory, networkState);
 
-            var interestRepo = new InMemInterestRepository();
+            var interestRepo = new MemoryMappedInterestRepository();
 
             QueryApi = new RouteNetworkQueryHandler(loggerFactory, routeNetworkRepo, interestRepo);
 
