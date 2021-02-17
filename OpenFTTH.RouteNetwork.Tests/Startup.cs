@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using OpenFTTH.CQRS;
 using OpenFTTH.EventSourcing;
 using OpenFTTH.EventSourcing.InMem;
@@ -15,14 +13,12 @@ namespace OpenFTTH.RouteNetworkService.Tests
 {
     public class Startup
     {
-        private ServiceProvider _serviceProvider;
         public void ConfigureServices(IServiceCollection services)
         {
             // Route Network State and Repository
             services.AddSingleton<IRouteNetworkState, InMemRouteNetworkState>();
             services.AddSingleton<IRouteNetworkRepository, InMemRouteNetworkRepository>();
             services.AddSingleton<IInterestRepository, MemoryMappedInterestRepository>();
-            
 
             // ES and CQRS
             services.AddSingleton<IEventStore, InMemEventStore>();
@@ -36,10 +32,8 @@ namespace OpenFTTH.RouteNetworkService.Tests
 
             services.AddProjections(businessAssemblies);
 
-
             // Test Route Network Data
             services.AddSingleton<ITestRouteNetworkData, TestRouteNetwork>();
-            
         }
     }
 }
