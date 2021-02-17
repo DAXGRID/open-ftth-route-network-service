@@ -13,9 +13,9 @@ namespace OpenFTTH.RouteNetwork.API.Commands
     /// You can specify the walk by providing route node ids, route segment ids or both.
     /// The result will always contain all the route network element ids.
     /// </summary>
-    public class RegisterWalkOfInterestCommand : ICommand<Result<RegisterWalkOfInterestCommandResult>>
+    public class RegisterWalkOfInterest : ICommand<Result>
     {
-        public static string RequestName => typeof(RegisterWalkOfInterestCommand).Name;
+        public static string RequestName => typeof(RegisterWalkOfInterest).Name;
         public Guid InterestId { get; }
         public RouteNetworkElementIdList WalkIds { get; }
         public string? CustomData { get; }
@@ -27,7 +27,7 @@ namespace OpenFTTH.RouteNetwork.API.Commands
         /// A walk in the route network graph. Can be specified using node ids or segments ids or both.
         /// </param>
         /// <param name="customData">Optional extra data to be save in the interest record</param>
-        public RegisterWalkOfInterestCommand(Guid interestId, RouteNetworkElementIdList walk, string? customData = null)
+        public RegisterWalkOfInterest(Guid interestId, RouteNetworkElementIdList walk, string? customData = null)
         {
             this.InterestId = interestId;
             this.WalkIds = walk;

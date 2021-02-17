@@ -1,17 +1,14 @@
-﻿using OpenFTTH.Events.Core.Infos;
+﻿using OpenFTTH.Core;
+using OpenFTTH.Events.Core.Infos;
 using OpenFTTH.Events.RouteNetwork.Infos;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OpenFTTH.RouteNetwork.API.Model
 {
     /// <summary>
     /// Data transformer object holding either route node and route segment information.
     /// </summary>
-    public record RouteNetworkElement
+    public record RouteNetworkElement : IIdentifiedObject
     {
         public Guid Id { get; }
         public RouteNetworkElementKindEnum Kind { get; }
@@ -23,6 +20,10 @@ namespace OpenFTTH.RouteNetwork.API.Model
         public SafetyInfo? SafetyInfo { get; init; }
         public MappingInfo? MappingInfo { get; init; }
         public RouteNetworkElementInterestRelation[]? InterestRelations { get; set; }
+
+        public string? Name => NamingInfo?.Name;
+
+        public string? Description => NamingInfo?.Description;
 
         public RouteNetworkElement(Guid id, RouteNetworkElementKindEnum kind)
         {

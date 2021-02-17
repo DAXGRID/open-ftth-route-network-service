@@ -1,19 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using OpenFTTH.Core;
+using System;
 
 namespace OpenFTTH.RouteNetwork.API.Model
 {
     /// <summary>
     /// Data transformer object holding point-of-interest or walk-of-interest information.
     /// </summary>
-    public record RouteNetworkInterest
+    public record RouteNetworkInterest : IIdentifiedObject
     {
         public Guid Id { get; }
         public RouteNetworkInterestKindEnum Kind { get; }
         public RouteNetworkElementIdList RouteNetworkElementRefs { get; }
+
+        public string? Name => null;
+
+        public string? Description => null;
 
         public RouteNetworkInterest(Guid id, RouteNetworkInterestKindEnum kind, RouteNetworkElementIdList routeNetworkElementRefs)
         {

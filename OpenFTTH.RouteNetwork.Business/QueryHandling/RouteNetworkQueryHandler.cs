@@ -6,6 +6,7 @@ using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.RouteNetwork.Business.DomainModel.Interest;
 using OpenFTTH.RouteNetwork.Business.StateHandling;
 using OpenFTTH.RouteNetwork.Service.Business.DomainModel.RouteNetwork;
+using OpenFTTH.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ using System.Threading.Tasks;
 namespace OpenFTTH.RouteNetworkService.QueryHandlers
 {
     public class RouteNetworkQueryHandler :
-        IQueryHandler<GetRouteNetworkDetailsQuery, Result<GetRouteNetworkDetailsQueryResult>>
+        IQueryHandler<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>
     {
         private readonly ILogger<RouteNetworkQueryHandler> _logger;
         private readonly IRouteNetworkRepository _routeNodeRepository;
@@ -33,30 +34,30 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
             _interestRepository = interestRepository;
         }
 
-        public Task<Result<GetRouteNetworkDetailsQueryResult>> HandleAsync(GetRouteNetworkDetailsQuery query)
+        public Task<Result<GetRouteNetworkDetailsResult>> HandleAsync(GetRouteNetworkDetails query)
         {
             // Get route elements
             var getRouteNetworkElementsResult = _routeNodeRepository.GetRouteElements(query.RouteNetworkElementIdsToQuery);
 
             if (getRouteNetworkElementsResult.IsFailure)
-                return Task.FromResult(Result.Failure<GetRouteNetworkDetailsQueryResult>(getRouteNetworkElementsResult.Error));
+                return Task.FromResult(Result.Failure<GetRouteNetworkDetailsResult>(getRouteNetworkElementsResult.Error));
 
             var mappedRouteNetworkElements = MapRouteElementDomainObjectsToQueryObjects(query, getRouteNetworkElementsResult.Value);
 
-            var queryResult = new GetRouteNetworkDetailsQueryResult(mappedRouteNetworkElements);
+            var queryResult = new GetRouteNetworkDetailsResult(mappedRouteNetworkElements);
 
             // Add interest information
             AddInterestReferencesToRouteNetworkElements(query, queryResult);
             AddInterestObjectsToQueryResult(query, queryResult);
 
             return Task.FromResult(
-                Result.Success<GetRouteNetworkDetailsQueryResult>(
+                Result.Success<GetRouteNetworkDetailsResult>(
                     queryResult
                 )
             );
         }
 
-        private void AddInterestReferencesToRouteNetworkElements(GetRouteNetworkDetailsQuery query, GetRouteNetworkDetailsQueryResult queryResult)
+        private void AddInterestReferencesToRouteNetworkElements(GetRouteNetworkDetails query, GetRouteNetworkDetailsResult queryResult)
         {
             if (query.RelatedInterestFilter != RelatedInterestFilterOptions.None)
             {
@@ -79,7 +80,7 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
             }
         }
 
-        private void AddInterestObjectsToQueryResult(GetRouteNetworkDetailsQuery query, GetRouteNetworkDetailsQueryResult queryResult)
+        private void AddInterestObjectsToQueryResult(GetRouteNetworkDetails query, GetRouteNetworkDetailsResult queryResult)
         {
             // Only add them if request by the caller
             if (query.RelatedInterestFilter == RelatedInterestFilterOptions.ReferencesFromRouteElementAndInterestObjects)
@@ -103,7 +104,7 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
                     }
                 }
 
-                queryResult.Interests = interestsToBeAddedToResult.Values.ToArray();
+                queryResult.Interests = new LookupCollection<RouteNetworkInterest>(interestsToBeAddedToResult.Values.ToArray());
             }
         }
 
@@ -114,7 +115,7 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
             return new RouteNetworkInterest(interest.Id, interestKind, interest.RouteNetworkElementIds);
         }
 
-        private static RouteNetworkElement[] MapRouteElementDomainObjectsToQueryObjects(GetRouteNetworkDetailsQuery query, List<IRouteNetworkElement> routeNetworkElements)
+        private static RouteNetworkElement[] MapRouteElementDomainObjectsToQueryObjects(GetRouteNetworkDetails query, List<IRouteNetworkElement> routeNetworkElements)
         {
             var routeNetworkElementDTOs = new List<RouteNetworkElement>();
 

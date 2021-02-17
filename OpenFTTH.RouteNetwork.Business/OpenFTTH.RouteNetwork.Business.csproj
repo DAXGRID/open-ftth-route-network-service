@@ -10,12 +10,19 @@
     <PackageReference Include="Marten" Version="3.13.3" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
     <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="2.0.4" />
-    <PackageReference Include="OpenFTTH.CQRS" Version="0.0.1" />
-    <PackageReference Include="OpenFTTH.Events" Version="2.1.2" />
+    <PackageReference Include="OpenFTTH.Core" Version="1.0.0" />
+    <PackageReference Include="OpenFTTH.CQRS" Version="1.0.2" />
+    <PackageReference Include="OpenFTTH.Events" Version="2.2.0" />
+    <PackageReference Include="OpenFTTH.EventSourcing" Version="1.1.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\OpenFTTH.RouteNetwork.API\OpenFTTH.RouteNetwork.API.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Interest\Projections\" />
+    <Folder Include="Interest\QueryHandlers\" />
   </ItemGroup>
 
 </Project>

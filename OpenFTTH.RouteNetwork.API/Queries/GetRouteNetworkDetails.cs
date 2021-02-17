@@ -10,9 +10,9 @@ namespace OpenFTTH.RouteNetwork.API.Queries
     /// including related interest information if explicitly requested. The query supports fetching information 
     /// by means of a list of route network ids or interest ids.
     /// </summary>
-    public class GetRouteNetworkDetailsQuery : IQuery<Result<GetRouteNetworkDetailsQueryResult>>
+    public class GetRouteNetworkDetails : IQuery<Result<GetRouteNetworkDetailsResult>>
     {
-        public static string RequestName => typeof(GetRouteNetworkDetailsQuery).Name;
+        public static string RequestName => typeof(GetRouteNetworkDetails).Name;
 
         /// <summary>
         /// List of route network element ids (route nodes and/or route segments) specified by the calling client
@@ -58,7 +58,7 @@ namespace OpenFTTH.RouteNetwork.API.Queries
         /// Use this contructor, if you want to query by route network element ids
         /// </summary>
         /// <param name="routeNetworkElementIds"></param>
-        public GetRouteNetworkDetailsQuery(RouteNetworkElementIdList routeNetworkElementIds)
+        public GetRouteNetworkDetails(RouteNetworkElementIdList routeNetworkElementIds)
         {
             // Add empty list to InterestIdsToQuery, because the client want to query by route network element ids
             InterestIdsToQuery = new InterestIdList(); 
@@ -73,7 +73,7 @@ namespace OpenFTTH.RouteNetwork.API.Queries
         /// Use this contructor, if you want to query by interest ids
         /// </summary>
         /// <param name="interestIds"></param>
-        public GetRouteNetworkDetailsQuery(InterestIdList interestIds)
+        public GetRouteNetworkDetails(InterestIdList interestIds)
         {
             // Add empty list to RouteNetworkElementIdsToQuery, because the client want to query by interest ids
             RouteNetworkElementIdsToQuery = new RouteNetworkElementIdList();

@@ -40,9 +40,7 @@ namespace OpenFTTH.RouteNetwork.Service.Controllers
             {
                 var bodyObject = JObject.Parse(bodyString);
 
-                JToken? requestToken = "notset";
-
-                if (bodyObject.TryGetValue("requestName", out requestToken))
+                if (bodyObject.TryGetValue("requestName", out JToken? requestToken))
                 {
                     var requestName = requestToken.ToString();
 

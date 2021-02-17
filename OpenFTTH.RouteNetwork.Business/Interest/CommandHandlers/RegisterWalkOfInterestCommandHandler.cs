@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 
 namespace OpenFTTH.RouteNetwork.Business.MutationHandling
 {
-    public class RouteNetworkCommandHandler : ICommandHandler<RegisterWalkOfInterest, Result>
+    public class RegisterWalkOfInterestCommandHandler : ICommandHandler<RegisterWalkOfInterest, Result>
     {
         private readonly IRouteNetworkRepository _routeNetworkRepository;
         private readonly IInterestRepository _interestRepository;
 
-        public RouteNetworkCommandHandler(IRouteNetworkRepository routeNodeRepository, IInterestRepository interestRepository)
+        public RegisterWalkOfInterestCommandHandler(IRouteNetworkRepository routeNodeRepository, IInterestRepository interestRepository)
         {
             _routeNetworkRepository = routeNodeRepository;
             _interestRepository = interestRepository;
