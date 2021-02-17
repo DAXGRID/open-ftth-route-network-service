@@ -8,11 +8,11 @@ using Xunit;
 
 namespace OpenFTTH.RouteNetwork.Tests
 {
-    public class InterestMutationTests : IClassFixture<TestRouteNetwork>
+    public class InterestMutationTestsOld : IClassFixture<TestRouteNetwork>
     {
         readonly TestRouteNetwork testNetwork;
 
-        public InterestMutationTests(TestRouteNetwork testNetwork)
+        public InterestMutationTestsOld(TestRouteNetwork testNetwork)
         {
             this.testNetwork = testNetwork;
         }
@@ -24,7 +24,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             // (CO_1) <- (S1) -> (HH_1)
             var interestId = Guid.NewGuid();
 
-            var walk = new RouteNetworkElementIdList() { testNetwork.S1 };
+            var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S1 };
 
             // Act
             var registerWalkOfInterestCommand = new RegisterWalkOfInterest(interestId, walk);
@@ -35,9 +35,9 @@ namespace OpenFTTH.RouteNetwork.Tests
             Assert.True(registerWalkOfInterestCommandResult.IsSuccess);
             /*
             Assert.Equal(3, registerWalkOfInterestCommandResult.Value.Walk.Count);
-            Assert.Equal(testNetwork.CO_1, registerWalkOfInterestCommandResult.Value.Walk[0]);
-            Assert.Equal(testNetwork.S1, registerWalkOfInterestCommandResult.Value.Walk[1]);
-            Assert.Equal(testNetwork.HH_1, registerWalkOfInterestCommandResult.Value.Walk[2]);
+            Assert.Equal(TestRouteNetwork.CO_1, registerWalkOfInterestCommandResult.Value.Walk[0]);
+            Assert.Equal(TestRouteNetwork.S1, registerWalkOfInterestCommandResult.Value.Walk[1]);
+            Assert.Equal(TestRouteNetwork.HH_1, registerWalkOfInterestCommandResult.Value.Walk[2]);
             */
         }
 
@@ -48,7 +48,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             // (CO_1) <- (S1) -> (HH_1) <- (S2) -> (HH_2) <- (S4) -> (CC_1)
             var interestId = Guid.NewGuid();
 
-            var walk = new RouteNetworkElementIdList() { testNetwork.S1, testNetwork.S2, testNetwork.S4 };
+            var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S1, TestRouteNetwork.S2, TestRouteNetwork.S4 };
 
             var createInterestCommand = new RegisterWalkOfInterest(interestId, walk);
 
@@ -59,13 +59,13 @@ namespace OpenFTTH.RouteNetwork.Tests
             Assert.True(registerWalkOfInterestCommandResult.IsSuccess);
             /*
             Assert.Equal(7, registerWalkOfInterestCommandResult.Value.Walk.Count);
-            Assert.Equal(testNetwork.CO_1, registerWalkOfInterestCommandResult.Value.Walk[0]);
-            Assert.Equal(testNetwork.S1, registerWalkOfInterestCommandResult.Value.Walk[1]);
-            Assert.Equal(testNetwork.HH_1, registerWalkOfInterestCommandResult.Value.Walk[2]);
-            Assert.Equal(testNetwork.S2, registerWalkOfInterestCommandResult.Value.Walk[3]);
-            Assert.Equal(testNetwork.HH_2, registerWalkOfInterestCommandResult.Value.Walk[4]);
-            Assert.Equal(testNetwork.S4, registerWalkOfInterestCommandResult.Value.Walk[5]);
-            Assert.Equal(testNetwork.CC_1, registerWalkOfInterestCommandResult.Value.Walk[6]);
+            Assert.Equal(TestRouteNetwork.CO_1, registerWalkOfInterestCommandResult.Value.Walk[0]);
+            Assert.Equal(TestRouteNetwork.S1, registerWalkOfInterestCommandResult.Value.Walk[1]);
+            Assert.Equal(TestRouteNetwork.HH_1, registerWalkOfInterestCommandResult.Value.Walk[2]);
+            Assert.Equal(TestRouteNetwork.S2, registerWalkOfInterestCommandResult.Value.Walk[3]);
+            Assert.Equal(TestRouteNetwork.HH_2, registerWalkOfInterestCommandResult.Value.Walk[4]);
+            Assert.Equal(TestRouteNetwork.S4, registerWalkOfInterestCommandResult.Value.Walk[5]);
+            Assert.Equal(TestRouteNetwork.CC_1, registerWalkOfInterestCommandResult.Value.Walk[6]);
             */
         }
 
@@ -76,7 +76,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             // (CO_1) <- (S1) -> (HH_1) <- (S2) -> (HH_2) <- (S4) -> (CC_1)
             var interestId = Guid.NewGuid();
 
-            var walk = new RouteNetworkElementIdList() { testNetwork.S1, testNetwork.S2, testNetwork.S1 };
+            var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S1, TestRouteNetwork.S2, TestRouteNetwork.S1 };
 
             var createInterestCommand = new RegisterWalkOfInterest(interestId, walk);
 
@@ -87,13 +87,13 @@ namespace OpenFTTH.RouteNetwork.Tests
             Assert.True(registerWalkOfInterestCommandResult.IsSuccess);
             /*
             Assert.Equal(7, registerWalkOfInterestCommandResult.Value.Walk.Count);
-            Assert.Equal(testNetwork.CO_1, registerWalkOfInterestCommandResult.Value.Walk[0]);
-            Assert.Equal(testNetwork.S1, registerWalkOfInterestCommandResult.Value.Walk[1]);
-            Assert.Equal(testNetwork.HH_1, registerWalkOfInterestCommandResult.Value.Walk[2]);
-            Assert.Equal(testNetwork.S2, registerWalkOfInterestCommandResult.Value.Walk[3]);
-            Assert.Equal(testNetwork.HH_2, registerWalkOfInterestCommandResult.Value.Walk[4]);
-            Assert.Equal(testNetwork.S1, registerWalkOfInterestCommandResult.Value.Walk[5]);
-            Assert.Equal(testNetwork.CO_1, registerWalkOfInterestCommandResult.Value.Walk[6]);
+            Assert.Equal(TestRouteNetwork.CO_1, registerWalkOfInterestCommandResult.Value.Walk[0]);
+            Assert.Equal(TestRouteNetwork.S1, registerWalkOfInterestCommandResult.Value.Walk[1]);
+            Assert.Equal(TestRouteNetwork.HH_1, registerWalkOfInterestCommandResult.Value.Walk[2]);
+            Assert.Equal(TestRouteNetwork.S2, registerWalkOfInterestCommandResult.Value.Walk[3]);
+            Assert.Equal(TestRouteNetwork.HH_2, registerWalkOfInterestCommandResult.Value.Walk[4]);
+            Assert.Equal(TestRouteNetwork.S1, registerWalkOfInterestCommandResult.Value.Walk[5]);
+            Assert.Equal(TestRouteNetwork.CO_1, registerWalkOfInterestCommandResult.Value.Walk[6]);
             */
         }
 
@@ -104,7 +104,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             // (CO_1) <- (S1)
             var interestId = Guid.NewGuid();
 
-            var walk = new RouteNetworkElementIdList() { testNetwork.CO_1, testNetwork.S1 };
+            var walk = new RouteNetworkElementIdList() { TestRouteNetwork.CO_1, TestRouteNetwork.S1 };
 
             var createInterestCommand = new RegisterWalkOfInterest(interestId, walk);
 
@@ -122,7 +122,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             // (CO_1) <- (S1) -> (HH_1) hole in the walk here (HH_2) -> (S4) -> (CC_1)
             var interestId = Guid.NewGuid();
 
-            var walk = new RouteNetworkElementIdList() { testNetwork.S1, testNetwork.S4 };
+            var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S1, TestRouteNetwork.S4 };
 
             var createInterestCommand = new RegisterWalkOfInterest(interestId, walk);
 

@@ -9,9 +9,8 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
     {
         public WalkOfInterestAR(Guid walkOfInterestId, RouteNetworkElementIdList routeNetworkWalkIds)
         {
-
-
             RaiseEvent(new WalkOfInterestRegistered(walkOfInterestId, routeNetworkWalkIds));
+
         }
     }
 }

@@ -41,7 +41,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         public async void QueryRouteElement_ThatExists_ShouldReturnSuccessAndAllRouteElementProperties()
         {
             // Setup
-            var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { testNetwork.CO_1 });
+            var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1 });
 
             // Act
             Result<GetRouteNetworkDetailsResult> routeNodeQueryResult = await testNetwork.QueryApi.HandleAsync(routeNodeQuery);
@@ -52,7 +52,7 @@ namespace OpenFTTH.RouteNetwork.Tests
 
             var theRouteNodeObjectReturned = routeNodeQueryResult.Value.RouteNetworkElements.TryFirst<RouteNetworkElement>().Value;
 
-            Assert.Equal(testNetwork.CO_1, theRouteNodeObjectReturned.Id);
+            Assert.Equal(TestRouteNetwork.CO_1, theRouteNodeObjectReturned.Id);
             Assert.Equal(RouteNetworkElementKindEnum.RouteNode, theRouteNodeObjectReturned.Kind);
 
             Assert.NotNull(theRouteNodeObjectReturned.Coordinates);
@@ -67,7 +67,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         public async void QueryMultiRouteElement_ShouldReturnSuccess()
         {
             // Setup
-            var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { testNetwork.CO_1, testNetwork.S13, testNetwork.S5 });
+            var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1, TestRouteNetwork.S13, TestRouteNetwork.S5 });
 
             // Act
             Result<GetRouteNetworkDetailsResult> queryResult = await testNetwork.QueryApi.HandleAsync(routeNodeQuery);
@@ -76,21 +76,21 @@ namespace OpenFTTH.RouteNetwork.Tests
             Assert.True(queryResult.IsSuccess);
             Assert.Equal(3, queryResult.Value.RouteNetworkElements.Count);
                         
-            Assert.Equal(testNetwork.CO_1, queryResult.Value.RouteNetworkElements[testNetwork.CO_1].Id);
-            Assert.Equal(RouteNetworkElementKindEnum.RouteNode, queryResult.Value.RouteNetworkElements[testNetwork.CO_1].Kind);
+            Assert.Equal(TestRouteNetwork.CO_1, queryResult.Value.RouteNetworkElements[TestRouteNetwork.CO_1].Id);
+            Assert.Equal(RouteNetworkElementKindEnum.RouteNode, queryResult.Value.RouteNetworkElements[TestRouteNetwork.CO_1].Kind);
 
-            Assert.Equal(testNetwork.S13, queryResult.Value.RouteNetworkElements[testNetwork.S13].Id);
-            Assert.Equal(RouteNetworkElementKindEnum.RouteSegment, queryResult.Value.RouteNetworkElements[testNetwork.S13].Kind);
+            Assert.Equal(TestRouteNetwork.S13, queryResult.Value.RouteNetworkElements[TestRouteNetwork.S13].Id);
+            Assert.Equal(RouteNetworkElementKindEnum.RouteSegment, queryResult.Value.RouteNetworkElements[TestRouteNetwork.S13].Kind);
 
-            Assert.Equal(testNetwork.S5, queryResult.Value.RouteNetworkElements[testNetwork.S5].Id);
-            Assert.Equal(RouteNetworkElementKindEnum.RouteSegment, queryResult.Value.RouteNetworkElements[testNetwork.S5].Kind);
+            Assert.Equal(TestRouteNetwork.S5, queryResult.Value.RouteNetworkElements[TestRouteNetwork.S5].Id);
+            Assert.Equal(RouteNetworkElementKindEnum.RouteSegment, queryResult.Value.RouteNetworkElements[TestRouteNetwork.S5].Kind);
         }
 
         [Fact]
         public async void ExplicitlyQueryCoordinatesOnly_ShouldReturnCoordinatesOnly()
         {
             // Setup
-            var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { testNetwork.CO_1, testNetwork.S13 })
+            var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1, TestRouteNetwork.S13 })
             {
                 RouteNetworkElementFilter = new RouteNetworkElementFilterOptions()
                 {
@@ -107,29 +107,29 @@ namespace OpenFTTH.RouteNetwork.Tests
             Assert.Equal(2, queryResult.Value.RouteNetworkElements.Count);
 
             // CO_1
-            Assert.Equal("[559485.6702553608,6209040.000026836]", queryResult.Value.RouteNetworkElements[testNetwork.CO_1].Coordinates);
-            Assert.Null(queryResult.Value.RouteNetworkElements[testNetwork.CO_1].RouteNodeInfo);
-            Assert.Null(queryResult.Value.RouteNetworkElements[testNetwork.CO_1].RouteSegmentInfo);
-            Assert.Null(queryResult.Value.RouteNetworkElements[testNetwork.CO_1].NamingInfo);
-            Assert.Null(queryResult.Value.RouteNetworkElements[testNetwork.CO_1].MappingInfo);
-            Assert.Null(queryResult.Value.RouteNetworkElements[testNetwork.CO_1].LifecycleInfo);
-            Assert.Null(queryResult.Value.RouteNetworkElements[testNetwork.CO_1].SafetyInfo);
+            Assert.Equal("[559485.6702553608,6209040.000026836]", queryResult.Value.RouteNetworkElements[TestRouteNetwork.CO_1].Coordinates);
+            Assert.Null(queryResult.Value.RouteNetworkElements[TestRouteNetwork.CO_1].RouteNodeInfo);
+            Assert.Null(queryResult.Value.RouteNetworkElements[TestRouteNetwork.CO_1].RouteSegmentInfo);
+            Assert.Null(queryResult.Value.RouteNetworkElements[TestRouteNetwork.CO_1].NamingInfo);
+            Assert.Null(queryResult.Value.RouteNetworkElements[TestRouteNetwork.CO_1].MappingInfo);
+            Assert.Null(queryResult.Value.RouteNetworkElements[TestRouteNetwork.CO_1].LifecycleInfo);
+            Assert.Null(queryResult.Value.RouteNetworkElements[TestRouteNetwork.CO_1].SafetyInfo);
 
             // S13
-            Assert.Equal("[[559537.3506715331,6209028.300262455],[559602.7453810525,6209027.060552321]]", queryResult.Value.RouteNetworkElements[testNetwork.S13].Coordinates);
-            Assert.Null(queryResult.Value.RouteNetworkElements[testNetwork.S13].RouteNodeInfo);
-            Assert.Null(queryResult.Value.RouteNetworkElements[testNetwork.S13].RouteSegmentInfo);
-            Assert.Null(queryResult.Value.RouteNetworkElements[testNetwork.S13].NamingInfo);
-            Assert.Null(queryResult.Value.RouteNetworkElements[testNetwork.S13].MappingInfo);
-            Assert.Null(queryResult.Value.RouteNetworkElements[testNetwork.S13].LifecycleInfo);
-            Assert.Null(queryResult.Value.RouteNetworkElements[testNetwork.S13].SafetyInfo);
+            Assert.Equal("[[559537.3506715331,6209028.300262455],[559602.7453810525,6209027.060552321]]", queryResult.Value.RouteNetworkElements[TestRouteNetwork.S13].Coordinates);
+            Assert.Null(queryResult.Value.RouteNetworkElements[TestRouteNetwork.S13].RouteNodeInfo);
+            Assert.Null(queryResult.Value.RouteNetworkElements[TestRouteNetwork.S13].RouteSegmentInfo);
+            Assert.Null(queryResult.Value.RouteNetworkElements[TestRouteNetwork.S13].NamingInfo);
+            Assert.Null(queryResult.Value.RouteNetworkElements[TestRouteNetwork.S13].MappingInfo);
+            Assert.Null(queryResult.Value.RouteNetworkElements[TestRouteNetwork.S13].LifecycleInfo);
+            Assert.Null(queryResult.Value.RouteNetworkElements[TestRouteNetwork.S13].SafetyInfo);
         }
 
         [Fact]
         public async void ExplicitlyQueryRouteNodeInfoOnly_ShouldReturnRouteNodeInfoOnly()
         {
             // Setup
-            var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { testNetwork.CO_1 })
+            var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1 })
             {
                 RouteNetworkElementFilter = new RouteNetworkElementFilterOptions()
                 {
@@ -145,7 +145,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             Assert.True(queryResult.IsSuccess);
             Assert.Single(queryResult.Value.RouteNetworkElements);
             
-            var nodeFromQueryResult = queryResult.Value.RouteNetworkElements[testNetwork.CO_1];
+            var nodeFromQueryResult = queryResult.Value.RouteNetworkElements[TestRouteNetwork.CO_1];
 
             // Assert that route node info is returned
             Assert.NotNull(nodeFromQueryResult.RouteNodeInfo);
@@ -165,7 +165,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         public async void ExplicitlyQueryRouteSegmentInfoOnly_ShouldReturnRouteSegmentInfoOnly()
         {
             // Setup
-            var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { testNetwork.S1 })
+            var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.S1 })
             {
                 RouteNetworkElementFilter = new RouteNetworkElementFilterOptions()
                 {
@@ -181,7 +181,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             Assert.True(queryResult.IsSuccess);
             Assert.Single(queryResult.Value.RouteNetworkElements);
 
-            var nodeFromQueryResult = queryResult.Value.RouteNetworkElements[testNetwork.S1];
+            var nodeFromQueryResult = queryResult.Value.RouteNetworkElements[TestRouteNetwork.S1];
 
             // Assert that route node info is returned
             Assert.NotNull(nodeFromQueryResult.RouteSegmentInfo);
@@ -200,7 +200,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         public async void ExplicitlyQueryNamingInfoOnly_ShouldReturnNamingInfoOnly()
         {
             // Setup
-            var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { testNetwork.CO_1 })
+            var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1 })
             {
                 RouteNetworkElementFilter = new RouteNetworkElementFilterOptions()
                 {
@@ -216,7 +216,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             Assert.True(queryResult.IsSuccess);
             Assert.Single(queryResult.Value.RouteNetworkElements);
 
-            var nodeFromQueryResult = queryResult.Value.RouteNetworkElements[testNetwork.CO_1];
+            var nodeFromQueryResult = queryResult.Value.RouteNetworkElements[TestRouteNetwork.CO_1];
 
             // Assert that route node info is returned
             Assert.NotNull(nodeFromQueryResult.NamingInfo);
@@ -236,7 +236,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         public async void ExplicitlyQueryMappingInfoOnly_ShouldReturnMappingInfoOnly()
         {
             // Setup
-            var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { testNetwork.CO_1 })
+            var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1 })
             {
                 RouteNetworkElementFilter = new RouteNetworkElementFilterOptions()
                 {
@@ -252,7 +252,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             Assert.True(queryResult.IsSuccess);
             Assert.Single(queryResult.Value.RouteNetworkElements);
 
-            var nodeFromQueryResult = queryResult.Value.RouteNetworkElements[testNetwork.CO_1];
+            var nodeFromQueryResult = queryResult.Value.RouteNetworkElements[TestRouteNetwork.CO_1];
 
             // Assert that route node info is returned
             Assert.NotNull(nodeFromQueryResult.MappingInfo);
@@ -271,7 +271,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         public async void ExplicitlyQueryLifecyleInfoOnly_ShouldReturnLifecyleInfoOnly()
         {
             // Setup
-            var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { testNetwork.CO_1 })
+            var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1 })
             {
                 RouteNetworkElementFilter = new RouteNetworkElementFilterOptions()
                 {
@@ -287,7 +287,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             Assert.True(queryResult.IsSuccess);
             Assert.Single(queryResult.Value.RouteNetworkElements);
 
-            var nodeFromQueryResult = queryResult.Value.RouteNetworkElements[testNetwork.CO_1];
+            var nodeFromQueryResult = queryResult.Value.RouteNetworkElements[TestRouteNetwork.CO_1];
 
             // Assert that route node info is returned
             Assert.NotNull(nodeFromQueryResult.LifecycleInfo);
@@ -306,7 +306,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         public async void ExplicitlyQuerySaftyInfoOnly_ShouldReturnSaftyInfoOnly()
         {
             // Setup
-            var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { testNetwork.CO_1 })
+            var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1 })
             {
                 RouteNetworkElementFilter = new RouteNetworkElementFilterOptions()
                 {
@@ -322,7 +322,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             Assert.True(queryResult.IsSuccess);
             Assert.Single(queryResult.Value.RouteNetworkElements);
 
-            var nodeFromQueryResult = queryResult.Value.RouteNetworkElements[testNetwork.CO_1];
+            var nodeFromQueryResult = queryResult.Value.RouteNetworkElements[TestRouteNetwork.CO_1];
 
             // Assert that route node info is returned
             Assert.NotNull(nodeFromQueryResult.SafetyInfo);

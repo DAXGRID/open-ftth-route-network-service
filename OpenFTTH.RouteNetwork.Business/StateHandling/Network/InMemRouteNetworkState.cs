@@ -31,7 +31,7 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.Network
         public DateTime LastEventRecievedTimestamp => __lastEventRecievedTimestamp;
         public long NumberOfObjectsLoaded => _numberOfObjectsLoaded;
 
-        public InMemRouteNetworkState(ILoggerFactory loggerFactory)
+        public InMemRouteNetworkState(ILoggerFactory loggerFactory, IServiceProvider serviceProvider)
         {
             if (null == loggerFactory)
             {
@@ -41,12 +41,18 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.Network
             _loggerFactory = loggerFactory;
 
             _logger = loggerFactory.CreateLogger<InMemRouteNetworkState>();
+
+            // Look for test route network to seed
+            if (serviceProvider != null && serviceProvider.GetService(typeof(ITestRouteNetworkData)) is ITestRouteNetworkData testRouteNetwork)
+            {
+                Seed(testRouteNetwork.RouteNetworkEventsAsJsonString());
+            }
         }
 
         /// <summary>
         /// Use this method to seed the in memory state with route network json data
         /// </summary>
-        public void SeedRouteNetworkEvents(string json)
+        public void Seed(string json)
         {
             JsonConvert.DefaultSettings = (() =>
             {
@@ -63,6 +69,8 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.Network
 
             foreach (var editOperationEvent in editOperationEvents)
                 routeNetworkEventHandler.HandleEvent(editOperationEvent);
+
+            FinishLoadMode();
         }
 
         public ITransaction GetTransaction()

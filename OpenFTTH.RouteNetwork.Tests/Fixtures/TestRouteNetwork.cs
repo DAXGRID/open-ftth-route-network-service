@@ -4,6 +4,7 @@ using OpenFTTH.RouteNetwork.Business.StateHandling.Network;
 using OpenFTTH.RouteNetwork.Business.StateHandling.Interest;
 using OpenFTTH.RouteNetworkService.QueryHandlers;
 using System;
+using OpenFTTH.RouteNetwork.Business.StateHandling;
 
 namespace OpenFTTH.RouteNetwork.Tests.Fixtures
 {
@@ -12,38 +13,38 @@ namespace OpenFTTH.RouteNetwork.Tests.Fixtures
     /// Based on the test data described and located here: 
     /// https://github.com/DAXGRID/open-ftth-integration-tests/tree/master/TestData/RouteNetworks/ForUnitTests
     /// </summary>
-    public class TestRouteNetwork : IDisposable
+    public class TestRouteNetwork : IDisposable, ITestRouteNetworkData
     {
         public RouteNetworkQueryHandler QueryApi { get; private set; }
 
         public RouteNetworkCommandHandler CommandApi { get; private set; }
 
-        public Guid CO_1 = Guid.Parse("9eaa3682-5e50-4021-a818-4cffde68d235");
-        public Guid HH_1 = Guid.Parse("8538ee23-1192-4ed8-b609-6cdd349bad21");
-        public Guid HH_2 = Guid.Parse("1b8fccb8-69a1-4f2a-abec-33f4512873ba");
-        public Guid FP_2 = Guid.Parse("53fd280f-f608-4f67-8939-91be2756cb78");
-        public Guid CC_1 = Guid.Parse("020c3eb8-13cc-4c0e-a331-c7610f996a52");
-        public Guid SP_1 = Guid.Parse("ce6800d1-e038-4d67-992b-d58f3bc5dbbb");
-        public Guid J_1 = Guid.Parse("3adeb5c2-7018-4206-9142-8c9dadc2d902");
-        public Guid J_2 = Guid.Parse("c6ee82ca-d558-4047-8138-e8674b8fc128");
-        public Guid SDU_1 = Guid.Parse("d9be5eb9-a6f9-4986-85a2-cba48e2c1dbf");
-        public Guid SDU_2 = Guid.Parse("a4a615e6-76b5-490c-9331-eb72e8fa3037");
-        public Guid SDU_3 = Guid.Parse("10e7ea6f-fd03-435e-8331-356bf4ffc611");
-        public Guid HH_10 = Guid.Parse("d0e5ce6a-0d90-4355-a1ff-60db24e5b153");
-        public Guid HH_11 = Guid.Parse("3d2ebcf7-3bd4-4461-8487-cb32c7261cf6");
-        public Guid S1 = Guid.Parse("7fdf2a74-6677-4ab4-8c01-c008b11c04be");
-        public Guid S2 = Guid.Parse("72987aae-a1b1-4705-b4a8-bf2968238cf0");
-        public Guid S3 = Guid.Parse("503ac015-d3e2-47ff-affb-373dcd6b5be7");
-        public Guid S4 = Guid.Parse("19fa6101-785d-498b-97e5-a15e8e8d2745");
-        public Guid S5 = Guid.Parse("d8ca4b7d-1fa5-4e45-b410-06d79099e924");
-        public Guid S6 = Guid.Parse("e005333d-2366-482b-8526-6e3a5b129a41");
-        public Guid S7 = Guid.Parse("293a73b2-e369-4658-8001-d2a225c0c549");
-        public Guid S8 = Guid.Parse("469845d1-2fd3-44d3-9497-34db7c862925");
-        public Guid S9 = Guid.Parse("f2f1e797-0a93-4bc1-a37c-00837bd17cb2");
-        public Guid S10 = Guid.Parse("7d323f6b-1dfd-45fd-bd61-8caaba943d76");
-        public Guid S11 = Guid.Parse("fccc48f5-24f7-471d-9ed6-7a18418f5ab8");
-        public Guid S12 = Guid.Parse("84613b64-e348-46d3-9972-73a081f46030");
-        public Guid S13 = Guid.Parse("bf0034cd-f805-4f73-be68-bd5e18281565");
+        public static Guid CO_1 = Guid.Parse("9eaa3682-5e50-4021-a818-4cffde68d235");
+        public static Guid HH_1 = Guid.Parse("8538ee23-1192-4ed8-b609-6cdd349bad21");
+        public static Guid HH_2 = Guid.Parse("1b8fccb8-69a1-4f2a-abec-33f4512873ba");
+        public static Guid FP_2 = Guid.Parse("53fd280f-f608-4f67-8939-91be2756cb78");
+        public static Guid CC_1 = Guid.Parse("020c3eb8-13cc-4c0e-a331-c7610f996a52");
+        public static Guid SP_1 = Guid.Parse("ce6800d1-e038-4d67-992b-d58f3bc5dbbb");
+        public static Guid J_1 = Guid.Parse("3adeb5c2-7018-4206-9142-8c9dadc2d902");
+        public static Guid J_2 = Guid.Parse("c6ee82ca-d558-4047-8138-e8674b8fc128");
+        public static Guid SDU_1 = Guid.Parse("d9be5eb9-a6f9-4986-85a2-cba48e2c1dbf");
+        public static Guid SDU_2 = Guid.Parse("a4a615e6-76b5-490c-9331-eb72e8fa3037");
+        public static Guid SDU_3 = Guid.Parse("10e7ea6f-fd03-435e-8331-356bf4ffc611");
+        public static Guid HH_10 = Guid.Parse("d0e5ce6a-0d90-4355-a1ff-60db24e5b153");
+        public static Guid HH_11 = Guid.Parse("3d2ebcf7-3bd4-4461-8487-cb32c7261cf6");
+        public static Guid S1 = Guid.Parse("7fdf2a74-6677-4ab4-8c01-c008b11c04be");
+        public static Guid S2 = Guid.Parse("72987aae-a1b1-4705-b4a8-bf2968238cf0");
+        public static Guid S3 = Guid.Parse("503ac015-d3e2-47ff-affb-373dcd6b5be7");
+        public static Guid S4 = Guid.Parse("19fa6101-785d-498b-97e5-a15e8e8d2745");
+        public static Guid S5 = Guid.Parse("d8ca4b7d-1fa5-4e45-b410-06d79099e924");
+        public static Guid S6 = Guid.Parse("e005333d-2366-482b-8526-6e3a5b129a41");
+        public static Guid S7 = Guid.Parse("293a73b2-e369-4658-8001-d2a225c0c549");
+        public static Guid S8 = Guid.Parse("469845d1-2fd3-44d3-9497-34db7c862925");
+        public static Guid S9 = Guid.Parse("f2f1e797-0a93-4bc1-a37c-00837bd17cb2");
+        public static Guid S10 = Guid.Parse("7d323f6b-1dfd-45fd-bd61-8caaba943d76");
+        public static Guid S11 = Guid.Parse("fccc48f5-24f7-471d-9ed6-7a18418f5ab8");
+        public static Guid S12 = Guid.Parse("84613b64-e348-46d3-9972-73a081f46030");
+        public static Guid S13 = Guid.Parse("bf0034cd-f805-4f73-be68-bd5e18281565");
 
         public TestRouteNetwork()
         {
@@ -58,8 +59,8 @@ namespace OpenFTTH.RouteNetwork.Tests.Fixtures
         {
             ILoggerFactory loggerFactory = new Microsoft.Extensions.Logging.Abstractions.NullLoggerFactory();
 
-            var networkState = new InMemRouteNetworkState(loggerFactory);
-            networkState.SeedRouteNetworkEvents(TestRouteNetworkJson);
+            var networkState = new InMemRouteNetworkState(loggerFactory, null);
+            networkState.Seed(TestRouteNetworkJson);
             networkState.FinishLoadMode();
 
             var routeNetworkRepo = new InMemRouteNetworkRepository(loggerFactory, networkState);
@@ -71,7 +72,12 @@ namespace OpenFTTH.RouteNetwork.Tests.Fixtures
             CommandApi = new RouteNetworkCommandHandler(routeNetworkRepo, interestRepo);
         }
 
-        private string TestRouteNetworkJson
+        public string RouteNetworkEventsAsJsonString()
+        {
+            return TestRouteNetworkJson;
+        }
+
+        private static string TestRouteNetworkJson
         {
             get
             {
