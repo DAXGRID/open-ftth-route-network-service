@@ -1,44 +1,47 @@
 ﻿using CSharpFunctionalExtensions;
 using OpenFTTH.CQRS;
+using OpenFTTH.EventSourcing;
 using OpenFTTH.RouteNetwork.API.Commands;
+using OpenFTTH.RouteNetwork.API.Model;
+using OpenFTTH.RouteNetwork.Business.Interest;
+using OpenFTTH.RouteNetwork.Business.Interest.Projections;
 using OpenFTTH.RouteNetwork.Business.StateHandling;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace OpenFTTH.RouteNetwork.Business.MutationHandling
 {
     public class RegisterWalkOfInterestCommandHandler : ICommandHandler<RegisterWalkOfInterest, Result>
     {
+        private readonly IEventStore _eventStore;
         private readonly IRouteNetworkRepository _routeNetworkRepository;
-        private readonly IInterestRepository _interestRepository;
 
-        public RegisterWalkOfInterestCommandHandler(IRouteNetworkRepository routeNodeRepository, IInterestRepository interestRepository)
+        public RegisterWalkOfInterestCommandHandler(IEventStore eventStore, IRouteNetworkRepository routeNodeRepository)
         {
+            _eventStore = eventStore;
             _routeNetworkRepository = routeNodeRepository;
-            _interestRepository = interestRepository;
         }
 
         public Task<Result> HandleAsync(RegisterWalkOfInterest command)
         {
-            // Make sure that an interest with the specified id not already exists in the system
-            if (_interestRepository.GetInterest(command.InterestId).IsSuccess)
-                return Task.FromResult(Result.Failure($"An interest with id: {command.InterestId} already exists"));
+            var interestProjection = _eventStore.Projections.Get<InterestsProjection>();
 
-            // Validate the walk
-            var walkValidationResult = new WalkValidator(_routeNetworkRepository).ValidateWalk(command.WalkIds);
+            var walkOfInterest = new RouteNetworkInterest(command.InterestId, RouteNetworkInterestKindEnum.WalkOfInterest, command.WalkIds);
 
-            if (walkValidationResult.IsFailure)
-                return Task.FromResult(Result.Failure(walkValidationResult.Error));
+            var walkValidator = new WalkValidator(_routeNetworkRepository);
 
-            // Save the interest
-            _interestRepository.RegisterWalkOfInterest(command.InterestId, walkValidationResult.Value.WalkIds);
+            try
+            {
+                var walkOfInterestAR = new WalkOfInterestAR(walkOfInterest, interestProjection, walkValidator);
 
-            // Return command result
-            var registerWalkOfInterestCommandResult = new RegisterWalkOfInterestCommandResult(walkValidationResult.Value.WalkIds);
-            return Task.FromResult(Result.Success());
+                _eventStore.Aggregates.Store(walkOfInterestAR);
+
+                return Task.FromResult(Result.Success());
+            }
+            catch (ArgumentException ex)
+            {
+                return Task.FromResult(Result.Failure(ex.Message));
+            }
         }
     }
 }

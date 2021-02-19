@@ -1,9 +1,10 @@
 ﻿using CSharpFunctionalExtensions;
 using Microsoft.Extensions.Logging;
 using OpenFTTH.CQRS;
+using OpenFTTH.EventSourcing;
 using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.API.Queries;
-using OpenFTTH.RouteNetwork.Business.DomainModel.Interest;
+using OpenFTTH.RouteNetwork.Business.Interest.Projections;
 using OpenFTTH.RouteNetwork.Business.StateHandling;
 using OpenFTTH.RouteNetwork.Service.Business.DomainModel.RouteNetwork;
 using OpenFTTH.Util;
@@ -18,10 +19,10 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
         IQueryHandler<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>
     {
         private readonly ILogger<RouteNetworkQueryHandler> _logger;
+        private readonly IEventStore _eventStore;
         private readonly IRouteNetworkRepository _routeNodeRepository;
-        private readonly IInterestRepository _interestRepository;
 
-        public RouteNetworkQueryHandler(ILoggerFactory loggerFactory, IRouteNetworkRepository routeNodeRepository, IInterestRepository interestRepository)
+        public RouteNetworkQueryHandler(ILoggerFactory loggerFactory, IEventStore eventStore, IRouteNetworkRepository routeNodeRepository)
         {
             if (null == loggerFactory)
             {
@@ -30,8 +31,8 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
 
             _logger = loggerFactory.CreateLogger<RouteNetworkQueryHandler>();
 
+            _eventStore = eventStore;
             _routeNodeRepository = routeNodeRepository;
-            _interestRepository = interestRepository;
         }
 
         public Task<Result<GetRouteNetworkDetailsResult>> HandleAsync(GetRouteNetworkDetails query)
@@ -61,10 +62,12 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
         {
             if (query.RelatedInterestFilter != RelatedInterestFilterOptions.None)
             {
+                var interestsProjection = _eventStore.Projections.Get<InterestsProjection>();
+
                 foreach (var routeElement in queryResult.RouteNetworkElements)
                 {
                     // Add relations to the route network element
-                    var interestRelationsResult = _interestRepository.GetInterestsByRouteNetworkElementId(routeElement.Id);
+                    var interestRelationsResult = interestsProjection.GetInterestsByRouteNetworkElementId(routeElement.Id);
 
                     if (interestRelationsResult.IsFailure)
                         throw new ApplicationException($"Unexpected error querying interests related to route network element with id: {routeElement.Id} {interestRelationsResult.Error}");
@@ -85,12 +88,14 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
             // Only add them if request by the caller
             if (query.RelatedInterestFilter == RelatedInterestFilterOptions.ReferencesFromRouteElementAndInterestObjects)
             {
+                var interestsProjection = _eventStore.Projections.Get<InterestsProjection>();
+
                 Dictionary<Guid, RouteNetworkInterest> interestsToBeAddedToResult = new Dictionary<Guid, RouteNetworkInterest>();
 
                 foreach (var routeElement in queryResult.RouteNetworkElements)
                 {
                     // Add relations to the route network element
-                    var interestRelationsResult = _interestRepository.GetInterestsByRouteNetworkElementId(routeElement.Id);
+                    var interestRelationsResult = interestsProjection.GetInterestsByRouteNetworkElementId(routeElement.Id);
 
                     if (interestRelationsResult.IsFailure)
                         throw new ApplicationException($"Unexpected error querying interests related to route network element with id: {routeElement.Id} {interestRelationsResult.Error}");
@@ -99,7 +104,7 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
                     {
                         if (!interestsToBeAddedToResult.ContainsKey(interestRelation.Item1.Id))
                         {
-                            interestsToBeAddedToResult.Add(interestRelation.Item1.Id, MapInterestObjectToQueryObjects(interestRelation.Item1));
+                            interestsToBeAddedToResult.Add(interestRelation.Item1.Id, interestRelation.Item1);
                         }
                     }
                 }
@@ -108,12 +113,6 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
             }
         }
 
-        private RouteNetworkInterest MapInterestObjectToQueryObjects(IInterest interest)
-        {
-            RouteNetworkInterestKindEnum interestKind = (interest is WalkOfInterest) ? RouteNetworkInterestKindEnum.WalkOfInterest : RouteNetworkInterestKindEnum.NodeOfInterest;
-
-            return new RouteNetworkInterest(interest.Id, interestKind, interest.RouteNetworkElementIds);
-        }
 
         private static RouteNetworkElement[] MapRouteElementDomainObjectsToQueryObjects(GetRouteNetworkDetails query, List<IRouteNetworkElement> routeNetworkElements)
         {
@@ -140,7 +139,7 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
             return routeNetworkElementDTOs.ToArray();
         }
 
-        private static RouteNetworkElementInterestRelation[] MapInterestRelationDomainObjectsToQueryObjects(List<(IInterest, RouteNetworkInterestRelationKindEnum)> interestRelations)
+        private static RouteNetworkElementInterestRelation[] MapInterestRelationDomainObjectsToQueryObjects(List<(RouteNetworkInterest, RouteNetworkInterestRelationKindEnum)> interestRelations)
         {
             var interestRelationsToReturn = new List<RouteNetworkElementInterestRelation>();
 

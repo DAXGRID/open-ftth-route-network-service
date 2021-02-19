@@ -10,7 +10,7 @@ namespace OpenFTTH.RouteNetwork.API.Model
     {
         public Guid Id { get; }
         public RouteNetworkInterestKindEnum Kind { get; }
-        public RouteNetworkElementIdList RouteNetworkElementRefs { get; }
+        public RouteNetworkElementIdList RouteNetworkElementRefs { get; init; }
 
         public string? Name => null;
 

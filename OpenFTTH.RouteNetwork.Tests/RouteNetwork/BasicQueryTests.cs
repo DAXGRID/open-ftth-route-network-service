@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using OpenFTTH.CQRS;
 using OpenFTTH.Events.Core.Infos;
 using OpenFTTH.Events.RouteNetwork.Infos;
 using OpenFTTH.RouteNetwork.API.Model;
@@ -11,13 +12,16 @@ namespace OpenFTTH.RouteNetwork.Tests
 {
     public class BasicQueryTests : IClassFixture<TestRouteNetwork>
     {
-        readonly TestRouteNetwork testNetwork;
+        private ICommandDispatcher _commandDispatcher;
+        private IQueryDispatcher _queryDispatcher;
 
-        public BasicQueryTests(TestRouteNetwork testNetwork)
+        public BasicQueryTests(ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher)
         {
-            this.testNetwork = testNetwork;
+            _commandDispatcher = commandDispatcher;
+            _queryDispatcher = queryDispatcher;
         }
 
+        
         [Fact]
         public async void QueryRouteElement_ThatDontExists_ShouldReturnFailure()
         {
@@ -27,7 +31,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { nonExistingRouteNetworkElementId });
 
             // Act
-            Result<GetRouteNetworkDetailsResult> routeNodeQueryResult = await testNetwork.QueryApi.HandleAsync(routeNodeQuery);
+            var routeNodeQueryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNodeQuery);
 
             // Assert
             Assert.True(routeNodeQueryResult.IsFailure);
@@ -35,7 +39,6 @@ namespace OpenFTTH.RouteNetwork.Tests
             // Assert that the error msg contains the id of route network element that the service could not lookup
             Assert.Contains(nonExistingRouteNetworkElementId.ToString(), routeNodeQueryResult.Error);
         }
-        
 
         [Fact]
         public async void QueryRouteElement_ThatExists_ShouldReturnSuccessAndAllRouteElementProperties()
@@ -43,8 +46,8 @@ namespace OpenFTTH.RouteNetwork.Tests
             // Setup
             var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1 });
 
-            // Act
-            Result<GetRouteNetworkDetailsResult> routeNodeQueryResult = await testNetwork.QueryApi.HandleAsync(routeNodeQuery);
+           // Act
+            var routeNodeQueryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNodeQuery);
 
             // Assert
             Assert.True(routeNodeQueryResult.IsSuccess);
@@ -62,6 +65,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             Assert.NotNull(theRouteNodeObjectReturned.LifecycleInfo);
             Assert.NotNull(theRouteNodeObjectReturned.SafetyInfo);
         }
+               
 
         [Fact]
         public async void QueryMultiRouteElement_ShouldReturnSuccess()
@@ -70,7 +74,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1, TestRouteNetwork.S13, TestRouteNetwork.S5 });
 
             // Act
-            Result<GetRouteNetworkDetailsResult> queryResult = await testNetwork.QueryApi.HandleAsync(routeNodeQuery);
+            var queryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNodeQuery);
 
             // Assert
             Assert.True(queryResult.IsSuccess);
@@ -100,7 +104,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             };
 
             // Act
-            Result<GetRouteNetworkDetailsResult> queryResult = await testNetwork.QueryApi.HandleAsync(routeNodeQuery);
+            var queryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNodeQuery);
 
             // Assert
             Assert.True(queryResult.IsSuccess);
@@ -139,7 +143,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             };
 
             // Act
-            Result<GetRouteNetworkDetailsResult> queryResult = await testNetwork.QueryApi.HandleAsync(routeNodeQuery);
+            var queryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNodeQuery);
 
             // Assert
             Assert.True(queryResult.IsSuccess);
@@ -175,7 +179,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             };
 
             // Act
-            Result<GetRouteNetworkDetailsResult> queryResult = await testNetwork.QueryApi.HandleAsync(routeNodeQuery);
+            var queryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNodeQuery);
 
             // Assert
             Assert.True(queryResult.IsSuccess);
@@ -210,7 +214,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             };
 
             // Act
-            Result<GetRouteNetworkDetailsResult> queryResult = await testNetwork.QueryApi.HandleAsync(routeNodeQuery);
+            var queryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNodeQuery);
 
             // Assert
             Assert.True(queryResult.IsSuccess);
@@ -246,7 +250,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             };
 
             // Act
-            Result<GetRouteNetworkDetailsResult> queryResult = await testNetwork.QueryApi.HandleAsync(routeNodeQuery);
+            var queryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNodeQuery);
 
             // Assert
             Assert.True(queryResult.IsSuccess);
@@ -281,7 +285,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             };
 
             // Act
-            Result<GetRouteNetworkDetailsResult> queryResult = await testNetwork.QueryApi.HandleAsync(routeNodeQuery);
+            var queryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNodeQuery);
 
             // Assert
             Assert.True(queryResult.IsSuccess);
@@ -316,7 +320,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             };
 
             // Act
-            Result<GetRouteNetworkDetailsResult> queryResult = await testNetwork.QueryApi.HandleAsync(routeNodeQuery);
+            var queryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNodeQuery);
 
             // Assert
             Assert.True(queryResult.IsSuccess);

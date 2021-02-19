@@ -28,7 +28,6 @@ namespace OpenFTTH.RouteNetwork.Service
 
             services.AddSingleton<IRouteNetworkState, InMemRouteNetworkState>();
             services.AddSingleton<IRouteNetworkRepository, InMemRouteNetworkRepository>();
-            services.AddSingleton<IInterestRepository, MemoryMappedInterestRepository>();
 
             services.AddCQRS(new Assembly[] { AppDomain.CurrentDomain.Load("OpenFTTH.RouteNetwork.Business") });
         }

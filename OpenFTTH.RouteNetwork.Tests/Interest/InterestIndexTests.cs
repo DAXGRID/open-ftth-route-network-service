@@ -1,10 +1,5 @@
-﻿using CSharpFunctionalExtensions;
-using OpenFTTH.RouteNetwork.API.Model;
-using OpenFTTH.RouteNetwork.API.Commands;
-using OpenFTTH.RouteNetwork.API.Queries;
-using OpenFTTH.RouteNetwork.Business.DomainModel.Interest;
+﻿using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.Business.StateHandling.Interest;
-using OpenFTTH.RouteNetwork.Tests.Fixtures;
 using System;
 using Xunit;
 
@@ -17,7 +12,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         public void TestIndexingSingleWalkOfInterest()
         {
             // Create a walk of interest spanning 3 route elements out of 4
-            InMemoryInterestRelationIndex index = new InMemoryInterestRelationIndex();
+            InMemInterestRelationIndex index = new InMemInterestRelationIndex();
 
             var routeElement1 = Guid.NewGuid();
             var routeElement2 = Guid.NewGuid();
@@ -26,7 +21,7 @@ namespace OpenFTTH.RouteNetwork.Tests
 
             var walkIds = new RouteNetworkElementIdList() { routeElement2, routeElement3, routeElement4 };
 
-            var walkOfInterest = new WalkOfInterest(Guid.NewGuid(), walkIds);
+            var walkOfInterest = new RouteNetworkInterest(Guid.NewGuid(), RouteNetworkInterestKindEnum.WalkOfInterest, walkIds);
 
             index.AddOrUpdate(walkOfInterest);
 
@@ -61,12 +56,12 @@ namespace OpenFTTH.RouteNetwork.Tests
         public void TestIndexingSingleNodeOfInterest()
         {
             // Create a walk of interest spanning 3 route elements out of 4
-            InMemoryInterestRelationIndex index = new InMemoryInterestRelationIndex();
+            InMemInterestRelationIndex index = new InMemInterestRelationIndex();
 
             var routeElement1 = Guid.NewGuid();
             var routeElement2 = Guid.NewGuid();
 
-            var nodeOfInterest = new NodeOfInterest(Guid.NewGuid(), routeElement2);
+            var nodeOfInterest = new RouteNetworkInterest(Guid.NewGuid(), RouteNetworkInterestKindEnum.NodeOfInterest, new RouteNetworkElementIdList() { routeElement2 });
 
             // Act
             index.AddOrUpdate(nodeOfInterest);
@@ -90,7 +85,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         public void TestIndexingMultipleWalkOfInterest()
         {
             // Setup
-            InMemoryInterestRelationIndex index = new InMemoryInterestRelationIndex();
+            InMemInterestRelationIndex index = new InMemInterestRelationIndex();
 
             var routeElement1 = Guid.NewGuid();
             var routeElement2 = Guid.NewGuid();
@@ -98,11 +93,11 @@ namespace OpenFTTH.RouteNetwork.Tests
             var routeElement4 = Guid.NewGuid();
 
             // Create walk of interest spanning route element 1,2,3
-            var walkOfInterest1 = new WalkOfInterest(Guid.NewGuid(), new RouteNetworkElementIdList() { routeElement1, routeElement2, routeElement3 });
+            var walkOfInterest1 = new RouteNetworkInterest(Guid.NewGuid(), RouteNetworkInterestKindEnum.WalkOfInterest,  new RouteNetworkElementIdList() { routeElement1, routeElement2, routeElement3 });
             index.AddOrUpdate(walkOfInterest1);
 
             // Create walk of interest spanning route element 2,3,4
-            var walkOfInterest2 = new WalkOfInterest(Guid.NewGuid(), new RouteNetworkElementIdList() { routeElement2, routeElement3, routeElement4 });
+            var walkOfInterest2 = new RouteNetworkInterest(Guid.NewGuid(), RouteNetworkInterestKindEnum.WalkOfInterest, new RouteNetworkElementIdList() { routeElement2, routeElement3, routeElement4 });
             index.AddOrUpdate(walkOfInterest2);
 
             var routeElement1InterestRelations = index.GetRouteNetworkElementInterestRelations(routeElement1);
@@ -136,7 +131,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         [Fact]
         public void TestUpdatingIndex()
         {
-            InMemoryInterestRelationIndex index = new InMemoryInterestRelationIndex();
+            InMemInterestRelationIndex index = new InMemInterestRelationIndex();
 
             var routeElement1 = Guid.NewGuid();
             var routeElement2 = Guid.NewGuid();
@@ -144,11 +139,11 @@ namespace OpenFTTH.RouteNetwork.Tests
             var routeElement4 = Guid.NewGuid();
 
             // Create a walk of interest spanning the first 3 route network elements
-            var walkOfInterest = new WalkOfInterest(Guid.NewGuid(), new RouteNetworkElementIdList() { routeElement1, routeElement2, routeElement3 } );
+            var walkOfInterest = new RouteNetworkInterest(Guid.NewGuid(), RouteNetworkInterestKindEnum.WalkOfInterest, new RouteNetworkElementIdList() { routeElement1, routeElement2, routeElement3 } );
             index.AddOrUpdate(walkOfInterest);
 
             // Create a walk of interest spanning the last 3 route network elements
-            walkOfInterest = new WalkOfInterest(walkOfInterest.Id, new RouteNetworkElementIdList() { routeElement2, routeElement3, routeElement4 });
+            walkOfInterest = new RouteNetworkInterest(walkOfInterest.Id, RouteNetworkInterestKindEnum.WalkOfInterest, new RouteNetworkElementIdList() { routeElement2, routeElement3, routeElement4 });
             index.AddOrUpdate(walkOfInterest);
 
             var routeElement1InterestRelations = index.GetRouteNetworkElementInterestRelations(routeElement1);
@@ -181,7 +176,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         public void TestRemoveWalkOfInterestFromIndex()
         {
             // Setup
-            InMemoryInterestRelationIndex index = new InMemoryInterestRelationIndex();
+            InMemInterestRelationIndex index = new InMemInterestRelationIndex();
 
             var routeElement1 = Guid.NewGuid();
             var routeElement2 = Guid.NewGuid();
@@ -189,11 +184,11 @@ namespace OpenFTTH.RouteNetwork.Tests
             var routeElement4 = Guid.NewGuid();
 
             // Create walk of interest spanning route element 1,2,3
-            var walkOfInterest1 = new WalkOfInterest(Guid.NewGuid(), new RouteNetworkElementIdList() { routeElement1, routeElement2, routeElement3 });
+            var walkOfInterest1 = new RouteNetworkInterest(Guid.NewGuid(), RouteNetworkInterestKindEnum.WalkOfInterest, new RouteNetworkElementIdList() { routeElement1, routeElement2, routeElement3 });
             index.AddOrUpdate(walkOfInterest1);
 
             // Create walk of interest spanning route element 2,3,4
-            var walkOfInterest2 = new WalkOfInterest(Guid.NewGuid(), new RouteNetworkElementIdList() { routeElement2, routeElement3, routeElement4 });
+            var walkOfInterest2 = new RouteNetworkInterest(Guid.NewGuid(), RouteNetworkInterestKindEnum.WalkOfInterest, new RouteNetworkElementIdList() { routeElement2, routeElement3, routeElement4 });
             index.AddOrUpdate(walkOfInterest2);
 
             // Remove the first interest

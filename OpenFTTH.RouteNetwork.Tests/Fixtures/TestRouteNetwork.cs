@@ -13,12 +13,8 @@ namespace OpenFTTH.RouteNetwork.Tests.Fixtures
     /// Based on the test data described and located here: 
     /// https://github.com/DAXGRID/open-ftth-integration-tests/tree/master/TestData/RouteNetworks/ForUnitTests
     /// </summary>
-    public class TestRouteNetwork : IDisposable, ITestRouteNetworkData
+    public class TestRouteNetwork : ITestRouteNetworkData
     {
-        public RouteNetworkQueryHandler QueryApi { get; private set; }
-
-        public RouteNetworkCommandHandler CommandApi { get; private set; }
-
         public static Guid CO_1 = Guid.Parse("9eaa3682-5e50-4021-a818-4cffde68d235");
         public static Guid HH_1 = Guid.Parse("8538ee23-1192-4ed8-b609-6cdd349bad21");
         public static Guid HH_2 = Guid.Parse("1b8fccb8-69a1-4f2a-abec-33f4512873ba");
@@ -48,28 +44,6 @@ namespace OpenFTTH.RouteNetwork.Tests.Fixtures
 
         public TestRouteNetwork()
         {
-            SetupHandlers();
-        }
-
-        public void Dispose()
-        {
-        }
-
-        private void SetupHandlers()
-        {
-            ILoggerFactory loggerFactory = new Microsoft.Extensions.Logging.Abstractions.NullLoggerFactory();
-
-            var networkState = new InMemRouteNetworkState(loggerFactory, null);
-            networkState.Seed(TestRouteNetworkJson);
-            networkState.FinishLoadMode();
-
-            var routeNetworkRepo = new InMemRouteNetworkRepository(loggerFactory, networkState);
-
-            var interestRepo = new MemoryMappedInterestRepository();
-
-            QueryApi = new RouteNetworkQueryHandler(loggerFactory, routeNetworkRepo, interestRepo);
-
-            CommandApi = new RouteNetworkCommandHandler(routeNetworkRepo, interestRepo);
         }
 
         public string RouteNetworkEventsAsJsonString()

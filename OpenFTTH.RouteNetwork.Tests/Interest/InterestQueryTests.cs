@@ -1,21 +1,23 @@
 ﻿using CSharpFunctionalExtensions;
-using OpenFTTH.RouteNetwork.API.Model;
+using OpenFTTH.CQRS;
 using OpenFTTH.RouteNetwork.API.Commands;
+using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.RouteNetwork.Tests.Fixtures;
 using System;
-using System.Linq;
 using Xunit;
 
 namespace OpenFTTH.RouteNetwork.Tests
 {
-    public class InterestQueryTestsOld : IClassFixture<TestRouteNetwork>
+    public class InterestQueryTests : IClassFixture<TestRouteNetwork>
     {
-        readonly TestRouteNetwork testNetwork;
+        private ICommandDispatcher _commandDispatcher;
+        private IQueryDispatcher _queryDispatcher;
 
-        public InterestQueryTestsOld(TestRouteNetwork testNetwork)
+        public InterestQueryTests(ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher)
         {
-            this.testNetwork = testNetwork;
+            _commandDispatcher = commandDispatcher;
+            _queryDispatcher = queryDispatcher;
         }
 
         [Fact]
@@ -23,10 +25,12 @@ namespace OpenFTTH.RouteNetwork.Tests
         {
             // Create interest (CO_1) <- (S1) -> (HH_1) that we can then try query
             var interestId = Guid.NewGuid();
+            System.Diagnostics.Debug.WriteLine("Test 1 id: " + interestId);
+
             var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S1 };
             var createInterestCommand = new RegisterWalkOfInterest(interestId, walk);
             
-            await testNetwork.CommandApi.HandleAsync(createInterestCommand);
+            await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result>(createInterestCommand);
 
             // Act: Query CO_1, S1, HH_1 and HH_2
             var routeNetworkQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1, TestRouteNetwork.S1, TestRouteNetwork.HH_1, TestRouteNetwork.HH_2 })
@@ -34,7 +38,7 @@ namespace OpenFTTH.RouteNetwork.Tests
                 RelatedInterestFilter = RelatedInterestFilterOptions.ReferencesFromRouteElementAndInterestObjects
             };
             
-            Result<GetRouteNetworkDetailsResult> queryResult = await testNetwork.QueryApi.HandleAsync(routeNetworkQuery);
+            Result<GetRouteNetworkDetailsResult> queryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkQuery);
 
             // Assert that we got information back on all 4 network elements queried
             Assert.True(queryResult.IsSuccess);
@@ -60,9 +64,6 @@ namespace OpenFTTH.RouteNetwork.Tests
             // Assert that route element 3 (HH_1) has interest information with correct relation type
             Assert.NotNull(queryResult.Value.RouteNetworkElements[TestRouteNetwork.HH_1].InterestRelations);
             Assert.Contains(queryResult.Value.RouteNetworkElements[TestRouteNetwork.HH_1].InterestRelations, r => r.RefId == interestId && r.RelationKind == RouteNetworkInterestRelationKindEnum.End);
-
-            // Assert that route element 4 (HH_2) has no references to interest information
-            Assert.Empty(queryResult.Value.RouteNetworkElements[TestRouteNetwork.HH_2].InterestRelations);
         }
 
         [Fact]
@@ -70,10 +71,12 @@ namespace OpenFTTH.RouteNetwork.Tests
         {
             // Create interest (CO_1) <- (S1) -> (HH_1) that we can then try query
             var interestId = Guid.NewGuid();
+            System.Diagnostics.Debug.WriteLine("Test 2 id: " + interestId);
+
             var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S1 };
             var createInterestCommand = new RegisterWalkOfInterest(interestId, walk);
 
-            await testNetwork.CommandApi.HandleAsync(createInterestCommand);
+            await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result>(createInterestCommand);
 
             // Act: Query CO_1, S1, HH_1 and HH_2
             var routeNetworkQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1, TestRouteNetwork.S1, TestRouteNetwork.HH_1, TestRouteNetwork.HH_2 })
@@ -81,7 +84,7 @@ namespace OpenFTTH.RouteNetwork.Tests
                 RelatedInterestFilter = RelatedInterestFilterOptions.ReferencesFromRouteElementOnly
             };
 
-            Result<GetRouteNetworkDetailsResult> queryResult = await testNetwork.QueryApi.HandleAsync(routeNetworkQuery);
+            Result<GetRouteNetworkDetailsResult> queryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkQuery);
 
             // Assert that we got information back on all 4 network elements queried
             Assert.True(queryResult.IsSuccess);
@@ -101,9 +104,6 @@ namespace OpenFTTH.RouteNetwork.Tests
             // Assert that route element 3 (HH_1) has interest information with correct relation type
             Assert.NotNull(queryResult.Value.RouteNetworkElements[TestRouteNetwork.HH_1].InterestRelations);
             Assert.Contains(queryResult.Value.RouteNetworkElements[TestRouteNetwork.HH_1].InterestRelations, r => r.RefId == interestId && r.RelationKind == RouteNetworkInterestRelationKindEnum.End);
-
-            // Assert that route element 4 (HH_2) has no references to interest information
-            Assert.Empty(queryResult.Value.RouteNetworkElements[TestRouteNetwork.HH_2].InterestRelations);
         }
 
         [Fact]
@@ -111,10 +111,12 @@ namespace OpenFTTH.RouteNetwork.Tests
         {
             // Create interest (CO_1) <- (S1) -> (HH_1) that we can then try query
             var interestId = Guid.NewGuid();
+            System.Diagnostics.Debug.WriteLine("Test 3 id: " + interestId);
+
             var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S1 };
             var createInterestCommand = new RegisterWalkOfInterest(interestId, walk);
 
-            await testNetwork.CommandApi.HandleAsync(createInterestCommand);
+            await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result>(createInterestCommand);
 
             // Act: Query CO_1, S1, HH_1 and HH_2
             var routeNetworkQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1, TestRouteNetwork.S1, TestRouteNetwork.HH_1, TestRouteNetwork.HH_2 })
@@ -122,7 +124,7 @@ namespace OpenFTTH.RouteNetwork.Tests
                 RelatedInterestFilter = RelatedInterestFilterOptions.None
             };
 
-            Result<GetRouteNetworkDetailsResult> queryResult = await testNetwork.QueryApi.HandleAsync(routeNetworkQuery);
+            Result<GetRouteNetworkDetailsResult> queryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkQuery);
 
             // Assert that we got information back on all 4 network elements queried
             Assert.True(queryResult.IsSuccess);

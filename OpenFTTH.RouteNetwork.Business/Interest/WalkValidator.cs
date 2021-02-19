@@ -1,15 +1,12 @@
 ﻿using CSharpFunctionalExtensions;
 using OpenFTTH.RouteNetwork.API.Model;
-using OpenFTTH.RouteNetwork.Business.DomainModel.Interest;
 using OpenFTTH.RouteNetwork.Business.StateHandling;
 using OpenFTTH.RouteNetwork.Service.Business.DomainModel.RouteNetwork;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace OpenFTTH.RouteNetwork.Business.MutationHandling
+namespace OpenFTTH.RouteNetwork.Business.Interest
 {
     public class WalkValidator
     {
@@ -20,7 +17,7 @@ namespace OpenFTTH.RouteNetwork.Business.MutationHandling
             _routeNetworkRepository = routeNetworkRepository;
         }
 
-        public Result<Walk> ValidateWalk(RouteNetworkElementIdList walkIds)
+        public Result<RouteNetworkElementIdList> ValidateWalk(RouteNetworkElementIdList walkIds)
         {
             long versionId = _routeNetworkRepository.NetworkState.GetLatestCommitedVersion();
 
@@ -28,35 +25,35 @@ namespace OpenFTTH.RouteNetwork.Business.MutationHandling
 
             // If some route network element could not be looked up then return failure
             if (routeNetworkObjects.IsFailure)
-                return Result.Failure<Walk>(routeNetworkObjects.Error);
+                return Result.Failure<RouteNetworkElementIdList>(routeNetworkObjects.Error);
 
             // If only one id is specified, make sure it'a a route segment
             if (routeNetworkObjects.Value.Count == 1 && !(routeNetworkObjects.Value[0] is IRouteSegment))
-                return Result.Failure<Walk>("If only one route network id is specified in a walk, it must be a route segment id");
+                return Result.Failure<RouteNetworkElementIdList>("If only one route network id is specified in a walk, it must be a route segment id");
 
             var routeElementsSummary = GetRouteNetworkElementsListSummary(routeNetworkObjects.Value);
 
             switch (routeElementsSummary)
             {
                 case RouteElementListSummary.None:
-                    return Result.Failure<Walk>("A valid walk should contain at least one route segment id");
+                    return Result.Failure<RouteNetworkElementIdList>("A valid walk should contain at least one route segment id");
 
                 case RouteElementListSummary.RouteNodesOnly:
-                    return Result.Failure<Walk>("A valid walk cannot contain route nodes only. This is because multiple segments might be connecting the same two nodes.");
+                    return Result.Failure<RouteNetworkElementIdList>("A valid walk cannot contain route nodes only. This is because multiple segments might be connecting the same two nodes.");
 
                 case RouteElementListSummary.RouteSegmentsOnly:
                     var routeSegments = routeNetworkObjects.Value.OfType<RouteSegment>().ToList();
                     return ValidateSegmentSequence(routeSegments, versionId);
 
                 case RouteElementListSummary.BothRouteNodesAndSegments:
-                    return Result.Failure<Walk>("A valid walk should contain at least one route segment id");
+                    return Result.Failure<RouteNetworkElementIdList>("A valid walk should contain route segment ids only");
             }
 
-            return Result.Failure<Walk>("Unsupported type of route network id sequence");
+            return Result.Failure<RouteNetworkElementIdList>("Unsupported type of route network id sequence");
         }
 
 
-        private Result<Walk> ValidateSegmentSequence(List<RouteSegment> routeSegments, long versionId)
+        private Result<RouteNetworkElementIdList> ValidateSegmentSequence(List<RouteSegment> routeSegments, long versionId)
         {
             var routeSegmentPosition = 0;
 
@@ -67,16 +64,16 @@ namespace OpenFTTH.RouteNetwork.Business.MutationHandling
                     var prevSegment = routeSegments[routeSegmentPosition - 1];
 
                     if (!IsAdjacent(prevSegment, routeSegment, versionId))
-                        return Result.Failure<Walk>($"Segments is out of sequence. Segment with id: {routeSegment.Id} was expected to follow segment with id: {prevSegment.Id} but was not.");
+                        return Result.Failure<RouteNetworkElementIdList>($"Segments is out of sequence. Segment with id: {routeSegment.Id} was expected to follow segment with id: {prevSegment.Id} but was not.");
                 }
 
                 routeSegmentPosition++;
             }
 
-            return Result.Success<Walk>(CreateWalkFromSegmentSequence(routeSegments, versionId));
+            return Result.Success<RouteNetworkElementIdList>(CreateWalkFromSegmentSequence(routeSegments, versionId));
         }
 
-        private Walk CreateWalkFromSegmentSequence(List<RouteSegment> routeSegments, long versionId)
+        private RouteNetworkElementIdList CreateWalkFromSegmentSequence(List<RouteSegment> routeSegments, long versionId)
         {
             RouteNetworkElementIdList walkIds = new RouteNetworkElementIdList();
 
@@ -89,7 +86,7 @@ namespace OpenFTTH.RouteNetwork.Business.MutationHandling
                 walkIds.Add(routeSegments[0].Id);
                 walkIds.Add(routeSegments[0].OutV(versionId).Id);
 
-                return new Walk(walkIds);
+                return walkIds;
             }
 
             // We're dealing with multi segments, if we reach this code
@@ -128,7 +125,7 @@ namespace OpenFTTH.RouteNetwork.Business.MutationHandling
                 routeSegmentPosition++;
             }
 
-            return new Walk(walkIds);
+            return walkIds;
         }
 
         private RouteNode FindSharedNode(RouteSegment segment1, RouteSegment segment2, long versionId)

@@ -18,7 +18,6 @@ namespace OpenFTTH.RouteNetworkService.Tests
             // Route Network State and Repository
             services.AddSingleton<IRouteNetworkState, InMemRouteNetworkState>();
             services.AddSingleton<IRouteNetworkRepository, InMemRouteNetworkRepository>();
-            services.AddSingleton<IInterestRepository, MemoryMappedInterestRepository>();
 
             // ES and CQRS
             services.AddSingleton<IEventStore, InMemEventStore>();

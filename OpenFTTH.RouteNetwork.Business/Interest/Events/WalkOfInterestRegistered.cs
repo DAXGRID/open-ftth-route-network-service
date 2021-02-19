@@ -5,13 +5,10 @@ namespace OpenFTTH.RouteNetwork.Business.Interest.Events
 {
     public class WalkOfInterestRegistered
     {
-        public Guid walkOfInterestId { get; } 
-        public RouteNetworkElementIdList routeNetworkWalkIds { get; }
-
-        public WalkOfInterestRegistered(Guid walkOfInterestId, RouteNetworkElementIdList routeNetworkWalkIds)
+        public RouteNetworkInterest Interest { get; }
+        public WalkOfInterestRegistered(RouteNetworkInterest interest)
         {
-            this.walkOfInterestId = walkOfInterestId;
-            this.routeNetworkWalkIds = routeNetworkWalkIds;
+            this.Interest = interest;
         }
     }
 }
