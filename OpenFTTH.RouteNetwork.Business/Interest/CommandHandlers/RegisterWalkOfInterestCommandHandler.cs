@@ -6,7 +6,6 @@ using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.Business.Interest;
 using OpenFTTH.RouteNetwork.Business.Interest.Projections;
 using OpenFTTH.RouteNetwork.Business.StateHandling;
-using System;
 using System.Threading.Tasks;
 
 namespace OpenFTTH.RouteNetwork.Business.MutationHandling
@@ -30,18 +29,16 @@ namespace OpenFTTH.RouteNetwork.Business.MutationHandling
 
             var walkValidator = new WalkValidator(_routeNetworkRepository);
 
-            try
-            {
-                var walkOfInterestAR = new WalkOfInterestAR(walkOfInterest, interestProjection, walkValidator);
+            var walkOfInterestAR = new WalkOfInterestAR();
 
+            var registerInterestResult = walkOfInterestAR.RegisterWalkOfInterest(walkOfInterest, interestProjection, walkValidator);
+
+            if (registerInterestResult.IsSuccess)
+            {
                 _eventStore.Aggregates.Store(walkOfInterestAR);
+            }
 
-                return Task.FromResult(Result.Success());
-            }
-            catch (ArgumentException ex)
-            {
-                return Task.FromResult(Result.Failure(ex.Message));
-            }
+            return Task.FromResult(registerInterestResult);
         }
     }
 }
