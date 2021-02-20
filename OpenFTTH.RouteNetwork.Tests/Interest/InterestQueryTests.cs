@@ -6,6 +6,7 @@ using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.RouteNetwork.Tests.Fixtures;
 using System;
 using Xunit;
+using FluentAssertions;
 
 namespace OpenFTTH.RouteNetwork.Tests
 {
@@ -25,7 +26,6 @@ namespace OpenFTTH.RouteNetwork.Tests
         {
             // Create interest (CO_1) <- (S1) -> (HH_1) that we can then try query
             var interestId = Guid.NewGuid();
-            System.Diagnostics.Debug.WriteLine("Test 1 id: " + interestId);
 
             var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S1 };
             var createInterestCommand = new RegisterWalkOfInterest(interestId, walk);
@@ -71,7 +71,6 @@ namespace OpenFTTH.RouteNetwork.Tests
         {
             // Create interest (CO_1) <- (S1) -> (HH_1) that we can then try query
             var interestId = Guid.NewGuid();
-            System.Diagnostics.Debug.WriteLine("Test 2 id: " + interestId);
 
             var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S1 };
             var createInterestCommand = new RegisterWalkOfInterest(interestId, walk);
@@ -91,7 +90,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             Assert.Equal(4, queryResult.Value.RouteNetworkElements.Count);
 
             // Assert that we did'nt get any interest object back
-            Assert.Null(queryResult.Value.Interests);
+            Assert.Empty(queryResult.Value.Interests);
 
             // Assert that route element 1 (CO_1) has interest information with correct relation type
             Assert.NotNull(queryResult.Value.RouteNetworkElements[TestRouteNetwork.CO_1].InterestRelations);
@@ -111,7 +110,6 @@ namespace OpenFTTH.RouteNetwork.Tests
         {
             // Create interest (CO_1) <- (S1) -> (HH_1) that we can then try query
             var interestId = Guid.NewGuid();
-            System.Diagnostics.Debug.WriteLine("Test 3 id: " + interestId);
 
             var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S1 };
             var createInterestCommand = new RegisterWalkOfInterest(interestId, walk);
@@ -131,13 +129,60 @@ namespace OpenFTTH.RouteNetwork.Tests
             Assert.Equal(4, queryResult.Value.RouteNetworkElements.Count);
 
             // Assert that we did'nt get any interest object back
-            Assert.Null(queryResult.Value.Interests);
+            Assert.Empty(queryResult.Value.Interests);
 
             // Assert that no route elements got interest relations
             Assert.Null(queryResult.Value.RouteNetworkElements[TestRouteNetwork.CO_1].InterestRelations);
             Assert.Null(queryResult.Value.RouteNetworkElements[TestRouteNetwork.S1].InterestRelations);
             Assert.Null(queryResult.Value.RouteNetworkElements[TestRouteNetwork.HH_1].InterestRelations);
             Assert.Null(queryResult.Value.RouteNetworkElements[TestRouteNetwork.HH_2].InterestRelations);
+        }
+
+        [Fact]
+        public async void QueryByInterestId_ShouldSucced()
+        {
+            // Create two overlapping walk of interests that we can try to query on
+            var interest1Id = Guid.NewGuid();
+            var walk1 = new RouteNetworkElementIdList() { TestRouteNetwork.S1 };
+            await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result>(new RegisterWalkOfInterest(interest1Id, walk1));
+
+            var interest2Id = Guid.NewGuid();
+            var walk2 = new RouteNetworkElementIdList() { TestRouteNetwork.S2 };
+            await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result>(new RegisterWalkOfInterest(interest2Id, walk2));
+
+
+            // Act
+            var routeNetworkQuery = new GetRouteNetworkDetails(new InterestIdList() { interest1Id, interest2Id })
+            {
+                RelatedInterestFilter = RelatedInterestFilterOptions.ReferencesFromRouteElementAndInterestObjects
+            };
+
+            Result<GetRouteNetworkDetailsResult> queryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkQuery);
+
+            // Assert
+            queryResult.Value.Interests.ContainsKey(interest1Id).Should().BeTrue();
+            queryResult.Value.Interests.ContainsKey(interest2Id).Should().BeTrue();
+
+            queryResult.Value.RouteNetworkElements.ContainsKey(TestRouteNetwork.CO_1).Should().BeTrue();
+            queryResult.Value.RouteNetworkElements.ContainsKey(TestRouteNetwork.S1).Should().BeTrue();
+            queryResult.Value.RouteNetworkElements.ContainsKey(TestRouteNetwork.HH_1).Should().BeTrue();
+            queryResult.Value.RouteNetworkElements.ContainsKey(TestRouteNetwork.S2).Should().BeTrue();
+            queryResult.Value.RouteNetworkElements.ContainsKey(TestRouteNetwork.HH_2).Should().BeTrue();
+
+            queryResult.Value.RouteNetworkElements[TestRouteNetwork.CO_1].InterestRelations.Should().Contain(i => i.RefId == interest1Id && i.RelationKind == RouteNetworkInterestRelationKindEnum.Start);
+            queryResult.Value.RouteNetworkElements[TestRouteNetwork.CO_1].InterestRelations.Should().NotContain(i => i.RefId == interest2Id);
+
+            queryResult.Value.RouteNetworkElements[TestRouteNetwork.S1].InterestRelations.Should().Contain(i => i.RefId == interest1Id && i.RelationKind == RouteNetworkInterestRelationKindEnum.PassThrough);
+            queryResult.Value.RouteNetworkElements[TestRouteNetwork.S1].InterestRelations.Should().NotContain(i => i.RefId == interest2Id);
+
+            queryResult.Value.RouteNetworkElements[TestRouteNetwork.HH_1].InterestRelations.Should().Contain(i => i.RefId == interest1Id && i.RelationKind == RouteNetworkInterestRelationKindEnum.End);
+            queryResult.Value.RouteNetworkElements[TestRouteNetwork.HH_1].InterestRelations.Should().Contain(i => i.RefId == interest2Id && i.RelationKind == RouteNetworkInterestRelationKindEnum.Start);
+
+            queryResult.Value.RouteNetworkElements[TestRouteNetwork.S2].InterestRelations.Should().Contain(i => i.RefId == interest2Id && i.RelationKind == RouteNetworkInterestRelationKindEnum.PassThrough);
+            queryResult.Value.RouteNetworkElements[TestRouteNetwork.S2].InterestRelations.Should().NotContain(i => i.RefId == interest1Id);
+
+            queryResult.Value.RouteNetworkElements[TestRouteNetwork.HH_2].InterestRelations.Should().Contain(i => i.RefId == interest2Id && i.RelationKind == RouteNetworkInterestRelationKindEnum.End);
+            queryResult.Value.RouteNetworkElements[TestRouteNetwork.HH_2].InterestRelations.Should().NotContain(i => i.RefId == interest1Id);
         }
     }
 }

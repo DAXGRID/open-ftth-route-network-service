@@ -38,18 +38,86 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
         public Task<Result<GetRouteNetworkDetailsResult>> HandleAsync(GetRouteNetworkDetails query)
         {
             // Get route elements
-            var getRouteNetworkElementsResult = _routeNodeRepository.GetRouteElements(query.RouteNetworkElementIdsToQuery);
+            if (query.RouteNetworkElementIdsToQuery.Count > 0 && query.InterestIdsToQuery.Count == 0)
+            {
+                return QueryByRouteElementIds(query);
+            }
+            else if (query.InterestIdsToQuery.Count > 0 && query.RouteNetworkElementIdsToQuery.Count == 0)
+            {
+                return QueryByInterestIds(query);
+            }
+            else
+            {
+                if (query.InterestIdsToQuery.Count > 0 && query.RouteNetworkElementIdsToQuery.Count > 0)
+                    return Task.FromResult(Result.Failure<GetRouteNetworkDetailsResult>("Invalid query. Cannot query by route network element ids and interest ids at the same time."));
+                else if (query.InterestIdsToQuery.Count == 0 && query.RouteNetworkElementIdsToQuery.Count == 0)
+                    return Task.FromResult(Result.Failure<GetRouteNetworkDetailsResult>("Invalid query. Neither route network element ids or interest ids specified. Therefore nothing to query."));
+                else
+                    return Task.FromResult(Result.Failure<GetRouteNetworkDetailsResult>("Invalid query."));
+            }
+        }
+
+        private Task<Result<GetRouteNetworkDetailsResult>> QueryByInterestIds(GetRouteNetworkDetails query)
+        {
+            RouteNetworkElementIdList routeElementsToQuery = new RouteNetworkElementIdList();
+
+            List<RouteNetworkInterest> interestsToReturn = new List<RouteNetworkInterest>();
+
+            // Find all interest to return and create a list of route network elements at the same time
+            var interestsProjection = _eventStore.Projections.Get<InterestsProjection>();
+
+            foreach (var interestId in query.InterestIdsToQuery)
+            {
+                var interestQueryResult = interestsProjection.GetInterest(interestId);
+
+                if (interestQueryResult.IsFailure)
+                    return Task.FromResult(Result.Failure<GetRouteNetworkDetailsResult>(interestQueryResult.Error));
+
+                interestsToReturn.Add(interestQueryResult.Value);
+
+                routeElementsToQuery.AddRange(interestQueryResult.Value.RouteNetworkElementRefs);
+            }
+
+            var getRouteNetworkElementsResult = _routeNodeRepository.GetRouteElements(routeElementsToQuery);
 
             if (getRouteNetworkElementsResult.IsFailure)
                 return Task.FromResult(Result.Failure<GetRouteNetworkDetailsResult>(getRouteNetworkElementsResult.Error));
 
             var mappedRouteNetworkElements = MapRouteElementDomainObjectsToQueryObjects(query, getRouteNetworkElementsResult.Value);
 
-            var queryResult = new GetRouteNetworkDetailsResult(mappedRouteNetworkElements);
+            var queryResult = new GetRouteNetworkDetailsResult(mappedRouteNetworkElements, interestsToReturn.ToArray());
+
+            // Add interest reference information
+            AddInterestReferencesToRouteNetworkElements(query, queryResult);
+
+            return Task.FromResult(
+                Result.Success<GetRouteNetworkDetailsResult>(
+                    queryResult
+                )
+            );
+        }
+
+
+        private Task<Result<GetRouteNetworkDetailsResult>> QueryByRouteElementIds(GetRouteNetworkDetails query)
+        {
+            var getRouteNetworkElementsResult = _routeNodeRepository.GetRouteElements(query.RouteNetworkElementIdsToQuery);
+
+            if (getRouteNetworkElementsResult.IsFailure)
+                return Task.FromResult(Result.Failure<GetRouteNetworkDetailsResult>(getRouteNetworkElementsResult.Error));
+
+            var routeNetworkElementsToReturn = MapRouteElementDomainObjectsToQueryObjects(query, getRouteNetworkElementsResult.Value);
+
+            var interestsToReturn = Array.Empty<RouteNetworkInterest>();
+
+            if (query.RelatedInterestFilter == RelatedInterestFilterOptions.ReferencesFromRouteElementAndInterestObjects)
+            {
+                interestsToReturn = GetInterestsRelatedToRouteNetworkElements(query.RouteNetworkElementIdsToQuery);
+            }
+
+            var queryResult = new GetRouteNetworkDetailsResult(routeNetworkElementsToReturn, interestsToReturn);
 
             // Add interest information
             AddInterestReferencesToRouteNetworkElements(query, queryResult);
-            AddInterestObjectsToQueryResult(query, queryResult);
 
             return Task.FromResult(
                 Result.Success<GetRouteNetworkDetailsResult>(
@@ -83,36 +151,31 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
             }
         }
 
-        private void AddInterestObjectsToQueryResult(GetRouteNetworkDetails query, GetRouteNetworkDetailsResult queryResult)
+        private RouteNetworkInterest[] GetInterestsRelatedToRouteNetworkElements(RouteNetworkElementIdList routeNetworkElementIds)
         {
-            // Only add them if request by the caller
-            if (query.RelatedInterestFilter == RelatedInterestFilterOptions.ReferencesFromRouteElementAndInterestObjects)
+            Dictionary<Guid, RouteNetworkInterest> interestsToBeAddedToResult = new Dictionary<Guid, RouteNetworkInterest>();
+
+            var interestsProjection = _eventStore.Projections.Get<InterestsProjection>();
+
+            foreach (var routeElementId in routeNetworkElementIds)
             {
-                var interestsProjection = _eventStore.Projections.Get<InterestsProjection>();
+                // Add relations to the route network element
+                var interestRelationsResult = interestsProjection.GetInterestsByRouteNetworkElementId(routeElementId);
 
-                Dictionary<Guid, RouteNetworkInterest> interestsToBeAddedToResult = new Dictionary<Guid, RouteNetworkInterest>();
+                if (interestRelationsResult.IsFailure)
+                    throw new ApplicationException($"Unexpected error querying interests related to route network element with id: {routeElementId} {interestRelationsResult.Error}");
 
-                foreach (var routeElement in queryResult.RouteNetworkElements)
+                foreach (var interestRelation in interestRelationsResult.Value)
                 {
-                    // Add relations to the route network element
-                    var interestRelationsResult = interestsProjection.GetInterestsByRouteNetworkElementId(routeElement.Id);
-
-                    if (interestRelationsResult.IsFailure)
-                        throw new ApplicationException($"Unexpected error querying interests related to route network element with id: {routeElement.Id} {interestRelationsResult.Error}");
-
-                    foreach (var interestRelation in interestRelationsResult.Value)
+                    if (!interestsToBeAddedToResult.ContainsKey(interestRelation.Item1.Id))
                     {
-                        if (!interestsToBeAddedToResult.ContainsKey(interestRelation.Item1.Id))
-                        {
-                            interestsToBeAddedToResult.Add(interestRelation.Item1.Id, interestRelation.Item1);
-                        }
+                        interestsToBeAddedToResult.Add(interestRelation.Item1.Id, interestRelation.Item1);
                     }
                 }
-
-                queryResult.Interests = new LookupCollection<RouteNetworkInterest>(interestsToBeAddedToResult.Values.ToArray());
             }
-        }
 
+            return interestsToBeAddedToResult.Values.ToArray();
+        }
 
         private static RouteNetworkElement[] MapRouteElementDomainObjectsToQueryObjects(GetRouteNetworkDetails query, List<IRouteNetworkElement> routeNetworkElements)
         {

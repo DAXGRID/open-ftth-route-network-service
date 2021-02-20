@@ -9,9 +9,10 @@ namespace OpenFTTH.RouteNetwork.API.Queries
 
         public LookupCollection<RouteNetworkInterest>? Interests { get; set; }
 
-        public GetRouteNetworkDetailsResult(RouteNetworkElement[] routeNetworkElements)
+        public GetRouteNetworkDetailsResult(RouteNetworkElement[] routeNetworkElements, RouteNetworkInterest[] routeNetworkInterests)
         {
             this.RouteNetworkElements = new LookupCollection<RouteNetworkElement>(routeNetworkElements);
+            this.Interests = new LookupCollection<RouteNetworkInterest>(routeNetworkInterests);
         }
     }
 }
