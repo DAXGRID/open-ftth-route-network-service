@@ -1,10 +1,7 @@
-﻿using NetTopologySuite.Geometries;
-using OpenFTTH.Events.Core.Infos;
+﻿using OpenFTTH.Events.Core.Infos;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace OpenFTTH.RouteNetwork.Service.Business.DomainModel.RouteNetwork
+namespace OpenFTTH.RouteNetwork.Business.RouteElements.Model
 {
     public interface IRouteNetworkElement
     {

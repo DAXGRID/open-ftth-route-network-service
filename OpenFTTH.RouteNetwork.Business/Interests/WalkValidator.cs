@@ -1,8 +1,8 @@
 ﻿using FluentResults;
 using OpenFTTH.RouteNetwork.API.Commands;
 using OpenFTTH.RouteNetwork.API.Model;
-using OpenFTTH.RouteNetwork.Business.StateHandling;
-using OpenFTTH.RouteNetwork.Service.Business.DomainModel.RouteNetwork;
+using OpenFTTH.RouteNetwork.Business.RouteElements.Model;
+using OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling;
 using System;
 using System.Collections.Generic;
 using System.Linq;

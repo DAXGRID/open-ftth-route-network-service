@@ -1,11 +1,11 @@
 ﻿using FluentResults;
 using Microsoft.Extensions.Logging;
 using OpenFTTH.RouteNetwork.API.Model;
-using OpenFTTH.RouteNetwork.Service.Business.DomainModel.RouteNetwork;
+using OpenFTTH.RouteNetwork.Business.RouteElements.Model;
 using System;
 using System.Collections.Generic;
 
-namespace OpenFTTH.RouteNetwork.Business.StateHandling.Network
+namespace OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling
 {
     public class InMemRouteNetworkRepository : IRouteNetworkRepository
     {

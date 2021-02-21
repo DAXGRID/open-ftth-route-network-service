@@ -2,12 +2,12 @@
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using OpenFTTH.Events.RouteNetwork;
-using OpenFTTH.RouteNetwork.Business.StateHandling;
-using OpenFTTH.RouteNetwork.Service.Business.DomainModel.RouteNetwork;
+using OpenFTTH.RouteNetwork.Business.RouteElements.Model;
+using OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling;
 using System;
 using System.Collections.Generic;
 
-namespace OpenFTTH.RouteNetwork.Business.EventHandling
+namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
 {
     public class RouteNetworkEventHandler
     {

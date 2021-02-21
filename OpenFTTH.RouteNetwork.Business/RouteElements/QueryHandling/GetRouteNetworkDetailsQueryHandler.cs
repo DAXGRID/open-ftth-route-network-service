@@ -6,30 +6,30 @@ using OpenFTTH.EventSourcing;
 using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.RouteNetwork.Business.Interest.Projections;
-using OpenFTTH.RouteNetwork.Business.StateHandling;
-using OpenFTTH.RouteNetwork.Service.Business.DomainModel.RouteNetwork;
+using OpenFTTH.RouteNetwork.Business.RouteElements.Model;
+using OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace OpenFTTH.RouteNetworkService.QueryHandlers
+namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
 {
-    public class RouteNetworkQueryHandler :
+    public class GetRouteNetworkDetailsQueryHandler :
         IQueryHandler<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>
     {
-        private readonly ILogger<RouteNetworkQueryHandler> _logger;
+        private readonly ILogger<GetRouteNetworkDetailsQueryHandler> _logger;
         private readonly IEventStore _eventStore;
         private readonly IRouteNetworkRepository _routeNodeRepository;
 
-        public RouteNetworkQueryHandler(ILoggerFactory loggerFactory, IEventStore eventStore, IRouteNetworkRepository routeNodeRepository)
+        public GetRouteNetworkDetailsQueryHandler(ILoggerFactory loggerFactory, IEventStore eventStore, IRouteNetworkRepository routeNodeRepository)
         {
             if (null == loggerFactory)
             {
                 throw new ArgumentNullException("loggerFactory is null");
             }
 
-            _logger = loggerFactory.CreateLogger<RouteNetworkQueryHandler>();
+            _logger = loggerFactory.CreateLogger<GetRouteNetworkDetailsQueryHandler>();
 
             _eventStore = eventStore;
             _routeNodeRepository = routeNodeRepository;

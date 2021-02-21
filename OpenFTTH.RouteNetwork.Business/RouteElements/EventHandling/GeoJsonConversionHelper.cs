@@ -1,9 +1,7 @@
 ﻿using NetTopologySuite.Geometries;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace OpenFTTH.RouteNetwork.Business.EventHandling
+namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
 {
     public static class GeoJsonConversionHelper
     {

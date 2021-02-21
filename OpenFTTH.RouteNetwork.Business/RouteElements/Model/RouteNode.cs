@@ -1,11 +1,9 @@
 ﻿using DAX.ObjectVersioning.Graph;
-using NetTopologySuite.Geometries;
 using OpenFTTH.Events.Core.Infos;
 using OpenFTTH.Events.RouteNetwork.Infos;
-using OpenFTTH.RouteNetwork.API.Queries;
 using System;
 
-namespace OpenFTTH.RouteNetwork.Service.Business.DomainModel.RouteNetwork
+namespace OpenFTTH.RouteNetwork.Business.RouteElements.Model
 {
     public class RouteNode : GraphNode, IRouteNode
     {

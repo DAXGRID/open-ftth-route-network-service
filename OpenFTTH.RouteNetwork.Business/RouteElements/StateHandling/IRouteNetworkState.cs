@@ -1,10 +1,8 @@
 ﻿using DAX.ObjectVersioning.Core;
-using OpenFTTH.RouteNetwork.Service.Business.DomainModel.RouteNetwork;
+using OpenFTTH.RouteNetwork.Business.RouteElements.Model;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace OpenFTTH.RouteNetwork.Business.StateHandling
+namespace OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling
 {
     public interface IRouteNetworkState
     {

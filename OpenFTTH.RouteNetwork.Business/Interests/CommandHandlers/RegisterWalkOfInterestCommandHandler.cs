@@ -5,7 +5,7 @@ using OpenFTTH.RouteNetwork.API.Commands;
 using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.Business.Interest;
 using OpenFTTH.RouteNetwork.Business.Interest.Projections;
-using OpenFTTH.RouteNetwork.Business.StateHandling;
+using OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling;
 using System.Threading.Tasks;
 
 namespace OpenFTTH.RouteNetwork.Business.MutationHandling

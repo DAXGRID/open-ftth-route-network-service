@@ -2,9 +2,7 @@
 using OpenFTTH.CQRS;
 using OpenFTTH.EventSourcing;
 using OpenFTTH.EventSourcing.InMem;
-using OpenFTTH.RouteNetwork.Business.StateHandling;
-using OpenFTTH.RouteNetwork.Business.StateHandling.Interest;
-using OpenFTTH.RouteNetwork.Business.StateHandling.Network;
+using OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling;
 using OpenFTTH.RouteNetwork.Tests.Fixtures;
 using System;
 using System.Reflection;

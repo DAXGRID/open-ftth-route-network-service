@@ -4,9 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OpenFTTH.CQRS;
-using OpenFTTH.RouteNetwork.Business.StateHandling;
-using OpenFTTH.RouteNetwork.Business.StateHandling.Interest;
-using OpenFTTH.RouteNetwork.Business.StateHandling.Network;
+using OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling;
 using System;
 using System.Reflection;
 

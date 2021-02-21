@@ -1,9 +1,9 @@
 ﻿using FluentResults;
 using OpenFTTH.RouteNetwork.API.Model;
-using OpenFTTH.RouteNetwork.Service.Business.DomainModel.RouteNetwork;
+using OpenFTTH.RouteNetwork.Business.RouteElements.Model;
 using System.Collections.Generic;
 
-namespace OpenFTTH.RouteNetwork.Business.StateHandling
+namespace OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling
 {
     public interface IRouteNetworkRepository
     {

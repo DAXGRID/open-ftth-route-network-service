@@ -1,10 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
-using OpenFTTH.RouteNetwork.Business.MutationHandling;
-using OpenFTTH.RouteNetwork.Business.StateHandling.Network;
-using OpenFTTH.RouteNetwork.Business.StateHandling.Interest;
-using OpenFTTH.RouteNetworkService.QueryHandlers;
+﻿using OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling;
 using System;
-using OpenFTTH.RouteNetwork.Business.StateHandling;
 
 namespace OpenFTTH.RouteNetwork.Tests.Fixtures
 {

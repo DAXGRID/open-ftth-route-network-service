@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Interest\QueryHandlers\" />
+    <Folder Include="Interests\QueryHandlers\" />
   </ItemGroup>
 
 </Project>
