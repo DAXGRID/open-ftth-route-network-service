@@ -30,27 +30,27 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
 
             // If only one id is specified, make sure it'a a route segment
             if (routeNetworkObjects.Value.Count == 1 && !(routeNetworkObjects.Value[0] is IRouteSegment))
-                return Result.Fail(new InterestValidationError(InterestValidationErrorCodes.INTEREST_INVALID_WALK, "If only one route network id is specified in a walk, it must be a route segment id"));
+                return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_WALK_SHOULD_CONTAIN_ROUTE_SEGMENT_IDS_ONLY, "If only one route network id is specified in a walk, it must be a route segment id"));
 
             var routeElementsSummary = GetRouteNetworkElementsListSummary(routeNetworkObjects.Value);
 
             switch (routeElementsSummary)
             {
                 case RouteElementListSummary.None:
-                    return Result.Fail(new InterestValidationError(InterestValidationErrorCodes.INTEREST_INVALID_WALK, "A valid walk should contain at least one route segment id"));
+                    return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_WALK_CANNOT_BE_EMPTY, "A valid walk should contain at least one route segment id"));
 
                 case RouteElementListSummary.RouteNodesOnly:
-                    return Result.Fail(new InterestValidationError(InterestValidationErrorCodes.INTEREST_INVALID_WALK, "A valid walk cannot contain route nodes only. This is because multiple segments might be connecting the same two nodes."));
+                    return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_WALK_SHOULD_CONTAIN_ROUTE_SEGMENT_IDS_ONLY, "A valid walk cannot contain route nodes only."));
 
                 case RouteElementListSummary.RouteSegmentsOnly:
                     var routeSegments = routeNetworkObjects.Value.OfType<RouteSegment>().ToList();
                     return ValidateSegmentSequence(routeSegments, versionId);
 
                 case RouteElementListSummary.BothRouteNodesAndSegments:
-                    return Result.Fail(new InterestValidationError(InterestValidationErrorCodes.INTEREST_INVALID_WALK, "A valid walk should contain route segment ids only"));
+                    return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_WALK_SHOULD_CONTAIN_ROUTE_SEGMENT_IDS_ONLY, "A valid walk should contain route segment ids only"));
             }
 
-            return Result.Fail(new InterestValidationError(InterestValidationErrorCodes.INTEREST_INVALID_WALK, "Unsupported type of route network id sequence"));
+            return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_WALK_SHOULD_CONTAIN_ROUTE_SEGMENT_IDS_ONLY, "Unsupported type of route network id sequence"));
         }
 
 
@@ -65,7 +65,7 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
                     var prevSegment = routeSegments[routeSegmentPosition - 1];
 
                     if (!IsAdjacent(prevSegment, routeSegment, versionId))
-                        return Result.Fail(new InterestValidationError(InterestValidationErrorCodes.INTEREST_INVALID_WALK, $"Segments is out of sequence. Segment with id: {routeSegment.Id} was expected to follow segment with id: {prevSegment.Id} but was not."));
+                        return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_WALK_SEGMENTS_ARE_NOT_ADJACENT, $"Segments is out of sequence and/or not adjacent to eatch other. Segment with id: {routeSegment.Id} was expected to be adjacent to segment with id: {prevSegment.Id} in the route network graph - but was not."));
                 }
 
                 routeSegmentPosition++;
@@ -160,7 +160,7 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
                 var routeNetworkElement = _routeNetworkRepository.NetworkState.GetRouteNetworkElement(networkElementId, versionId);
 
                 if (routeNetworkElement == null)
-                    return Result.Fail<List<IRouteNetworkElement>>($"Cannot find any route network element with id: {networkElementId}");
+                    return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_WALK_CANNOT_FIND_ROUTE_NETWORK_ELEMENT, $"Cannot find any route network element with id: {networkElementId}"));
                 else
                     result.Add(routeNetworkElement);
             }

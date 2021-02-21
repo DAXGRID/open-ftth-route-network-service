@@ -7,6 +7,7 @@ using System;
 using Xunit;
 using FluentAssertions;
 using FluentResults;
+using System.Linq;
 
 namespace OpenFTTH.RouteNetworkService.Tests.Interest
 {
@@ -136,7 +137,7 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
 
             // Assert
             registerWalkOfInterestCommandResult.IsFailed.Should().BeTrue();
-
+            registerWalkOfInterestCommandResult.Errors.OfType<RegisterWalkOfInterestError>().Should().Contain(e => e.Code == RegisterWalkOfInterestErrorCodes.INVALID_WALK_SHOULD_CONTAIN_ROUTE_SEGMENT_IDS_ONLY);
         }
 
         [Fact]
@@ -154,6 +155,23 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
 
             // Assert
             registerWalkOfInterestCommandResult.IsFailed.Should().BeTrue();
+            registerWalkOfInterestCommandResult.Errors.OfType<RegisterWalkOfInterestError>().Should().Contain(e => e.Code == RegisterWalkOfInterestErrorCodes.INVALID_WALK_SEGMENTS_ARE_NOT_ADJACENT);
+        }
+
+        [Fact]
+        public async void CreateInvalidWalkOfInterestWithNonExistingRouteNetworkElement_ShouldReturnFaliour()
+        {
+            var interestId = Guid.NewGuid();
+
+            var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S1, TestRouteNetwork.S2, Guid.NewGuid() };
+
+            // Act
+            var registerWalkOfInterestCommand = new RegisterWalkOfInterest(interestId, walk);
+            Result registerWalkOfInterestCommandResult = await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result>(registerWalkOfInterestCommand);
+
+            // Assert
+            registerWalkOfInterestCommandResult.IsFailed.Should().BeTrue();
+            registerWalkOfInterestCommandResult.Errors.OfType<RegisterWalkOfInterestError>().Should().Contain(e => e.Code == RegisterWalkOfInterestErrorCodes.INVALID_WALK_CANNOT_FIND_ROUTE_NETWORK_ELEMENT);
         }
     }
 }

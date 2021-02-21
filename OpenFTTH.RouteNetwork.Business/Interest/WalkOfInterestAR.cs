@@ -19,13 +19,13 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
         public Result RegisterWalkOfInterest(RouteNetworkInterest interest, InterestsProjection interestsProjection, WalkValidator walkValidator)
         {
             if (interest.Kind != RouteNetworkInterestKindEnum.WalkOfInterest)
-                return Result.Fail(new InterestValidationError(InterestValidationErrorCodes.INTEREST_INVALID_WALK, "Interest kind must be WalkOfInterest"));
+                return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_INTEREST_KIND_MUST_BE_WALK_OF_INTEREST, "Interest kind must be WalkOfInterest"));
 
             if (interest.Id == Guid.Empty)
-                return Result.Fail($"{InterestValidationErrorCodes.INTEREST_INVALID_ID}: Interest id cannot be empty");
+                return Result.Fail($"{RegisterWalkOfInterestErrorCodes.INVALID_INTEREST_ID_CANNOT_BE_EMPTY}: Interest id cannot be empty");
 
             if (interestsProjection.GetInterest(interest.Id).IsSuccess)
-                return Result.Fail($"{InterestValidationErrorCodes.INTEREST_ALREADY_EXISTS}: An interest with id: {interest.Id} already exists");
+                return Result.Fail($"{RegisterWalkOfInterestErrorCodes.INVALID_INTEREST_ALREADY_EXISTS}: An interest with id: {interest.Id} already exists");
 
             var walkValidationResult = walkValidator.ValidateWalk(interest.RouteNetworkElementRefs);
 
