@@ -11,12 +11,14 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
 {
     public class WalkOfInterestAR : AggregateBase
     {
+        private RouteNetworkInterest? _walkOfInterest;
+
         public WalkOfInterestAR()
         {
             Register<WalkOfInterestRegistered>(Apply);
         }
 
-        public Result RegisterWalkOfInterest(RouteNetworkInterest interest, InterestsProjection interestsProjection, WalkValidator walkValidator)
+        public Result<RouteNetworkInterest> RegisterWalkOfInterest(RouteNetworkInterest interest, InterestsProjection interestsProjection, WalkValidator walkValidator)
         {
             if (interest.Kind != RouteNetworkInterestKindEnum.WalkOfInterest)
                 return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_INTEREST_KIND_MUST_BE_WALK_OF_INTEREST, "Interest kind must be WalkOfInterest"));
@@ -36,12 +38,16 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
 
             RaiseEvent(new WalkOfInterestRegistered(interestWithValidatedWalk));
 
-            return Result.Ok();
+            if (_walkOfInterest == null)
+                throw new ApplicationException("Unexpected aggreagate state. Walk of interest must be non-null after WalkOfInterestRegistered has been raised.");
+
+            return Result.Ok<RouteNetworkInterest>(_walkOfInterest);
         }
 
         private void Apply(WalkOfInterestRegistered obj)
         {
             Id = obj.Interest.Id;
+            _walkOfInterest = obj.Interest;
         }
     }
 }

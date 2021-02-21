@@ -31,7 +31,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S1 };
             var createInterestCommand = new RegisterWalkOfInterest(interestId, walk);
             
-            await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result>(createInterestCommand);
+            await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>>(createInterestCommand);
 
             // Act: Query CO_1, S1, HH_1 and HH_2
             var routeNetworkQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1, TestRouteNetwork.S1, TestRouteNetwork.HH_1, TestRouteNetwork.HH_2 })
@@ -76,7 +76,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S1 };
             var createInterestCommand = new RegisterWalkOfInterest(interestId, walk);
 
-            await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result>(createInterestCommand);
+            await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>>(createInterestCommand);
 
             // Act: Query CO_1, S1, HH_1 and HH_2
             var routeNetworkQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1, TestRouteNetwork.S1, TestRouteNetwork.HH_1, TestRouteNetwork.HH_2 })
@@ -115,7 +115,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S1 };
             var createInterestCommand = new RegisterWalkOfInterest(interestId, walk);
 
-            await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result>(createInterestCommand);
+            await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>>(createInterestCommand);
 
             // Act: Query CO_1, S1, HH_1 and HH_2
             var routeNetworkQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1, TestRouteNetwork.S1, TestRouteNetwork.HH_1, TestRouteNetwork.HH_2 })
@@ -145,11 +145,11 @@ namespace OpenFTTH.RouteNetwork.Tests
             // Create two overlapping walk of interests that we can try to query on
             var interest1Id = Guid.NewGuid();
             var walk1 = new RouteNetworkElementIdList() { TestRouteNetwork.S1 };
-            await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result>(new RegisterWalkOfInterest(interest1Id, walk1));
+            await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>>(new RegisterWalkOfInterest(interest1Id, walk1));
 
             var interest2Id = Guid.NewGuid();
             var walk2 = new RouteNetworkElementIdList() { TestRouteNetwork.S2 };
-            await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result>(new RegisterWalkOfInterest(interest2Id, walk2));
+            await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>>(new RegisterWalkOfInterest(interest2Id, walk2));
 
 
             // Act

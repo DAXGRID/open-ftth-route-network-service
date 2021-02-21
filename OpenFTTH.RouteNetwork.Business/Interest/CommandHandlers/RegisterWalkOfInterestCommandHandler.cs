@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace OpenFTTH.RouteNetwork.Business.MutationHandling
 {
-    public class RegisterWalkOfInterestCommandHandler : ICommandHandler<RegisterWalkOfInterest, Result>
+    public class RegisterWalkOfInterestCommandHandler : ICommandHandler<RegisterWalkOfInterest, Result<RouteNetworkInterest>>
     {
         private readonly IEventStore _eventStore;
         private readonly IRouteNetworkRepository _routeNetworkRepository;
@@ -21,7 +21,7 @@ namespace OpenFTTH.RouteNetwork.Business.MutationHandling
             _routeNetworkRepository = routeNodeRepository;
         }
 
-        public Task<Result> HandleAsync(RegisterWalkOfInterest command)
+        public Task<Result<RouteNetworkInterest>> HandleAsync(RegisterWalkOfInterest command)
         {
             var interestProjection = _eventStore.Projections.Get<InterestsProjection>();
 

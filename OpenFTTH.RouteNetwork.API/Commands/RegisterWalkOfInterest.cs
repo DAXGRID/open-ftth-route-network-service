@@ -13,7 +13,7 @@ namespace OpenFTTH.RouteNetwork.API.Commands
     /// You can specify the walk by providing route node ids, route segment ids or both.
     /// The result will always contain all the route network element ids.
     /// </summary>
-    public class RegisterWalkOfInterest : ICommand<Result>
+    public class RegisterWalkOfInterest : ICommand<Result<RouteNetworkInterest>>
     {
         public static string RequestName => typeof(RegisterWalkOfInterest).Name;
         public Guid InterestId { get; }
