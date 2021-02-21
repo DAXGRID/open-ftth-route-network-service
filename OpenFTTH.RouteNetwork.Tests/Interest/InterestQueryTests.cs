@@ -7,6 +7,7 @@ using System;
 using Xunit;
 using FluentAssertions;
 using FluentResults;
+using System.Linq;
 
 namespace OpenFTTH.RouteNetwork.Tests
 {
@@ -183,6 +184,22 @@ namespace OpenFTTH.RouteNetwork.Tests
 
             queryResult.Value.RouteNetworkElements[TestRouteNetwork.HH_2].InterestRelations.Should().Contain(i => i.RefId == interest2Id && i.RelationKind == RouteNetworkInterestRelationKindEnum.End);
             queryResult.Value.RouteNetworkElements[TestRouteNetwork.HH_2].InterestRelations.Should().NotContain(i => i.RefId == interest1Id);
+        }
+
+        [Fact]
+        public async void QueryByNonExistingInterestId_ShouldFail()
+        {
+            // Act
+            var routeNetworkQuery = new GetRouteNetworkDetails(new InterestIdList() { Guid.NewGuid() })
+            {
+                RelatedInterestFilter = RelatedInterestFilterOptions.ReferencesFromRouteElementAndInterestObjects
+            };
+
+            Result<GetRouteNetworkDetailsResult> queryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkQuery);
+
+            // Assert
+            queryResult.IsFailed.Should().BeTrue();
+            queryResult.Errors.OfType<GetRouteNetworkDetailsError>().Should().Contain(e => e.Code == GetRouteNetworkDetailsErrorCodes.INVALID_QUERY_ARGUMENT_ERROR_LOOKING_UP_SPECIFIED_INTEREST_BY_ID);
         }
     }
 }

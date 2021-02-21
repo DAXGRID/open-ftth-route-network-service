@@ -1,5 +1,6 @@
 ﻿using FluentResults;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using OpenFTTH.CQRS;
 using OpenFTTH.EventSourcing;
 using OpenFTTH.RouteNetwork.API.Model;
@@ -48,11 +49,11 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
             else
             {
                 if (query.InterestIdsToQuery.Count > 0 && query.RouteNetworkElementIdsToQuery.Count > 0)
-                    return Task.FromResult(Result.Fail<GetRouteNetworkDetailsResult>("Invalid query. Cannot query by route network element ids and interest ids at the same time."));
+                    return Task.FromResult(Result.Fail<GetRouteNetworkDetailsResult>(new GetRouteNetworkDetailsError(GetRouteNetworkDetailsErrorCodes.INVALID_QUERY_ARGUMENT_CANT_QUERY_BY_INTEREST_AND_ROUTE_NETWORK_ELEMENT_AT_THE_SAME_TIME, "Invalid query. Cannot query by route network element ids and interest ids at the same time.")));
                 else if (query.InterestIdsToQuery.Count == 0 && query.RouteNetworkElementIdsToQuery.Count == 0)
-                    return Task.FromResult(Result.Fail<GetRouteNetworkDetailsResult>("Invalid query. Neither route network element ids or interest ids specified. Therefore nothing to query."));
+                    return Task.FromResult(Result.Fail<GetRouteNetworkDetailsResult>(new GetRouteNetworkDetailsError(GetRouteNetworkDetailsErrorCodes.INVALID_QUERY_ARGUMENT_NO_INTEREST_OR_ROUTE_NETWORK_IDS_SPECIFIED, "Invalid query. Neither route network element ids or interest ids specified. Therefore nothing to query.")));
                 else
-                    return Task.FromResult(Result.Fail<GetRouteNetworkDetailsResult>("Invalid query."));
+                    throw new ApplicationException("Unexpected combination of query arguments in GetRouteNetworkDetailsResult:\r\n" + JsonConvert.SerializeObject(query));
             }
         }
 
@@ -69,8 +70,12 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
             {
                 var interestQueryResult = interestsProjection.GetInterest(interestId);
 
+                // Here we return a error result, because we're dealing with invalid interest ids provided by the client
                 if (interestQueryResult.IsFailed)
-                    return Task.FromResult(Result.Fail<GetRouteNetworkDetailsResult>(interestQueryResult.Errors.First()));
+                    return Task.FromResult(
+                        Result.Fail<GetRouteNetworkDetailsResult>(new GetRouteNetworkDetailsError(GetRouteNetworkDetailsErrorCodes.INVALID_QUERY_ARGUMENT_ERROR_LOOKING_UP_SPECIFIED_INTEREST_BY_ID, $"Error looking up interest by id: {interestId}")).
+                        WithError(interestQueryResult.Errors.First())
+                    );
 
                 interestsToReturn.Add(interestQueryResult.Value);
 
@@ -79,8 +84,9 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
 
             var getRouteNetworkElementsResult = _routeNodeRepository.GetRouteElements(routeElementsToQuery);
 
+            // Here we create an exception, because this situation should not be allowed by the system
             if (getRouteNetworkElementsResult.IsFailed)
-                return Task.FromResult(Result.Fail<GetRouteNetworkDetailsResult>(getRouteNetworkElementsResult.Errors.First()));
+                throw new ApplicationException($"Unexpected error querying route elements referenced by interests. All the interest exists and therefore the route network elements must also exists. Validation that route elements having interest cannot be deleted seems not to be working! Initial query:\r\n" + JsonConvert.SerializeObject(query));
 
             var mappedRouteNetworkElements = MapRouteElementDomainObjectsToQueryObjects(query, getRouteNetworkElementsResult.Value);
 
@@ -101,8 +107,12 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
         {
             var getRouteNetworkElementsResult = _routeNodeRepository.GetRouteElements(query.RouteNetworkElementIdsToQuery);
 
+            // Here we return a error result, because we're dealing with invalid route network ids provided by the client
             if (getRouteNetworkElementsResult.IsFailed)
-                return Task.FromResult(Result.Fail<GetRouteNetworkDetailsResult>(getRouteNetworkElementsResult.Errors.First()));
+                    return Task.FromResult(
+                        Result.Fail<GetRouteNetworkDetailsResult>(new GetRouteNetworkDetailsError(GetRouteNetworkDetailsErrorCodes.INVALID_QUERY_ARGUMENT_ERROR_LOOKING_UP_SPECIFIED_ROUTE_NETWORK_ELEMENT_BY_ID, $"Error looking up route network elements: " + JsonConvert.SerializeObject(query))).
+                        WithError(getRouteNetworkElementsResult.Errors.First())
+                    );
 
             var routeNetworkElementsToReturn = MapRouteElementDomainObjectsToQueryObjects(query, getRouteNetworkElementsResult.Value);
 
@@ -140,12 +150,6 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
                         throw new ApplicationException($"Unexpected error querying interests related to route network element with id: {routeElement.Id} {interestRelationsResult.Errors.First()}");
 
                     routeElement.InterestRelations = MapInterestRelationDomainObjectsToQueryObjects(interestRelationsResult.Value);
-
-                    // Add the interest object itself as well if the filter says so
-                    if (query.RelatedInterestFilter == RelatedInterestFilterOptions.ReferencesFromRouteElementAndInterestObjects)
-                    {
-                        
-                    }
                 }
             }
         }

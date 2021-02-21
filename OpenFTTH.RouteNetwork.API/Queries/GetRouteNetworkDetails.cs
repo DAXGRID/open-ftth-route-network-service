@@ -63,9 +63,6 @@ namespace OpenFTTH.RouteNetwork.API.Queries
             // Add empty list to InterestIdsToQuery, because the client want to query by route network element ids
             InterestIdsToQuery = new InterestIdList(); 
 
-            if (routeNetworkElementIds == null || routeNetworkElementIds.Count == 0)
-                throw new ArgumentException("At least one route node or segment id must be specified using the routeNetworkElementIds parameter");
-
             this.RouteNetworkElementIdsToQuery = routeNetworkElementIds;
         }
 

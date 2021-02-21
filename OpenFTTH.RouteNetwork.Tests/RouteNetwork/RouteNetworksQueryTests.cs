@@ -1,4 +1,5 @@
-﻿using FluentResults;
+﻿using FluentAssertions;
+using FluentResults;
 using OpenFTTH.CQRS;
 using OpenFTTH.Events.Core.Infos;
 using OpenFTTH.Events.RouteNetwork.Infos;
@@ -6,16 +7,17 @@ using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.RouteNetwork.Tests.Fixtures;
 using System;
+using System.Linq;
 using Xunit;
 
 namespace OpenFTTH.RouteNetwork.Tests
 {
-    public class BasicQueryTests : IClassFixture<TestRouteNetwork>
+    public class RouteNetworksQueryTests : IClassFixture<TestRouteNetwork>
     {
         private ICommandDispatcher _commandDispatcher;
         private IQueryDispatcher _queryDispatcher;
 
-        public BasicQueryTests(ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher)
+        public RouteNetworksQueryTests(ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher)
         {
             _commandDispatcher = commandDispatcher;
             _queryDispatcher = queryDispatcher;
@@ -339,6 +341,48 @@ namespace OpenFTTH.RouteNetwork.Tests
             Assert.Null(nodeFromQueryResult.NamingInfo);
             Assert.Null(nodeFromQueryResult.MappingInfo);
             Assert.Null(nodeFromQueryResult.LifecycleInfo);
+        }
+
+        [Fact]
+        public async void QueryNonExistingRouteNetworkElement_ShouldFail()
+        {
+            // Setup
+            var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { Guid.NewGuid() })
+            {
+                RouteNetworkElementFilter = new RouteNetworkElementFilterOptions()
+                {
+                    IncludeSafetyInfo = true
+                },
+                RelatedInterestFilter = RelatedInterestFilterOptions.None
+            };
+
+            // Act
+            var queryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNodeQuery);
+
+            // Assert
+            queryResult.IsFailed.Should().BeTrue();
+            queryResult.Errors.OfType<GetRouteNetworkDetailsError>().Should().Contain(e => e.Code == GetRouteNetworkDetailsErrorCodes.INVALID_QUERY_ARGUMENT_ERROR_LOOKING_UP_SPECIFIED_ROUTE_NETWORK_ELEMENT_BY_ID);
+        }
+
+        [Fact]
+        public async void QueryWithNoInterestOrRouteElementIds_ShouldFail()
+        {
+            // Setup
+            var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() {})
+            {
+                RouteNetworkElementFilter = new RouteNetworkElementFilterOptions()
+                {
+                    IncludeSafetyInfo = true
+                },
+                RelatedInterestFilter = RelatedInterestFilterOptions.None
+            };
+
+            // Act
+            var queryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNodeQuery);
+
+            // Assert
+            queryResult.IsFailed.Should().BeTrue();
+            queryResult.Errors.OfType<GetRouteNetworkDetailsError>().Should().Contain(e => e.Code == GetRouteNetworkDetailsErrorCodes.INVALID_QUERY_ARGUMENT_NO_INTEREST_OR_ROUTE_NETWORK_IDS_SPECIFIED);
         }
     }
 }

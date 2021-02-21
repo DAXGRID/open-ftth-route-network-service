@@ -46,7 +46,5 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.Network
             return Result.Ok<List<IRouteNetworkElement>>(routeNetworkElementFetched);
         }
 
-    
-
     }
 }
