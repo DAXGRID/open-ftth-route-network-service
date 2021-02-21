@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+﻿using FluentResults;
 using Microsoft.Extensions.Logging;
 using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.Service.Business.DomainModel.RouteNetwork;
@@ -37,13 +37,13 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.Network
 
                 if (routeNetworkElement == null)
                 {
-                    return Result.Failure<List<IRouteNetworkElement>>($"Cannot find any route network element with id: {routeElementId}");
+                    return Result.Fail<List<IRouteNetworkElement>>($"Cannot find any route network element with id: {routeElementId}");
                 }
 
                 routeNetworkElementFetched.Add(routeNetworkElement as IRouteNetworkElement);
             }
 
-            return Result.Success<List<IRouteNetworkElement>>(routeNetworkElementFetched);
+            return Result.Ok<List<IRouteNetworkElement>>(routeNetworkElementFetched);
         }
 
     

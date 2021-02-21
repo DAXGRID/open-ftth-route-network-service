@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CSharpFunctionalExtensions" Version="2.13.2" />
+    <PackageReference Include="FluentResults" Version="2.3.0" />
     <PackageReference Include="OpenFTTH.Core" Version="1.0.0" />
     <PackageReference Include="OpenFTTH.CQRS" Version="1.0.2" />
     <PackageReference Include="OpenFTTH.Events" Version="2.2.0" />

@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+﻿using FluentResults;
 using Microsoft.Extensions.Logging;
 using OpenFTTH.CQRS;
 using OpenFTTH.EventSourcing;
@@ -7,7 +7,6 @@ using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.RouteNetwork.Business.Interest.Projections;
 using OpenFTTH.RouteNetwork.Business.StateHandling;
 using OpenFTTH.RouteNetwork.Service.Business.DomainModel.RouteNetwork;
-using OpenFTTH.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,11 +48,11 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
             else
             {
                 if (query.InterestIdsToQuery.Count > 0 && query.RouteNetworkElementIdsToQuery.Count > 0)
-                    return Task.FromResult(Result.Failure<GetRouteNetworkDetailsResult>("Invalid query. Cannot query by route network element ids and interest ids at the same time."));
+                    return Task.FromResult(Result.Fail<GetRouteNetworkDetailsResult>("Invalid query. Cannot query by route network element ids and interest ids at the same time."));
                 else if (query.InterestIdsToQuery.Count == 0 && query.RouteNetworkElementIdsToQuery.Count == 0)
-                    return Task.FromResult(Result.Failure<GetRouteNetworkDetailsResult>("Invalid query. Neither route network element ids or interest ids specified. Therefore nothing to query."));
+                    return Task.FromResult(Result.Fail<GetRouteNetworkDetailsResult>("Invalid query. Neither route network element ids or interest ids specified. Therefore nothing to query."));
                 else
-                    return Task.FromResult(Result.Failure<GetRouteNetworkDetailsResult>("Invalid query."));
+                    return Task.FromResult(Result.Fail<GetRouteNetworkDetailsResult>("Invalid query."));
             }
         }
 
@@ -70,8 +69,8 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
             {
                 var interestQueryResult = interestsProjection.GetInterest(interestId);
 
-                if (interestQueryResult.IsFailure)
-                    return Task.FromResult(Result.Failure<GetRouteNetworkDetailsResult>(interestQueryResult.Error));
+                if (interestQueryResult.IsFailed)
+                    return Task.FromResult(Result.Fail<GetRouteNetworkDetailsResult>(interestQueryResult.Errors.First()));
 
                 interestsToReturn.Add(interestQueryResult.Value);
 
@@ -80,8 +79,8 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
 
             var getRouteNetworkElementsResult = _routeNodeRepository.GetRouteElements(routeElementsToQuery);
 
-            if (getRouteNetworkElementsResult.IsFailure)
-                return Task.FromResult(Result.Failure<GetRouteNetworkDetailsResult>(getRouteNetworkElementsResult.Error));
+            if (getRouteNetworkElementsResult.IsFailed)
+                return Task.FromResult(Result.Fail<GetRouteNetworkDetailsResult>(getRouteNetworkElementsResult.Errors.First()));
 
             var mappedRouteNetworkElements = MapRouteElementDomainObjectsToQueryObjects(query, getRouteNetworkElementsResult.Value);
 
@@ -91,7 +90,7 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
             AddInterestReferencesToRouteNetworkElements(query, queryResult);
 
             return Task.FromResult(
-                Result.Success<GetRouteNetworkDetailsResult>(
+                Result.Ok<GetRouteNetworkDetailsResult>(
                     queryResult
                 )
             );
@@ -102,8 +101,8 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
         {
             var getRouteNetworkElementsResult = _routeNodeRepository.GetRouteElements(query.RouteNetworkElementIdsToQuery);
 
-            if (getRouteNetworkElementsResult.IsFailure)
-                return Task.FromResult(Result.Failure<GetRouteNetworkDetailsResult>(getRouteNetworkElementsResult.Error));
+            if (getRouteNetworkElementsResult.IsFailed)
+                return Task.FromResult(Result.Fail<GetRouteNetworkDetailsResult>(getRouteNetworkElementsResult.Errors.First()));
 
             var routeNetworkElementsToReturn = MapRouteElementDomainObjectsToQueryObjects(query, getRouteNetworkElementsResult.Value);
 
@@ -120,7 +119,7 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
             AddInterestReferencesToRouteNetworkElements(query, queryResult);
 
             return Task.FromResult(
-                Result.Success<GetRouteNetworkDetailsResult>(
+                Result.Ok<GetRouteNetworkDetailsResult>(
                     queryResult
                 )
             );
@@ -137,8 +136,8 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
                     // Add relations to the route network element
                     var interestRelationsResult = interestsProjection.GetInterestsByRouteNetworkElementId(routeElement.Id);
 
-                    if (interestRelationsResult.IsFailure)
-                        throw new ApplicationException($"Unexpected error querying interests related to route network element with id: {routeElement.Id} {interestRelationsResult.Error}");
+                    if (interestRelationsResult.IsFailed)
+                        throw new ApplicationException($"Unexpected error querying interests related to route network element with id: {routeElement.Id} {interestRelationsResult.Errors.First()}");
 
                     routeElement.InterestRelations = MapInterestRelationDomainObjectsToQueryObjects(interestRelationsResult.Value);
 
@@ -162,8 +161,8 @@ namespace OpenFTTH.RouteNetworkService.QueryHandlers
                 // Add relations to the route network element
                 var interestRelationsResult = interestsProjection.GetInterestsByRouteNetworkElementId(routeElementId);
 
-                if (interestRelationsResult.IsFailure)
-                    throw new ApplicationException($"Unexpected error querying interests related to route network element with id: {routeElementId} {interestRelationsResult.Error}");
+                if (interestRelationsResult.IsFailed)
+                    throw new ApplicationException($"Unexpected error querying interests related to route network element with id: {routeElementId} {interestRelationsResult.Errors.First()}");
 
                 foreach (var interestRelation in interestRelationsResult.Value)
                 {

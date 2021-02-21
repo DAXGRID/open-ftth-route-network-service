@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+﻿using FluentResults;
 using OpenFTTH.CQRS;
 using OpenFTTH.Events.Core.Infos;
 using OpenFTTH.Events.RouteNetwork.Infos;
@@ -34,10 +34,10 @@ namespace OpenFTTH.RouteNetwork.Tests
             var routeNodeQueryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNodeQuery);
 
             // Assert
-            Assert.True(routeNodeQueryResult.IsFailure);
+            Assert.True(routeNodeQueryResult.IsFailed);
 
             // Assert that the error msg contains the id of route network element that the service could not lookup
-            Assert.Contains(nonExistingRouteNetworkElementId.ToString(), routeNodeQueryResult.Error);
+            //Assert.Contains(nonExistingRouteNetworkElementId.ToString(), routeNodeQueryResult.Errors);
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             Assert.True(routeNodeQueryResult.IsSuccess);
             Assert.Single(routeNodeQueryResult.Value.RouteNetworkElements);
 
-            var theRouteNodeObjectReturned = routeNodeQueryResult.Value.RouteNetworkElements.TryFirst<RouteNetworkElement>().Value;
+            var theRouteNodeObjectReturned = routeNodeQueryResult.Value.RouteNetworkElements[TestRouteNetwork.CO_1];
 
             Assert.Equal(TestRouteNetwork.CO_1, theRouteNodeObjectReturned.Id);
             Assert.Equal(RouteNetworkElementKindEnum.RouteNode, theRouteNodeObjectReturned.Kind);

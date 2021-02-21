@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+﻿using FluentResults;
 using OpenFTTH.EventSourcing;
 using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.Business.Interest.Events;
@@ -23,11 +23,11 @@ namespace OpenFTTH.RouteNetwork.Business.Interest.Projections
         {
             if (_interestById.TryGetValue(interestId, out RouteNetworkInterest? interest))
             {
-                return Result.Success<RouteNetworkInterest>(interest);
+                return Result.Ok<RouteNetworkInterest>(interest);
             }
             else
             {
-                return Result.Failure<RouteNetworkInterest>($"No interest with id: {interestId} found");
+                return Result.Fail<RouteNetworkInterest>($"No interest with id: {interestId} found");
             }
         }
 
@@ -42,7 +42,7 @@ namespace OpenFTTH.RouteNetwork.Business.Interest.Projections
                 result.Add((_interestById[interestRelation.Item1], interestRelation.Item2));
             }
 
-            return Result.Success<List<(RouteNetworkInterest, RouteNetworkInterestRelationKindEnum)>>(result);
+            return Result.Ok<List<(RouteNetworkInterest, RouteNetworkInterestRelationKindEnum)>>(result);
         }
 
 

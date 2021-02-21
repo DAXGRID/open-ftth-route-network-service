@@ -1,5 +1,4 @@
-﻿using CSharpFunctionalExtensions;
-using OpenFTTH.CQRS;
+﻿using OpenFTTH.CQRS;
 using OpenFTTH.RouteNetwork.API.Commands;
 using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.API.Queries;
@@ -7,6 +6,7 @@ using OpenFTTH.RouteNetwork.Tests.Fixtures;
 using System;
 using Xunit;
 using FluentAssertions;
+using FluentResults;
 
 namespace OpenFTTH.RouteNetworkService.Tests.Interest
 {
@@ -135,7 +135,7 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
             Result registerWalkOfInterestCommandResult = await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result>(registerWalkOfInterestCommand);
 
             // Assert
-            registerWalkOfInterestCommandResult.IsFailure.Should().BeTrue();
+            registerWalkOfInterestCommandResult.IsFailed.Should().BeTrue();
 
         }
 
@@ -153,7 +153,7 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
             Result registerWalkOfInterestCommandResult = await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result>(registerWalkOfInterestCommand);
 
             // Assert
-            registerWalkOfInterestCommandResult.IsFailure.Should().BeTrue();
+            registerWalkOfInterestCommandResult.IsFailed.Should().BeTrue();
         }
     }
 }
