@@ -9,13 +9,26 @@ using System.Collections.Generic;
 
 namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
 {
-    public class RouteNetworkEventHandler
+    public class RouteNetworkEventHandler : IObserver<RouteNetworkEditOperationOccuredEvent>
     {
         private readonly ILogger<RouteNetworkEventHandler> _logger;
 
         private IRouteNetworkState _networkState;
 
         private HashSet<Guid> _alreadyProcessed = new HashSet<Guid>();
+
+        public void OnCompleted()
+        {
+        }
+
+        public void OnError(Exception error)
+        {
+        }
+
+        public void OnNext(RouteNetworkEditOperationOccuredEvent @event)
+        {
+            HandleEvent(@event);
+        }
 
         public RouteNetworkEventHandler(ILoggerFactory loggerFactory, IRouteNetworkState networkState)
         {
