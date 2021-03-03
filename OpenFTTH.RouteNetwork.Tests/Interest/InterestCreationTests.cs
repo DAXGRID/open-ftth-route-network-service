@@ -94,6 +94,36 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
         }
 
         [Fact]
+        public async void CreateValidNodeOfInterest_ShouldReturnSuccess()
+        {
+            var interestId = Guid.NewGuid();
+            var routeNodeId = TestRouteNetwork.CC_1;
+
+            // Act
+            var registerNodeOfInterestCommand = new RegisterNodeOfInterest(interestId, routeNodeId);
+            var registerNodeOfInterestCommandResult = await _commandDispatcher.HandleAsync<RegisterNodeOfInterest, Result<RouteNetworkInterest>>(registerNodeOfInterestCommand);
+
+            var routeNetworkQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CC_1 })
+            {
+                RelatedInterestFilter = RelatedInterestFilterOptions.ReferencesFromRouteElementAndInterestObjects
+            };
+
+            Result<GetRouteNetworkDetailsResult> routeNetworkQueryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkQuery);
+
+            // Assert command result
+            registerNodeOfInterestCommandResult.IsSuccess.Should().BeTrue();
+            registerNodeOfInterestCommandResult.Value.Kind.Should().Be(RouteNetworkInterestKindEnum.NodeOfInterest);
+            registerNodeOfInterestCommandResult.Value.RouteNetworkElementRefs.Count.Should().Be(1);
+            registerNodeOfInterestCommandResult.Value.RouteNetworkElementRefs.Should().Contain(TestRouteNetwork.CC_1);
+
+            // Assert query result
+            routeNetworkQueryResult.IsSuccess.Should().BeTrue();
+            routeNetworkQueryResult.Value.Interests[interestId].RouteNetworkElementRefs.Count.Should().Be(1);
+            routeNetworkQueryResult.Value.Interests[interestId].RouteNetworkElementRefs.Should().Contain(TestRouteNetwork.CC_1);
+            routeNetworkQueryResult.Value.RouteNetworkElements[routeNodeId].InterestRelations.Should().Contain(i => i.RefId == interestId && i.RelationKind == RouteNetworkInterestRelationKindEnum.InsideNode);
+        }
+
+        [Fact]
         public async void CreateValidWalkOfInterestOverlappingSegments_ShouldReturnSuccess()
         {
             // Route network subset used in this test:

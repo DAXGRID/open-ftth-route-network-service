@@ -52,7 +52,11 @@ namespace OpenFTTH.RouteNetwork.Business.Interest.Projections
             {
                 case (WalkOfInterestRegistered @event):
                     _interestById[@event.Interest.Id] = @event.Interest;
+                    _interestIndex.AddOrUpdate(@event.Interest);
+                    break;
 
+                case (NodeOfInterestRegistered @event):
+                    _interestById[@event.Interest.Id] = @event.Interest;
                     _interestIndex.AddOrUpdate(@event.Interest);
                     break;
             }

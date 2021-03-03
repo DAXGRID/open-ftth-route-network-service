@@ -10,28 +10,26 @@ using System.Threading.Tasks;
 
 namespace OpenFTTH.RouteNetwork.Business.MutationHandling
 {
-    public class RegisterWalkOfInterestCommandHandler : ICommandHandler<RegisterWalkOfInterest, Result<RouteNetworkInterest>>
+    public class RegisterNodeOfInterestCommandHandler : ICommandHandler<RegisterNodeOfInterest, Result<RouteNetworkInterest>>
     {
         private readonly IEventStore _eventStore;
         private readonly IRouteNetworkRepository _routeNetworkRepository;
 
-        public RegisterWalkOfInterestCommandHandler(IEventStore eventStore, IRouteNetworkRepository routeNodeRepository)
+        public RegisterNodeOfInterestCommandHandler(IEventStore eventStore, IRouteNetworkRepository routeNodeRepository)
         {
             _eventStore = eventStore;
             _routeNetworkRepository = routeNodeRepository;
         }
 
-        public Task<Result<RouteNetworkInterest>> HandleAsync(RegisterWalkOfInterest command)
+        public Task<Result<RouteNetworkInterest>> HandleAsync(RegisterNodeOfInterest command)
         {
             var interestProjection = _eventStore.Projections.Get<InterestsProjection>();
 
-            var walkOfInterest = new RouteNetworkInterest(command.InterestId, RouteNetworkInterestKindEnum.WalkOfInterest, command.WalkIds);
-
-            var walkValidator = new WalkValidator(_routeNetworkRepository);
+            var nodeOfInterest = new RouteNetworkInterest(command.InterestId, RouteNetworkInterestKindEnum.NodeOfInterest, new RouteNetworkElementIdList() { command.RouteNetworkElementId });
 
             var interestAR = new InterestAR();
 
-            var registerInterestResult = interestAR.RegisterWalkOfInterest(walkOfInterest, interestProjection, walkValidator);
+            var registerInterestResult = interestAR.RegisterNodeOfInterest(nodeOfInterest, interestProjection);
 
             if (registerInterestResult.IsSuccess)
             {
