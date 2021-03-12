@@ -12,11 +12,13 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
     public class InterestAR : AggregateBase
     {
         private RouteNetworkInterest? _interest;
+        private bool _unregistered = false;
 
         public InterestAR()
         {
             Register<WalkOfInterestRegistered>(Apply);
             Register<NodeOfInterestRegistered>(Apply);
+            Register<InterestUnregistered>(Apply);
         }
 
         public Result<RouteNetworkInterest> RegisterWalkOfInterest(RouteNetworkInterest interest, InterestsProjection interestsProjection, WalkValidator walkValidator)
@@ -45,6 +47,16 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
             return Result.Ok<RouteNetworkInterest>(_interest);
         }
 
+        public Result UnregisterInterest(InterestsProjection interestsProjection, Guid interestId)
+        {
+            if (!interestsProjection.GetInterest(interestId).IsSuccess)
+                return Result.Fail($"Cannot find interest with id: {interestId}");
+
+            RaiseEvent(new InterestUnregistered(interestId));
+
+            return Result.Ok();
+        }
+
         public Result<RouteNetworkInterest> RegisterNodeOfInterest(RouteNetworkInterest interest, InterestsProjection interestsProjection)
         {
             if (interest.Kind != RouteNetworkInterestKindEnum.NodeOfInterest)
@@ -56,7 +68,7 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
             if (interestsProjection.GetInterest(interest.Id).IsSuccess)
                 return Result.Fail(new RegisterNodeOfInterestError(RegisterNodeOfInterestErrorCodes.INVALID_INTEREST_ALREADY_EXISTS, $"{RegisterNodeOfInterestErrorCodes.INVALID_INTEREST_ALREADY_EXISTS}: An interest with id: {interest.Id} already exists"));
 
-            RaiseEvent(new WalkOfInterestRegistered(interest));
+            RaiseEvent(new NodeOfInterestRegistered(interest));
 
             if (_interest == null)
                 throw new ApplicationException("Unexpected aggreagate state. Interest must be non-null after NodeOfInterestRegistered has been raised.");
@@ -74,6 +86,11 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
         {
             Id = obj.Interest.Id;
             _interest = obj.Interest;
+        }
+
+        private void Apply(InterestUnregistered obj)
+        {
+            _unregistered = true;
         }
     }
 }

@@ -17,6 +17,8 @@ namespace OpenFTTH.RouteNetwork.Business.Interest.Projections
         public InterestsProjection()
         {
             ProjectEvent<WalkOfInterestRegistered>(Project);
+            ProjectEvent<NodeOfInterestRegistered>(Project);
+            ProjectEvent<InterestUnregistered>(Project);
         }
 
         public Result<RouteNetworkInterest> GetInterest(Guid interestId)
@@ -58,6 +60,11 @@ namespace OpenFTTH.RouteNetwork.Business.Interest.Projections
                 case (NodeOfInterestRegistered @event):
                     _interestById[@event.Interest.Id] = @event.Interest;
                     _interestIndex.AddOrUpdate(@event.Interest);
+                    break;
+
+                case (InterestUnregistered @event):
+                    _interestById.TryRemove(@event.InterestId, out _);
+                    _interestIndex.Remove(@event.InterestId);
                     break;
             }
         }
