@@ -8,11 +8,11 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.Model
     public class RouteNode : GraphNode, IRouteNode
     {
         public string Coordinates { get; }
-        public RouteNodeInfo? RouteNodeInfo { get; init; }
-        public NamingInfo? NamingInfo { get; init; }
-        public LifecycleInfo? LifecycleInfo { get; init; }
-        public SafetyInfo? SafetyInfo { get; init; }
-        public MappingInfo? MappingInfo { get; init; }
+        public RouteNodeInfo? RouteNodeInfo { get; set; }
+        public NamingInfo? NamingInfo { get; set; }
+        public LifecycleInfo? LifecycleInfo { get; set; }
+        public SafetyInfo? SafetyInfo { get; set; }
+        public MappingInfo? MappingInfo { get; set; }
 
         public RouteNode(Guid id, string coordinates) : base(id)
         {

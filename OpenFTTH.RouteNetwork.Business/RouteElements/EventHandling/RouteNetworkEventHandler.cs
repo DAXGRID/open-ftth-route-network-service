@@ -184,18 +184,8 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
 
             if (_networkState.GetRouteNetworkElement(request.AggregateId) is RouteNode existingRouteNode)
             {
-                var updatedRouteNode = new RouteNode(existingRouteNode.Id, existingRouteNode.Coordinates)
-                {
-                    RouteNodeInfo = existingRouteNode.RouteNodeInfo,
-                    NamingInfo = request.NamingInfo,
-                    MappingInfo = existingRouteNode.MappingInfo,
-                    LifecycleInfo = existingRouteNode.LifecycleInfo,
-                    SafetyInfo = existingRouteNode.SafetyInfo
-                };
-
-                existingRouteNode.CopyEdgeRelationshipsTo(updatedRouteNode);
-
-                transaction.Update(updatedRouteNode, ignoreDublicates: true);
+                // We don't care about versioning af naming info, so we just modify the reference
+                existingRouteNode.NamingInfo = request.NamingInfo;
             }
             else
             {
