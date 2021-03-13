@@ -1,6 +1,7 @@
 ﻿using DAX.ObjectVersioning.Core;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using OpenFTTH.Events.Core;
 using OpenFTTH.Events.RouteNetwork;
 using OpenFTTH.RouteNetwork.Business.RouteElements.Model;
 using OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling;
@@ -45,7 +46,6 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
         public void HandleEvent(RouteNetworkEditOperationOccuredEvent request)
         {
             _logger.LogDebug("Got route network edit opreation occured message:");
-            _logger.LogDebug(JsonConvert.SerializeObject(request, Formatting.Indented));
 
             var trans = _networkState.GetTransaction();
 
@@ -76,6 +76,10 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
                                     break;
 
                                 case RouteSegmentRemoved domainEvent:
+                                    HandleEvent(domainEvent, trans);
+                                    break;
+
+                                case NamingInfoModified domainEvent:
                                     HandleEvent(domainEvent, trans);
                                     break;
                             }
@@ -169,6 +173,34 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
                 return;
 
             transaction.Delete(request.NodeId, ignoreDublicates: true);
+        }
+
+        private void HandleEvent(NamingInfoModified request, ITransaction transaction)
+        {
+            _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
+
+            if (AlreadyProcessed(request.EventId))
+                return;
+
+            if (_networkState.GetRouteNetworkElement(request.AggregateId) is RouteNode existingRouteNode)
+            {
+                var updatedRouteNode = new RouteNode(existingRouteNode.Id, existingRouteNode.Coordinates)
+                {
+                    RouteNodeInfo = existingRouteNode.RouteNodeInfo,
+                    NamingInfo = request.NamingInfo,
+                    MappingInfo = existingRouteNode.MappingInfo,
+                    LifecycleInfo = existingRouteNode.LifecycleInfo,
+                    SafetyInfo = existingRouteNode.SafetyInfo
+                };
+
+                existingRouteNode.CopyEdgeRelationshipsTo(updatedRouteNode);
+
+                transaction.Update(updatedRouteNode, ignoreDublicates: true);
+            }
+            else
+            {
+                _logger.LogWarning($"Could not lookup existing route node by id: {request.AggregateId} processing event: {JsonConvert.SerializeObject(request)}");
+            }
         }
 
 
