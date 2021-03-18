@@ -182,7 +182,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
             if (AlreadyProcessed(request.EventId))
                 return;
 
-            if (_networkState.GetRouteNetworkElement(request.AggregateId) is RouteNode existingRouteNode)
+            if (_networkState.GetRouteNetworkElement(request.AggregateId) is IRouteNetworkElement existingRouteNode)
             {
                 // We don't care about versioning af naming info, so we just modify the reference
                 existingRouteNode.NamingInfo = request.NamingInfo;

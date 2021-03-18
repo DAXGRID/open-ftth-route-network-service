@@ -7,9 +7,9 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.Model
     {
         Guid Id { get; }
         string Coordinates { get; }
-        public NamingInfo? NamingInfo { get; }
-        public LifecycleInfo? LifecycleInfo { get; }
-        public SafetyInfo? SafetyInfo { get;  }
-        public MappingInfo? MappingInfo { get;  }
+        public NamingInfo? NamingInfo { get; set; }
+        public LifecycleInfo? LifecycleInfo { get; set; }
+        public SafetyInfo? SafetyInfo { get; set; }
+        public MappingInfo? MappingInfo { get; set; }
     }
 }
