@@ -82,6 +82,26 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
                                 case NamingInfoModified domainEvent:
                                     HandleEvent(domainEvent, trans);
                                     break;
+
+                                case LifecycleInfoModified domainEvent:
+                                    HandleEvent(domainEvent, trans);
+                                    break;
+
+                                case MappingInfoModified domainEvent:
+                                    HandleEvent(domainEvent, trans);
+                                    break;
+
+                                case SafetyInfoModified domainEvent:
+                                    HandleEvent(domainEvent, trans);
+                                    break;
+
+                                case RouteNodeInfoModified domainEvent:
+                                    HandleEvent(domainEvent, trans);
+                                    break;
+
+                                case RouteSegmentInfoModified domainEvent:
+                                    HandleEvent(domainEvent, trans);
+                                    break;
                             }
                         }
                     }
@@ -182,14 +202,104 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
             if (AlreadyProcessed(request.EventId))
                 return;
 
-            if (_networkState.GetRouteNetworkElement(request.AggregateId) is IRouteNetworkElement existingRouteNode)
+            if (_networkState.GetRouteNetworkElement(request.AggregateId) is IRouteNetworkElement existingRouteNetworkElement)
             {
                 // We don't care about versioning af naming info, so we just modify the reference
-                existingRouteNode.NamingInfo = request.NamingInfo;
+                existingRouteNetworkElement.NamingInfo = request.NamingInfo;
             }
             else
             {
-                _logger.LogWarning($"Could not lookup existing route node by id: {request.AggregateId} processing event: {JsonConvert.SerializeObject(request)}");
+                _logger.LogWarning($"Could not lookup existing route network element by id: {request.AggregateId} processing event: {JsonConvert.SerializeObject(request)}");
+            }
+        }
+
+        private void HandleEvent(LifecycleInfoModified request, ITransaction transaction)
+        {
+            _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
+
+            if (AlreadyProcessed(request.EventId))
+                return;
+
+            if (_networkState.GetRouteNetworkElement(request.AggregateId) is IRouteNetworkElement existingRouteNetworkElement)
+            {
+                // We don't care about versioning
+                existingRouteNetworkElement.LifecycleInfo = request.LifecycleInfo;
+            }
+            else
+            {
+                _logger.LogWarning($"Could not lookup existing route network element by id: {request.AggregateId} processing event: {JsonConvert.SerializeObject(request)}");
+            }
+        }
+
+        private void HandleEvent(MappingInfoModified request, ITransaction transaction)
+        {
+            _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
+
+            if (AlreadyProcessed(request.EventId))
+                return;
+
+            if (_networkState.GetRouteNetworkElement(request.AggregateId) is IRouteNetworkElement existingRouteNetworkElement)
+            {
+                // We don't care about versioning
+                existingRouteNetworkElement.MappingInfo = request.MappingInfo;
+            }
+            else
+            {
+                _logger.LogWarning($"Could not lookup existing route network element by id: {request.AggregateId} processing event: {JsonConvert.SerializeObject(request)}");
+            }
+        }
+
+        private void HandleEvent(SafetyInfoModified request, ITransaction transaction)
+        {
+            _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
+
+            if (AlreadyProcessed(request.EventId))
+                return;
+
+            if (_networkState.GetRouteNetworkElement(request.AggregateId) is IRouteNetworkElement existingRouteNetworkElement)
+            {
+                // We don't care about versioning
+                existingRouteNetworkElement.SafetyInfo = request.SafetyInfo;
+            }
+            else
+            {
+                _logger.LogWarning($"Could not lookup existing route network element by id: {request.AggregateId} processing event: {JsonConvert.SerializeObject(request)}");
+            }
+        }
+
+        private void HandleEvent(RouteNodeInfoModified request, ITransaction transaction)
+        {
+            _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
+
+            if (AlreadyProcessed(request.EventId))
+                return;
+
+            if (_networkState.GetRouteNetworkElement(request.NodeId) is IRouteNode existingRouteNode)
+            {
+                // We don't care about versioning here
+                existingRouteNode.RouteNodeInfo = request.RouteNodeInfo;
+            }
+            else
+            {
+                _logger.LogWarning($"Could not lookup existing route node by id: {request.NodeId} processing event: {JsonConvert.SerializeObject(request)}");
+            }
+        }
+
+        private void HandleEvent(RouteSegmentInfoModified request, ITransaction transaction)
+        {
+            _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
+
+            if (AlreadyProcessed(request.EventId))
+                return;
+
+            if (_networkState.GetRouteNetworkElement(request.SegmentId) is IRouteSegment existingRouteSegment)
+            {
+                // We don't care about versioning here
+                existingRouteSegment.RouteSegmentInfo = request.RouteSegmentInfo;
+            }
+            else
+            {
+                _logger.LogWarning($"Could not lookup existing route segment by id: {request.SegmentId} processing event: {JsonConvert.SerializeObject(request)}");
             }
         }
 
