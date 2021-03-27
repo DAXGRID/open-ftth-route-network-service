@@ -22,17 +22,22 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
         {
             long versionId = _routeNetworkRepository.NetworkState.GetLatestCommitedVersion();
 
-            var routeNetworkObjects = LookupRouteNetworkObjects(walkIds, versionId);
+            var lookupRouteNetworkObjectsResult = LookupRouteNetworkObjects(walkIds, versionId);
 
             // If some route network element could not be looked up then return failure
-            if (routeNetworkObjects.IsFailed)
-                return Result.Fail<RouteNetworkElementIdList>(routeNetworkObjects.Errors.First());
+            if (lookupRouteNetworkObjectsResult.IsFailed)
+                return Result.Fail<RouteNetworkElementIdList>(lookupRouteNetworkObjectsResult.Errors.First());
+
+            var sortedRouteNetworkObjectsResult = SortRouteSegments(lookupRouteNetworkObjectsResult.Value.OfType<RouteSegment>().ToList(), versionId);
+
+            if (sortedRouteNetworkObjectsResult.IsFailed)
+                return Result.Fail<RouteNetworkElementIdList>(sortedRouteNetworkObjectsResult.Errors.First());
 
             // If only one id is specified, make sure it'a a route segment
-            if (routeNetworkObjects.Value.Count == 1 && !(routeNetworkObjects.Value[0] is IRouteSegment))
+            if (sortedRouteNetworkObjectsResult.Value.Count == 1 && !(sortedRouteNetworkObjectsResult.Value[0] is IRouteSegment))
                 return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_WALK_SHOULD_CONTAIN_ROUTE_SEGMENT_IDS_ONLY, "If only one route network id is specified in a walk, it must be a route segment id"));
 
-            var routeElementsSummary = GetRouteNetworkElementsListSummary(routeNetworkObjects.Value);
+            var routeElementsSummary = GetRouteNetworkElementsListSummary(lookupRouteNetworkObjectsResult.Value);
 
             switch (routeElementsSummary)
             {
@@ -43,7 +48,7 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
                     return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_WALK_SHOULD_CONTAIN_ROUTE_SEGMENT_IDS_ONLY, "A valid walk cannot contain route nodes only."));
 
                 case RouteElementListSummary.RouteSegmentsOnly:
-                    var routeSegments = routeNetworkObjects.Value.OfType<RouteSegment>().ToList();
+                    var routeSegments = sortedRouteNetworkObjectsResult.Value.OfType<RouteSegment>().ToList();
                     return ValidateSegmentSequence(routeSegments, versionId);
 
                 case RouteElementListSummary.BothRouteNodesAndSegments:
@@ -166,6 +171,112 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
             }
 
             return Result.Ok<List<IRouteNetworkElement>>(result);
+        }
+
+        private static Result<List<RouteSegment>> SortRouteSegments(List<RouteSegment> routeNetworkElementsToBeSorted, long versionId)
+        {
+            if (routeNetworkElementsToBeSorted.Count == 1)
+                return Result.Ok(routeNetworkElementsToBeSorted);
+
+            var ends = FindLinkPathEnds(routeNetworkElementsToBeSorted, versionId);
+
+            if (ends.Count < 1)
+                return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_WALK_SEGMENTS_ARE_NOT_ADJACENT, "No ends found in path. Make sure the links represent a path (not a trail or walk with repeating edges or vertices). Links: " + IdStringList(routeNetworkElementsToBeSorted)));
+
+            if (ends.Count == 1)
+                return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_WALK_SEGMENTS_ARE_NOT_ADJACENT, "Only one end found in path. Make sure the links represent a path (not a trail or walk with repeating edges or vertices). Links: " + IdStringList(routeNetworkElementsToBeSorted)));
+
+            if (ends.Count > 2)
+                return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_WALK_SEGMENTS_ARE_NOT_ADJACENT, ends.Count + " ends found in path. Make sure the links represent a connected path. Ends: " + IdStringList(ends)));
+
+            List<RouteSegment> linksSorted = new List<RouteSegment>();
+            List<RouteSegment> linksRemaning = new List<RouteSegment>();
+            linksRemaning.AddRange(routeNetworkElementsToBeSorted);
+
+            var currentSegment = ends[0];
+            linksRemaning.Remove(currentSegment);
+
+            while (currentSegment != null)
+            {
+                linksSorted.Add(currentSegment);
+
+                var segmentToExamine = currentSegment;
+                currentSegment = null;
+
+                foreach (var neighborNode in segmentToExamine.NeighborElements(versionId))
+                {
+                    foreach (var neighborSegment in neighborNode.NeighborElements(versionId))
+                    {
+                        if (neighborSegment != segmentToExamine && linksRemaning.Contains(neighborSegment))
+                        {
+                            currentSegment = neighborSegment as RouteSegment;
+
+                            if (currentSegment == null)
+                                throw new ApplicationException($"Neighbors of route node element with id: {neighborNode.Id} was expected to be a route network segment.");
+
+                            linksRemaning.Remove(currentSegment);
+                        }
+                    }
+                }
+            }
+
+            if (linksSorted.Count != routeNetworkElementsToBeSorted.Count)
+                return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_WALK_SEGMENTS_ARE_NOT_ADJACENT, "Only " + linksSorted.Count + " out of " + routeNetworkElementsToBeSorted.Count + " could be sorted. Make sure the links represent a connected path. Route network segments that could not be sorted:" + IdStringList(routeNetworkElementsToBeSorted)));
+
+            return Result.Ok(linksSorted);
+        }
+
+        public static List<RouteSegment> FindLinkPathEnds(List<RouteSegment> segments, long versionId)
+        {
+            List<RouteSegment> result = new List<RouteSegment>();
+
+            foreach (var segment in segments)
+            {
+                // Check if we find no links (in the links list) related to the start node. If that's the case, it's an end
+                bool linkStartFound = true;
+
+                foreach (var startSegment in segment.InV(versionId).NeighborElements(versionId))
+                {
+                    if (startSegment.Id != segment.Id && segments.Exists(s => s.Id == startSegment.Id))
+                        linkStartFound = false;
+                }
+
+                if (linkStartFound)
+                {
+                    result.Add(segment);
+                }
+
+
+                // Check if we find no links (in the links list) related to the end node. If that's the case, it's an end
+                bool linkEndFound = true;
+
+                foreach (var endLink in segment.OutV(versionId).NeighborElements(versionId))
+                {
+                    if (endLink.Id != segment.Id && segments.Exists(s => s.Id == endLink.Id))
+                        linkEndFound = false;
+                }
+
+                if (linkEndFound)
+                {
+                    result.Add(segment);
+                }
+            }
+
+            return result;
+        }
+
+        private static string IdStringList(List<RouteSegment> segments)
+        {
+            string idStr = "";
+            foreach (var segment in segments)
+            {
+                if (idStr.Length > 1)
+                    idStr += ",";
+
+                idStr += segment.Id;
+            }
+
+            return idStr;
         }
 
         private static RouteElementListSummary GetRouteNetworkElementsListSummary(List<IRouteNetworkElement> routeNetworkObjects)

@@ -124,19 +124,19 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
         }
 
         [Fact]
-        public async void CreateValidWalkOfInterestOverlappingSegments_ShouldReturnSuccess()
+        public async void CreateValidWalkOfWithNonAjacentSegments_ShouldReturnSuccess()
         {
             // Route network subset used in this test:
-            // (CO_1) <- (S1) -> (HH_1) <- (S2) -> (HH_2) <- (S1) -> (CO_1)
+            // S5-S6-S9-S11
             var interestId = Guid.NewGuid();
 
-            var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S1, TestRouteNetwork.S2, TestRouteNetwork.S1 };
+            var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S9, TestRouteNetwork.S11, TestRouteNetwork.S6, TestRouteNetwork.S5 };
 
             // Act
             var registerWalkOfInterestCommand = new RegisterWalkOfInterest(interestId, walk);
             Result registerWalkOfInterestCommandResult = await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>>(registerWalkOfInterestCommand);
 
-            var routeNetworkQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1 })
+            var routeNetworkQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.J_2 })
             {
                 RelatedInterestFilter = RelatedInterestFilterOptions.ReferencesFromRouteElementAndInterestObjects
             };
@@ -147,15 +147,11 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
             registerWalkOfInterestCommandResult.IsSuccess.Should().BeTrue();
             routeNetworkQueryResult.IsSuccess.Should().BeTrue();
 
-            routeNetworkQueryResult.Value.Interests[interestId].RouteNetworkElementRefs.Count.Should().Be(7);
-            routeNetworkQueryResult.Value.Interests[interestId].RouteNetworkElementRefs.Should().Contain(TestRouteNetwork.CO_1);
-            routeNetworkQueryResult.Value.Interests[interestId].RouteNetworkElementRefs.Should().Contain(TestRouteNetwork.S1);
-            routeNetworkQueryResult.Value.Interests[interestId].RouteNetworkElementRefs.Should().Contain(TestRouteNetwork.HH_1);
-            routeNetworkQueryResult.Value.Interests[interestId].RouteNetworkElementRefs.Should().Contain(TestRouteNetwork.S2);
-            routeNetworkQueryResult.Value.Interests[interestId].RouteNetworkElementRefs.Should().Contain(TestRouteNetwork.HH_2);
-            routeNetworkQueryResult.Value.Interests[interestId].RouteNetworkElementRefs.Should().Contain(TestRouteNetwork.S1);
-            routeNetworkQueryResult.Value.Interests[interestId].RouteNetworkElementRefs.Should().Contain(TestRouteNetwork.CO_1);
+            routeNetworkQueryResult.Value.Interests[interestId].RouteNetworkElementRefs.Count.Should().Be(9);
+            //routeNetworkQueryResult.Value.Interests[interestId].RouteNetworkElementRefs.Should().Contain(TestRouteNetwork.CO_1);
         }
+
+
 
         [Fact]
         public async void CreateInvalidWalkOfInterestUsingOneNodeAndOneSegments_ShouldReturnFaliour()
