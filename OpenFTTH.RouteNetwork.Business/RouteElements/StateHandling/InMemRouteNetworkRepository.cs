@@ -1,5 +1,6 @@
 ﻿using FluentResults;
 using Microsoft.Extensions.Logging;
+using OpenFTTH.Events.Core.Infos;
 using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.Business.RouteElements.Model;
 using System;
@@ -27,7 +28,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling
 
         public IRouteNetworkState NetworkState => _routeNetworkState;
 
-        public Result<List<IRouteNetworkElement>> GetRouteElements(RouteNetworkElementIdList routeNetworkElementIds)
+        public Result<List<IRouteNetworkElement>> GetRouteElements(RouteNetworkElementIdList routeNetworkElementIds, bool createSubstitudesForMissingRouteNetworkElements = false)
         {
             var routeNetworkElementFetched = new List<IRouteNetworkElement>();
 
@@ -37,7 +38,15 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling
 
                 if (routeNetworkElement == null)
                 {
-                    return Result.Fail<List<IRouteNetworkElement>>($"Cannot find any route network element with id: {routeElementId}");
+                    if (createSubstitudesForMissingRouteNetworkElements)
+                    {
+                        routeNetworkElement = new RouteNode(routeElementId, "[559000,6210000]")
+                        {
+                            NamingInfo = new NamingInfo() { Name = "#NA" }
+                        };
+                    }
+                    else
+                        return Result.Fail<List<IRouteNetworkElement>>($"Cannot find any route network element with id: {routeElementId}");
                 }
 
                 routeNetworkElementFetched.Add(routeNetworkElement as IRouteNetworkElement);

@@ -7,7 +7,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling
 {
     public interface IRouteNetworkRepository
     {
-        Result<List<IRouteNetworkElement>> GetRouteElements(RouteNetworkElementIdList guids);
+        Result<List<IRouteNetworkElement>> GetRouteElements(RouteNetworkElementIdList guids, bool createSubstitudesForMissingRouteNetworkElements = false);
 
         IRouteNetworkState NetworkState { get; }
     }

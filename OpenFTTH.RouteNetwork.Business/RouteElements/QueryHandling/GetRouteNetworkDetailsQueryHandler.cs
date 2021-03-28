@@ -82,7 +82,8 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
                 routeElementsToQuery.AddRange(interestQueryResult.Value.RouteNetworkElementRefs);
             }
 
-            var getRouteNetworkElementsResult = _routeNodeRepository.GetRouteElements(routeElementsToQuery);
+            // TODO: Fix so that we don't create substitudes when something is deleted
+            var getRouteNetworkElementsResult = _routeNodeRepository.GetRouteElements(routeElementsToQuery, true);
 
             // Here we create an exception, because this situation should not be allowed by the system
             if (getRouteNetworkElementsResult.IsFailed)
