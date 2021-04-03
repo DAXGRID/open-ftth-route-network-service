@@ -17,6 +17,7 @@ namespace OpenFTTH.RouteNetwork.Business.Interest.Projections
         public InterestsProjection()
         {
             ProjectEvent<WalkOfInterestRegistered>(Project);
+            ProjectEvent<WalkOfInterestRouteNetworkElementsModified>(Project);
             ProjectEvent<NodeOfInterestRegistered>(Project);
             ProjectEvent<InterestUnregistered>(Project);
         }
@@ -55,6 +56,13 @@ namespace OpenFTTH.RouteNetwork.Business.Interest.Projections
                 case (WalkOfInterestRegistered @event):
                     _interestById[@event.Interest.Id] = @event.Interest;
                     _interestIndex.AddOrUpdate(@event.Interest);
+                    break;
+
+                case (WalkOfInterestRouteNetworkElementsModified @event):
+                    var existingInterest = _interestById[@event.InterestId];
+                    var newInterest = existingInterest with { RouteNetworkElementRefs = @event.RouteNetworkElementIds };
+                    _interestById.TryUpdate(@event.InterestId, newInterest, existingInterest);
+                    _interestIndex.AddOrUpdate(newInterest);
                     break;
 
                 case (NodeOfInterestRegistered @event):

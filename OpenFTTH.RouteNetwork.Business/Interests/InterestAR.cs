@@ -17,6 +17,7 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
         public InterestAR()
         {
             Register<WalkOfInterestRegistered>(Apply);
+            Register<WalkOfInterestRouteNetworkElementsModified>(Apply);
             Register<NodeOfInterestRegistered>(Apply);
             Register<InterestUnregistered>(Apply);
         }
@@ -46,6 +47,31 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
 
             return Result.Ok<RouteNetworkInterest>(_interest);
         }
+
+        public Result<RouteNetworkInterest> UpdateRouteNetworkElements(RouteNetworkInterest walkOfInterest, InterestsProjection interestProjection, WalkValidator walkValidator)
+        {
+            if (walkOfInterest.Kind != RouteNetworkInterestKindEnum.WalkOfInterest)
+                return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_INTEREST_KIND_MUST_BE_WALK_OF_INTEREST, "Interest kind must be WalkOfInterest"));
+
+            if (walkOfInterest.Id == Guid.Empty)
+                return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_INTEREST_ID_CANNOT_BE_EMPTY, $"{RegisterWalkOfInterestErrorCodes.INVALID_INTEREST_ID_CANNOT_BE_EMPTY}: Interest id cannot be empty"));
+
+            if (interestProjection.GetInterest(walkOfInterest.Id).IsFailed)
+                return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_INTEREST_DONT_EXISTS, $"{RegisterWalkOfInterestErrorCodes.INVALID_INTEREST_DONT_EXISTS}: An interest with id: {walkOfInterest.Id} could not be found"));
+
+            var walkValidationResult = walkValidator.ValidateWalk(walkOfInterest.RouteNetworkElementRefs);
+
+            if (walkValidationResult.IsFailed)
+                return Result.Fail(walkValidationResult.Errors.First());
+
+            RaiseEvent(new WalkOfInterestRouteNetworkElementsModified(this.Id, walkValidationResult.Value));
+
+            if (_interest == null)
+                throw new ApplicationException("Unexpected aggreagate state. Interest must be non-null after WalkOfInterestRegistered has been raised.");
+
+            return Result.Ok<RouteNetworkInterest>(_interest);
+        }
+
 
         public Result UnregisterInterest(InterestsProjection interestsProjection, Guid interestId)
         {
@@ -80,6 +106,14 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
         {
             Id = obj.Interest.Id;
             _interest = obj.Interest;
+        }
+
+        private void Apply(WalkOfInterestRouteNetworkElementsModified @event)
+        {
+            if (_interest == null)
+                throw new ApplicationException("Unexpected aggreagate state. Interest state must be non-null when this event is processed.");
+
+            _interest = _interest with { RouteNetworkElementRefs = @event.RouteNetworkElementIds };
         }
 
         private void Apply(NodeOfInterestRegistered obj)
