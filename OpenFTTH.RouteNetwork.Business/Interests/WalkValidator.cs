@@ -233,30 +233,30 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
             foreach (var segment in segments)
             {
                 // Check if we find no links (in the links list) related to the start node. If that's the case, it's an end
-                bool linkStartFound = true;
+                bool segmentOutVertexIsAnEnd = true;
 
                 foreach (var startSegment in segment.InV(versionId).NeighborElements(versionId))
                 {
                     if (startSegment.Id != segment.Id && segments.Exists(s => s.Id == startSegment.Id))
-                        linkStartFound = false;
+                        segmentOutVertexIsAnEnd = false;
                 }
 
-                if (linkStartFound)
+                if (segmentOutVertexIsAnEnd)
                 {
                     result.Add(segment);
                 }
 
 
                 // Check if we find no links (in the links list) related to the end node. If that's the case, it's an end
-                bool linkEndFound = true;
+                bool segmentInVertexIsAnEnd = true;
 
                 foreach (var endLink in segment.OutV(versionId).NeighborElements(versionId))
                 {
                     if (endLink.Id != segment.Id && segments.Exists(s => s.Id == endLink.Id))
-                        linkEndFound = false;
+                        segmentInVertexIsAnEnd = false;
                 }
 
-                if (linkEndFound)
+                if (segmentInVertexIsAnEnd)
                 {
                     result.Add(segment);
                 }

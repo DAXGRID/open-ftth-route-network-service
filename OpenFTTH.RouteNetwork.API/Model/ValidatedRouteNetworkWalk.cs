@@ -59,5 +59,45 @@ namespace OpenFTTH.RouteNetwork.API.Model
             }
         }
 
+        public override bool Equals(object? obj)
+        {
+            if (obj == null)
+                return false;
+
+            var walk = (ValidatedRouteNetworkWalk)obj;
+
+            if (walk == null)
+                return false;
+
+            if (walk.RouteNetworkElementRefs.Count != this.RouteNetworkElementRefs.Count)
+                return false;
+
+            // Compare forward
+            bool refsEqual = true;
+
+            for (int i = 0; i < this.RouteNetworkElementRefs.Count; i++)
+            {
+                if (walk.RouteNetworkElementRefs[i] != this.RouteNetworkElementRefs[i])
+                    refsEqual = false;
+            }
+
+            if (refsEqual)
+                return true;
+
+            // Try if sequence if route element ids are the same if we compare them backwards
+            bool refsBackwardsEqual = true;
+
+            for (int i = 0; i < this.RouteNetworkElementRefs.Count; i++)
+            {
+                if (walk.RouteNetworkElementRefs[walk.RouteNetworkElementRefs.Count - (i + 1)] != this.RouteNetworkElementRefs[i])
+                    refsBackwardsEqual = false;
+            }
+
+            if (refsBackwardsEqual)
+                return true;
+
+            return false;
+        }
+
     }
 }

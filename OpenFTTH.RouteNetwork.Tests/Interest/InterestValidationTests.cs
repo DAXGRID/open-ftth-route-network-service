@@ -59,5 +59,53 @@ namespace OpenFTTH.RouteNetwork.Tests
             validateResult.IsFailed.Should().BeTrue();
         }
 
+        [Fact]
+        public async void ValidatedWalkEqualTest_ShouldSucceed()
+        {
+            // We create two walks. One that goes CO_1 -> HH_1 -> HH_2 -> to CC_1, and one that goes the opposite way.
+            // These two walks are to be treated as equal
+
+            var validateInterestForwardCommand = new ValidateWalkOfInterest(new RouteNetworkElementIdList() { TestRouteNetwork.S2, TestRouteNetwork.S1, TestRouteNetwork.S4 });
+            var validateResultForward = await _commandDispatcher.HandleAsync<ValidateWalkOfInterest, Result<ValidatedRouteNetworkWalk>>(validateInterestForwardCommand);
+
+            var validateInterestReversedCommand = new ValidateWalkOfInterest(new RouteNetworkElementIdList() { TestRouteNetwork.S4, TestRouteNetwork.S2, TestRouteNetwork.S1 });
+            var validateResultReversed = await _commandDispatcher.HandleAsync<ValidateWalkOfInterest, Result<ValidatedRouteNetworkWalk>>(validateInterestReversedCommand);
+
+
+            // Assert
+            validateResultForward.IsSuccess.Should().BeTrue();
+            validateResultReversed.IsSuccess.Should().BeTrue();
+            validateResultForward.Value.FromNodeId.Should().Be(TestRouteNetwork.CO_1);
+            validateResultReversed.Value.FromNodeId.Should().Be(TestRouteNetwork.CC_1);
+
+            var walk1 = new ValidatedRouteNetworkWalk(validateResultForward.Value.RouteNetworkElementRefs);
+            var walk2 = new ValidatedRouteNetworkWalk(validateResultReversed.Value.RouteNetworkElementRefs);
+
+            walk1.Equals(walk2).Should().BeTrue();
+        }
+
+
+
+        [Fact]
+        public async void ValidatedWalkEqualTest_ShouldFail()
+        {
+            // We create two walks that are not equal
+            var validateInterestCommand1 = new ValidateWalkOfInterest(new RouteNetworkElementIdList() { TestRouteNetwork.S1, TestRouteNetwork.S2 });
+            var validateResult1 = await _commandDispatcher.HandleAsync<ValidateWalkOfInterest, Result<ValidatedRouteNetworkWalk>>(validateInterestCommand1);
+
+            var validateInterestCommand2 = new ValidateWalkOfInterest(new RouteNetworkElementIdList() { TestRouteNetwork.S1 });
+            var validateResult2 = await _commandDispatcher.HandleAsync<ValidateWalkOfInterest, Result<ValidatedRouteNetworkWalk>>(validateInterestCommand2);
+
+
+            // Assert
+            validateResult1.IsSuccess.Should().BeTrue();
+            validateResult2.IsSuccess.Should().BeTrue();
+
+            var walk1 = new ValidatedRouteNetworkWalk(validateResult1.Value.RouteNetworkElementRefs);
+            var walk2 = new ValidatedRouteNetworkWalk(validateResult2.Value.RouteNetworkElementRefs);
+
+            walk1.Equals(walk2).Should().BeFalse();
+        }
+
     }
 }
