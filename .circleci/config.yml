@@ -114,6 +114,7 @@ jobs:
           command: |
             dotnet pack --output ./publish --configuration Release -p:PackageVersion=${CIRCLE_TAG:1}
             dotnet nuget push --source "${NUGET_FEED_URL}" --api-key="${NUGET_KEY}" "./publish/*.nupkg"
+
 workflows:
   build-test-upload_image:
     jobs:
@@ -127,23 +128,6 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - build-docker-image:
-          requires:
-            - test-app
-          filters:
-            tags:
-              only: /^v.*/
-            branches:
-              ignore: /.*/
-      - docker-publish-image:
-          context: docker
-          requires:
-           - build-docker-image
-          filters:
-            tags:
-              only: /^v.*/
-            branches:
-              ignore: /.*/
       - publish-nuget:
           context: nuget
           requires:
