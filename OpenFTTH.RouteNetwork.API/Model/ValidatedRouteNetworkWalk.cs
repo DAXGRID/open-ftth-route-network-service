@@ -59,6 +59,18 @@ namespace OpenFTTH.RouteNetwork.API.Model
             }
         }
 
+        public ValidatedRouteNetworkWalk Reverse()
+        {
+            var newRouteNetworkElementRefs = new RouteNetworkElementIdList();
+
+            for (int i = 0; i < this.RouteNetworkElementRefs.Count; i++)
+            {
+                newRouteNetworkElementRefs.Add(RouteNetworkElementRefs[RouteNetworkElementRefs.Count - (i + 1)]);
+            }
+
+            return new ValidatedRouteNetworkWalk(newRouteNetworkElementRefs);
+        }
+
         public override bool Equals(object? obj)
         {
             if (obj == null)
