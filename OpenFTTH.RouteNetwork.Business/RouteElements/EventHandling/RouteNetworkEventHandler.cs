@@ -60,14 +60,14 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
         {
             _logger.LogDebug("Got route network edit opreation occured message:");
 
-            var trans = _networkState.GetTransaction();
-
             if (request.RouteNetworkCommands != null)
             {
                 foreach (var command in request.RouteNetworkCommands)
                 {
                     if (command.RouteNetworkEvents != null)
                     {
+                        var trans = _networkState.GetTransaction();
+
                         foreach (var routeNetworkEvent in command.RouteNetworkEvents)
                         {
                             switch (routeNetworkEvent)
@@ -117,20 +117,14 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
                                     break;
                             }
                         }
-                    }
-                }
-            }
 
-            _networkState.FinishWithTransaction();
+                        _networkState.FinishWithTransaction();
 
-            // Process eventually splits that might requires updates to route network interests
-            if (request.RouteNetworkCommands != null)
-            {
-                foreach (var command in request.RouteNetworkCommands)
-                {
-                    if (command.CmdType == "ExistingRouteSegmentSplitted")
-                    {
-                        HandleSplitCommand(command, trans);
+                        // Process eventually splits that might requires updates to route network interests
+                        if (command.CmdType == "ExistingRouteSegmentSplitted")
+                        {
+                            HandleSplitCommand(command, trans);
+                        }
                     }
                 }
             }
