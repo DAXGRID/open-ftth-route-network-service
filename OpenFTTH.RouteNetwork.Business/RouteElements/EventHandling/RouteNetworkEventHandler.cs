@@ -116,11 +116,6 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
         {
             _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
 
-            if (request.NodeId == Guid.Parse("27686ff8-75cd-4671-9c71-0e8970e92699"))
-            {
-
-            }
-
             if (AlreadyProcessed(request.EventId))
                 return;
 
@@ -202,16 +197,6 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
 
         private void HandleEvent(NamingInfoModified request, ITransaction transaction)
         {
-            if (request.AggregateId == Guid.Parse("27686ff8-75cd-4671-9c71-0e8970e92699"))
-            {
-
-            }
-
-            if (request.NamingInfo.Name == "A0537")
-            {
-
-            }
-
             _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
 
             if (AlreadyProcessed(request.EventId))
@@ -285,12 +270,6 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
         private void HandleEvent(RouteNodeInfoModified request, ITransaction transaction)
         {
             _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
-
-            if (request.NodeId == Guid.Parse("27686ff8-75cd-4671-9c71-0e8970e92699"))
-            {
-
-            }
-
 
             if (AlreadyProcessed(request.EventId))
                 return;
