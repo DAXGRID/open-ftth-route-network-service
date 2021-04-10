@@ -12,5 +12,6 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling
         IRouteNetworkElement? GetRouteNetworkElement(Guid id);
         IRouteNetworkElement? GetRouteNetworkElement(Guid id, long versionId);
         void Seed(string routeNetworkEventsJson);
+        bool IsLoadMode { get; }
     }
 }

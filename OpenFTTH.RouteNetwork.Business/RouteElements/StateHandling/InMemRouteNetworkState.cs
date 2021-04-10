@@ -3,7 +3,9 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using OpenFTTH.CQRS;
 using OpenFTTH.Events.RouteNetwork;
+using OpenFTTH.EventSourcing;
 using OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling;
 using OpenFTTH.RouteNetwork.Business.RouteElements.Model;
 using System;
@@ -18,6 +20,9 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling
     {
         private ILoggerFactory _loggerFactory;
         private readonly ILogger<InMemRouteNetworkState> _logger;
+        private readonly IEventStore _eventStore;
+        private readonly ICommandDispatcher _commandDispatcher;
+        private readonly IQueryDispatcher _queryDispatcher;
 
         private InMemoryObjectManager _objectManager = new InMemoryObjectManager();
         
@@ -31,7 +36,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling
         public DateTime LastEventRecievedTimestamp => __lastEventRecievedTimestamp;
         public long NumberOfObjectsLoaded => _numberOfObjectsLoaded;
 
-        public InMemRouteNetworkState(ILoggerFactory loggerFactory, IServiceProvider serviceProvider)
+        public InMemRouteNetworkState(ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IEventStore eventStore, ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher)
         {
             if (null == loggerFactory)
             {
@@ -41,6 +46,10 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling
             _loggerFactory = loggerFactory;
 
             _logger = loggerFactory.CreateLogger<InMemRouteNetworkState>();
+
+            _eventStore = eventStore;
+            _commandDispatcher = commandDispatcher;
+            _queryDispatcher = queryDispatcher;
 
             // Look for test route network to seed
             if (serviceProvider != null && serviceProvider.GetService(typeof(ITestRouteNetworkData)) is ITestRouteNetworkData testRouteNetwork)
@@ -65,7 +74,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling
 
             var editOperationEvents = JsonConvert.DeserializeObject<List<RouteNetworkEditOperationOccuredEvent>>(json);
 
-            var routeNetworkEventHandler = new RouteNetworkEventHandler(_loggerFactory, this);
+            var routeNetworkEventHandler = new RouteNetworkEventHandler(_loggerFactory, this, _eventStore, _commandDispatcher, _queryDispatcher);
 
             foreach (var editOperationEvent in editOperationEvents)
                 routeNetworkEventHandler.HandleEvent(editOperationEvent);
@@ -150,5 +159,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling
 
             return _cmdTransaction;
         }
+
+        public bool IsLoadMode => _loadMode;
     }
 }

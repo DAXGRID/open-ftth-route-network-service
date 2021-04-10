@@ -1,20 +1,30 @@
 ﻿using DAX.ObjectVersioning.Core;
+using FluentResults;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using OpenFTTH.CQRS;
 using OpenFTTH.Events.Core;
 using OpenFTTH.Events.RouteNetwork;
+using OpenFTTH.EventSourcing;
+using OpenFTTH.RouteNetwork.API.Commands;
+using OpenFTTH.RouteNetwork.API.Model;
+using OpenFTTH.RouteNetwork.API.Queries;
+using OpenFTTH.RouteNetwork.Business.Interest.Projections;
 using OpenFTTH.RouteNetwork.Business.RouteElements.Model;
 using OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
 {
     public class RouteNetworkEventHandler : IObserver<RouteNetworkEditOperationOccuredEvent>
     {
         private readonly ILogger<RouteNetworkEventHandler> _logger;
-
-        private IRouteNetworkState _networkState;
+        private readonly IRouteNetworkState _networkState;
+        private readonly IEventStore _eventStore;
+        private readonly ICommandDispatcher _commandDispatcher;
+        private readonly IQueryDispatcher _queryDispatcher;
 
         private HashSet<Guid> _alreadyProcessed = new HashSet<Guid>();
 
@@ -31,7 +41,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
             HandleEvent(@event);
         }
 
-        public RouteNetworkEventHandler(ILoggerFactory loggerFactory, IRouteNetworkState networkState)
+        public RouteNetworkEventHandler(ILoggerFactory loggerFactory, IRouteNetworkState networkState, IEventStore eventStore, ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher)
         {
             if (null == loggerFactory)
             {
@@ -41,6 +51,9 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
             _logger = loggerFactory.CreateLogger<RouteNetworkEventHandler>();
 
             _networkState = networkState;
+            _eventStore = eventStore;
+            _commandDispatcher = commandDispatcher;
+            _queryDispatcher = queryDispatcher;
         }
 
         public void HandleEvent(RouteNetworkEditOperationOccuredEvent request)
@@ -109,8 +122,111 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
             }
 
             _networkState.FinishWithTransaction();
+
+            // Process eventually splits that might requires updates to route network interests
+            if (request.RouteNetworkCommands != null)
+            {
+                foreach (var command in request.RouteNetworkCommands)
+                {
+                    if (command.CmdType == "ExistingRouteSegmentSplitted")
+                    {
+                        HandleSplitCommand(command, trans);
+                    }
+                }
+            }
         }
 
+        private void HandleSplitCommand(Events.RouteNetworkCommand command, ITransaction trans)
+        {
+            if (!_networkState.IsLoadMode)
+            {
+                RouteNodeAdded? routeNodeAddedEvent = null;
+                RouteSegmentAdded? fromAddedSegmentEvent = null;
+                RouteSegmentAdded? toAddedSegmentEvent = null;
+                RouteSegmentRemoved? removedSegmentEvent = null;
+
+                foreach (var routeNetworkEvent in command.RouteNetworkEvents)
+                {
+                    if (routeNetworkEvent is RouteNodeAdded)
+                        routeNodeAddedEvent = routeNetworkEvent as RouteNodeAdded;
+                    else if (routeNetworkEvent is RouteSegmentAdded && routeNodeAddedEvent != null && ((RouteSegmentAdded)routeNetworkEvent).FromNodeId == routeNodeAddedEvent.NodeId)
+                        fromAddedSegmentEvent = routeNetworkEvent as RouteSegmentAdded;
+                    else if (routeNetworkEvent is RouteSegmentAdded && routeNodeAddedEvent != null && ((RouteSegmentAdded)routeNetworkEvent).ToNodeId == routeNodeAddedEvent.NodeId)
+                        toAddedSegmentEvent = routeNetworkEvent as RouteSegmentAdded;
+                    else if (routeNetworkEvent is RouteSegmentRemoved)
+                        removedSegmentEvent = routeNetworkEvent as RouteSegmentRemoved;
+                }
+
+                // Only proceed if we manage to get all the needed information from the split command
+                if (routeNodeAddedEvent != null && fromAddedSegmentEvent != null && toAddedSegmentEvent != null && removedSegmentEvent != null)
+                {
+                    // Find all interests of the deleted route segment
+                    var interestsProjection = _eventStore.Projections.Get<InterestsProjection>();
+
+                    var interestRelationsResult = interestsProjection.GetInterestsByRouteNetworkElementId(removedSegmentEvent.SegmentId);
+
+                    if (interestRelationsResult.IsFailed)
+                    { 
+                        _logger.LogError($"Split handler: Failed with error: {interestRelationsResult.Errors.First().Message} trying to get interest related by removed segment with id: {removedSegmentEvent.SegmentId} processing split command: " + JsonConvert.SerializeObject(command));
+                        return;
+                    }
+
+                    foreach (var interest in interestRelationsResult.Value)
+                    {
+                        var newRouteNetworkElementIdList = CreateNewRouteNetworkElementIdListFromSplit(interest.Item1.RouteNetworkElementRefs, removedSegmentEvent.SegmentId, routeNodeAddedEvent.NodeId, fromAddedSegmentEvent, toAddedSegmentEvent);
+
+                        var updateWalkOfInterestCommand = new UpdateWalkOfInterest(interest.Item1.Id, newRouteNetworkElementIdList);
+                        var updateWalkOfInterestCommandResult = _commandDispatcher.HandleAsync<UpdateWalkOfInterest, Result<RouteNetworkInterest>>(updateWalkOfInterestCommand).Result;
+
+                        if (updateWalkOfInterestCommandResult.IsFailed)
+                        {
+                            _logger.LogError($"Split handler: Failed error: {updateWalkOfInterestCommandResult.Errors.First().Message} trying to update interest with id: {interest.Item1.Id} processing split command: " + JsonConvert.SerializeObject(command));
+                        }
+                    }
+                }
+                else
+                {
+                    _logger.LogError("Split handler: can't find needed information in event: " + JsonConvert.SerializeObject(command));
+                }
+
+            }
+        }
+
+        private RouteNetworkElementIdList CreateNewRouteNetworkElementIdListFromSplit(RouteNetworkElementIdList existingRouteNetworkElementIds, Guid removedSegmentId, Guid newNodeId, RouteSegmentAdded newFromSegmentEvent, RouteSegmentAdded newToSegmentEvent)
+        {
+            RouteNetworkElementIdList result = new RouteNetworkElementIdList();
+
+            for (int i = 0; i < existingRouteNetworkElementIds.Count; i++)
+            {
+                var existingId = existingRouteNetworkElementIds[i]; 
+
+                if (existingId == removedSegmentId)
+                {
+                    // Check if the from segment is the one connected to the from node of the removed segment in the walk
+                    if (newFromSegmentEvent.FromNodeId == existingRouteNetworkElementIds[i - 1] || newFromSegmentEvent.ToNodeId == existingRouteNetworkElementIds[i - 1])
+                    {
+                        // The from segment is comming first
+                        result.Add(newFromSegmentEvent.SegmentId);
+                        result.Add(newNodeId);
+                        result.Add(newToSegmentEvent.SegmentId);
+                    }
+                    else
+                    {
+                        // The to segment is comming first
+                        result.Add(newToSegmentEvent.SegmentId);
+                        result.Add(newNodeId);
+                        result.Add(newFromSegmentEvent.SegmentId);
+                    }
+                }
+                else
+                    result.Add(existingId);
+            }
+
+            var walk = new ValidatedRouteNetworkWalk(result);
+            RouteNetworkElementIdList segmentsOnly = new();
+            segmentsOnly.AddRange(walk.SegmentIds);
+            return segmentsOnly;
+        }
 
         private void HandleEvent(RouteNodeAdded request, ITransaction transaction)
         {
