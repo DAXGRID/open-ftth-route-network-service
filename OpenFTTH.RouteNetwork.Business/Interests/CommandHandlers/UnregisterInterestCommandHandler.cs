@@ -27,7 +27,9 @@ namespace OpenFTTH.RouteNetwork.Business.MutationHandling
 
             var interestAR = _eventStore.Aggregates.Load<InterestAR>(command.InterestId);
 
-            var unregisterInterestResult = interestAR.UnregisterInterest(interestProjection, command.InterestId);
+            var commandContext = new CommandContext(command.CmdId, command.UserContext);
+
+            var unregisterInterestResult = interestAR.UnregisterInterest(commandContext, interestProjection, command.InterestId);
 
             if (unregisterInterestResult.IsSuccess)
             {

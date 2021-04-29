@@ -22,7 +22,7 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
             Register<InterestUnregistered>(Apply);
         }
 
-        public Result<RouteNetworkInterest> RegisterWalkOfInterest(RouteNetworkInterest interest, InterestsProjection interestsProjection, WalkValidator walkValidator)
+        public Result<RouteNetworkInterest> RegisterWalkOfInterest(CommandContext cmdContext, RouteNetworkInterest interest, InterestsProjection interestsProjection, WalkValidator walkValidator)
         {
             if (interest.Kind != RouteNetworkInterestKindEnum.WalkOfInterest)
                 return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_INTEREST_KIND_MUST_BE_WALK_OF_INTEREST, "Interest kind must be WalkOfInterest"));
@@ -40,7 +40,14 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
 
             var interestWithValidatedWalk = interest with { RouteNetworkElementRefs = walkValidationResult.Value };
 
-            RaiseEvent(new WalkOfInterestRegistered(interestWithValidatedWalk));
+            RaiseEvent(
+                new WalkOfInterestRegistered(interestWithValidatedWalk)
+                {
+                    IncitingCmdId = cmdContext.CmdId,
+                    UserName = cmdContext.UserContext?.UserName,
+                    WorkTaskId = cmdContext.UserContext?.WorkTaskId
+                }
+            );
 
             if (_interest == null)
                 throw new ApplicationException("Unexpected aggreagate state. Interest must be non-null after WalkOfInterestRegistered has been raised.");
@@ -48,7 +55,7 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
             return Result.Ok<RouteNetworkInterest>(_interest);
         }
 
-        public Result<RouteNetworkInterest> UpdateRouteNetworkElements(RouteNetworkInterest walkOfInterest, InterestsProjection interestProjection, WalkValidator walkValidator)
+        public Result<RouteNetworkInterest> UpdateRouteNetworkElements(CommandContext cmdContext, RouteNetworkInterest walkOfInterest, InterestsProjection interestProjection, WalkValidator walkValidator)
         {
             if (walkOfInterest.Kind != RouteNetworkInterestKindEnum.WalkOfInterest)
                 return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_INTEREST_KIND_MUST_BE_WALK_OF_INTEREST, "Interest kind must be WalkOfInterest"));
@@ -64,7 +71,14 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
             if (walkValidationResult.IsFailed)
                 return Result.Fail(walkValidationResult.Errors.First());
 
-            RaiseEvent(new WalkOfInterestRouteNetworkElementsModified(this.Id, walkValidationResult.Value));
+            RaiseEvent(
+                new WalkOfInterestRouteNetworkElementsModified(this.Id, walkValidationResult.Value)
+                {
+                    IncitingCmdId = cmdContext.CmdId,
+                    UserName = cmdContext.UserContext?.UserName,
+                    WorkTaskId = cmdContext.UserContext?.WorkTaskId
+                }
+            );
 
             if (_interest == null)
                 throw new ApplicationException("Unexpected aggreagate state. Interest must be non-null after WalkOfInterestRegistered has been raised.");
@@ -73,17 +87,24 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
         }
 
 
-        public Result UnregisterInterest(InterestsProjection interestsProjection, Guid interestId)
+        public Result UnregisterInterest(CommandContext cmdContext, InterestsProjection interestsProjection, Guid interestId)
         {
             if (!interestsProjection.GetInterest(interestId).IsSuccess)
                 return Result.Fail($"Cannot find interest with id: {interestId}");
 
-            RaiseEvent(new InterestUnregistered(interestId));
+            RaiseEvent(
+                new InterestUnregistered(interestId)
+                {
+                    IncitingCmdId = cmdContext.CmdId,
+                    UserName = cmdContext.UserContext?.UserName,
+                    WorkTaskId = cmdContext.UserContext?.WorkTaskId
+                }
+            );
 
             return Result.Ok();
         }
 
-        public Result<RouteNetworkInterest> RegisterNodeOfInterest(RouteNetworkInterest interest, InterestsProjection interestsProjection)
+        public Result<RouteNetworkInterest> RegisterNodeOfInterest(CommandContext cmdContext, RouteNetworkInterest interest, InterestsProjection interestsProjection)
         {
             if (interest.Kind != RouteNetworkInterestKindEnum.NodeOfInterest)
                 return Result.Fail(new RegisterNodeOfInterestError(RegisterNodeOfInterestErrorCodes.INVALID_INTEREST_KIND_MUST_BE_NODE_OF_INTEREST, "Interest kind must be NodeOfInterest"));
@@ -94,7 +115,14 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
             if (interestsProjection.GetInterest(interest.Id).IsSuccess)
                 return Result.Fail(new RegisterNodeOfInterestError(RegisterNodeOfInterestErrorCodes.INVALID_INTEREST_ALREADY_EXISTS, $"{RegisterNodeOfInterestErrorCodes.INVALID_INTEREST_ALREADY_EXISTS}: An interest with id: {interest.Id} already exists"));
 
-            RaiseEvent(new NodeOfInterestRegistered(interest));
+            RaiseEvent(
+                new NodeOfInterestRegistered(interest)
+                {
+                    IncitingCmdId = cmdContext.CmdId,
+                    UserName = cmdContext.UserContext?.UserName,
+                    WorkTaskId = cmdContext.UserContext?.WorkTaskId
+                }
+            );
 
             if (_interest == null)
                 throw new ApplicationException("Unexpected aggreagate state. Interest must be non-null after NodeOfInterestRegistered has been raised.");

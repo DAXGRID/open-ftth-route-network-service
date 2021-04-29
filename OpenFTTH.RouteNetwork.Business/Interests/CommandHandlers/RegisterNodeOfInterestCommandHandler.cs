@@ -29,7 +29,9 @@ namespace OpenFTTH.RouteNetwork.Business.MutationHandling
 
             var interestAR = new InterestAR();
 
-            var registerInterestResult = interestAR.RegisterNodeOfInterest(nodeOfInterest, interestProjection);
+            var commandContext = new CommandContext(command.CmdId, command.UserContext);
+
+            var registerInterestResult = interestAR.RegisterNodeOfInterest(commandContext, nodeOfInterest, interestProjection);
 
             if (registerInterestResult.IsSuccess)
             {

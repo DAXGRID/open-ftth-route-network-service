@@ -31,7 +31,9 @@ namespace OpenFTTH.RouteNetwork.Business.MutationHandling
 
             var walkValidator = new WalkValidator(_routeNetworkRepository);
 
-            var updateInterestResult = interestAR.UpdateRouteNetworkElements(walkOfInterest, interestProjection, walkValidator);
+            var commandContext = new CommandContext(command.CmdId, command.UserContext);
+
+            var updateInterestResult = interestAR.UpdateRouteNetworkElements(commandContext, walkOfInterest, interestProjection, walkValidator);
 
             if (updateInterestResult.IsSuccess)
             {

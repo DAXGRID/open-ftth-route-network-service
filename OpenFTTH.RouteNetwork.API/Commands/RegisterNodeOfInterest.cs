@@ -10,7 +10,7 @@ namespace OpenFTTH.RouteNetwork.API.Commands
     /// Used to register interest in a node in the route network.
     /// An typical usage is to register some equipment put into a route node - such as a well, cabinet etc.
     /// </summary>
-    public class RegisterNodeOfInterest : ICommand<Result<RouteNetworkInterest>>
+    public record RegisterNodeOfInterest : BaseCommand, ICommand<Result<RouteNetworkInterest>>
     {
         public static string RequestName => typeof(RegisterNodeOfInterest).Name;
         public Guid InterestId { get; }
@@ -19,6 +19,9 @@ namespace OpenFTTH.RouteNetwork.API.Commands
 
         public RegisterNodeOfInterest(Guid interestId, Guid routeNetworkElementId, string? customData = null)
         {
+            this.CmdId = Guid.NewGuid();
+            this.Timestamp = DateTime.UtcNow;
+
             this.InterestId = interestId;
             this.RouteNetworkElementId = routeNetworkElementId;
             this.CustomData = customData;

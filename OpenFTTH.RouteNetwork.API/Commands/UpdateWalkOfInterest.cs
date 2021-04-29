@@ -6,7 +6,7 @@ using System;
 namespace OpenFTTH.RouteNetwork.API.Commands
 {
 
-    public class UpdateWalkOfInterest : ICommand<Result<RouteNetworkInterest>>
+    public record UpdateWalkOfInterest : BaseCommand, ICommand<Result<RouteNetworkInterest>>
     {
         public static string RequestName => typeof(RegisterWalkOfInterest).Name;
         public Guid InterestId { get; }
@@ -15,6 +15,9 @@ namespace OpenFTTH.RouteNetwork.API.Commands
 
         public UpdateWalkOfInterest(Guid interestId, RouteNetworkElementIdList walk, string? customData = null)
         {
+            this.CmdId = Guid.NewGuid();
+            this.Timestamp = DateTime.UtcNow;
+
             this.InterestId = interestId;
             this.WalkIds = walk;
             this.CustomData = customData;

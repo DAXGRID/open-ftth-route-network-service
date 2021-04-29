@@ -1,6 +1,7 @@
 ﻿using FluentResults;
 using OpenFTTH.CQRS;
 using OpenFTTH.RouteNetwork.API.Model;
+using System;
 
 namespace OpenFTTH.RouteNetwork.API.Commands
 {
@@ -9,7 +10,7 @@ namespace OpenFTTH.RouteNetwork.API.Commands
     /// Used to validate a walk of interest in the route network.
     /// A walk is a sequence of edges (route segments) which joins a sequence of vertices (route nodes).
     /// </summary>
-    public class ValidateWalkOfInterest : ICommand<Result<ValidatedRouteNetworkWalk>>
+    public record ValidateWalkOfInterest : BaseCommand, ICommand<Result<ValidatedRouteNetworkWalk>>
     {
         public static string RequestName => typeof(RegisterWalkOfInterest).Name;
         public RouteNetworkElementIdList WalkIds { get; }
@@ -21,6 +22,9 @@ namespace OpenFTTH.RouteNetwork.API.Commands
         /// </param>
         public ValidateWalkOfInterest(RouteNetworkElementIdList segmentWalk)
         {
+            this.CmdId = Guid.NewGuid();
+            this.Timestamp = DateTime.UtcNow;
+
             this.WalkIds = segmentWalk;
         }
     }
