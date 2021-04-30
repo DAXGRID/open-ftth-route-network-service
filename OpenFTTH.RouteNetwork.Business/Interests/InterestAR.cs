@@ -43,6 +43,7 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
             RaiseEvent(
                 new WalkOfInterestRegistered(interestWithValidatedWalk)
                 {
+                    CorrelationId = cmdContext.CorrelationId,
                     IncitingCmdId = cmdContext.CmdId,
                     UserName = cmdContext.UserContext?.UserName,
                     WorkTaskId = cmdContext.UserContext?.WorkTaskId
@@ -74,6 +75,7 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
             RaiseEvent(
                 new WalkOfInterestRouteNetworkElementsModified(this.Id, walkValidationResult.Value)
                 {
+                    CorrelationId = cmdContext.CorrelationId,
                     IncitingCmdId = cmdContext.CmdId,
                     UserName = cmdContext.UserContext?.UserName,
                     WorkTaskId = cmdContext.UserContext?.WorkTaskId
@@ -95,6 +97,7 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
             RaiseEvent(
                 new InterestUnregistered(interestId)
                 {
+                    CorrelationId = cmdContext.CorrelationId,
                     IncitingCmdId = cmdContext.CmdId,
                     UserName = cmdContext.UserContext?.UserName,
                     WorkTaskId = cmdContext.UserContext?.WorkTaskId
@@ -118,6 +121,7 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
             RaiseEvent(
                 new NodeOfInterestRegistered(interest)
                 {
+                    CorrelationId = cmdContext.CorrelationId,
                     IncitingCmdId = cmdContext.CmdId,
                     UserName = cmdContext.UserContext?.UserName,
                     WorkTaskId = cmdContext.UserContext?.WorkTaskId
