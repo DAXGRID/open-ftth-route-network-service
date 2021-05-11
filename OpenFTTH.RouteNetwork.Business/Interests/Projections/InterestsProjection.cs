@@ -54,25 +54,37 @@ namespace OpenFTTH.RouteNetwork.Business.Interest.Projections
             switch (eventEnvelope.Data)
             {
                 case (WalkOfInterestRegistered @event):
-                    _interestById[@event.Interest.Id] = @event.Interest;
-                    _interestIndex.AddOrUpdate(@event.Interest);
+                    //_interestById[@event.Interest.Id] = @event.Interest;
+                    _interestById.TryAdd(@event.Interest.Id, @event.Interest);
+                    _interestIndex.Add(@event.Interest);
+
+                    System.Diagnostics.Debug.WriteLine("New walk of interest " + @event.Interest.Id);
                     break;
 
                 case (WalkOfInterestRouteNetworkElementsModified @event):
                     var existingInterest = _interestById[@event.InterestId];
-                    var newInterest = existingInterest with { RouteNetworkElementRefs = @event.RouteNetworkElementIds };
-                    _interestById.TryUpdate(@event.InterestId, newInterest, existingInterest);
-                    _interestIndex.AddOrUpdate(newInterest);
+                    var updatedInterest = existingInterest with { RouteNetworkElementRefs = @event.RouteNetworkElementIds };
+                    _interestById.TryUpdate(@event.InterestId, updatedInterest, existingInterest);
+                    _interestIndex.Update(updatedInterest, existingInterest);
+
+                    System.Diagnostics.Debug.WriteLine("Walk of interest modified " + @event.InterestId);
                     break;
 
                 case (NodeOfInterestRegistered @event):
                     _interestById[@event.Interest.Id] = @event.Interest;
-                    _interestIndex.AddOrUpdate(@event.Interest);
+                    _interestIndex.Add(@event.Interest);
+                    System.Diagnostics.Debug.WriteLine("New node of interest " + @event.Interest.Id);
                     break;
 
                 case (InterestUnregistered @event):
+                    System.Diagnostics.Debug.WriteLine("Interest removed " + @event.InterestId);
+
+                    _interestById.TryGetValue(@event.InterestId, out var routeNetworkInterest);
+
+                    var existingInterestToBeRemoved = _interestById[@event.InterestId];
+                    
                     _interestById.TryRemove(@event.InterestId, out _);
-                    _interestIndex.Remove(@event.InterestId);
+                    _interestIndex.Remove(existingInterestToBeRemoved);
                     break;
             }
         }

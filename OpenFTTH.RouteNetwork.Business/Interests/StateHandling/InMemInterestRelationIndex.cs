@@ -15,15 +15,19 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.Interest
         private readonly ConcurrentDictionary<Guid, ConcurrentDictionary<Guid, (Guid, RouteNetworkInterestRelationKindEnum)>> _routeElementInterestRelations = new ConcurrentDictionary<Guid, ConcurrentDictionary<Guid, (Guid, RouteNetworkInterestRelationKindEnum)>>();
 
         /// <summary>
-        /// Add interest to index. If already indexed, the index will be updated.
+        /// Update index of existing interest
         /// </summary>
         /// <param name="interest"></param>
-        public void AddOrUpdate(RouteNetworkInterest interest)
+        public void Update(RouteNetworkInterest updatedInterest, RouteNetworkInterest existingInterest)
         {
-            // Remove all existing index entries referencing the interest
-            RemoveExistingInterestIdsFromIndex(interest.Id);
+            // Remove all interest relations from index
+            foreach (var routeElementId in existingInterest.RouteNetworkElementRefs)
+            {
+                if (_routeElementInterestRelations.ContainsKey(routeElementId))
+                    _routeElementInterestRelations[routeElementId].TryRemove(existingInterest.Id, out var _);
+            }
 
-            Add(interest);
+            Add(updatedInterest);
         }
 
         /// <summary>
@@ -54,9 +58,14 @@ namespace OpenFTTH.RouteNetwork.Business.StateHandling.Interest
             }
         }
 
-        public void Remove(Guid interestId)
+        public void Remove(RouteNetworkInterest interestToRemove)
         {
-            RemoveExistingInterestIdsFromIndex(interestId);
+            // Remove relations that don't exist anymore in updated interest
+            foreach (var routeElementId in interestToRemove.RouteNetworkElementRefs)
+            {
+                if (_routeElementInterestRelations.ContainsKey(routeElementId))
+                    _routeElementInterestRelations[routeElementId].TryRemove(interestToRemove.Id, out var _);
+            }
         }
 
         public List<(Guid, RouteNetworkInterestRelationKindEnum)> GetRouteNetworkElementInterestRelations(Guid routeElementId)

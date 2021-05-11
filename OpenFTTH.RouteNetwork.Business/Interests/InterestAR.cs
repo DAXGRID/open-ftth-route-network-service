@@ -72,8 +72,18 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
             if (walkValidationResult.IsFailed)
                 return Result.Fail(walkValidationResult.Errors.First());
 
+            if (_interest == null)
+                throw new ApplicationException("Unexpected aggreagate state. Interest state must be non-null when this event is processed.");
+
+            // Reverse walk if one of its ends are opposite of existing walk ends
+            var existingWalk = new ValidatedRouteNetworkWalk(_interest.RouteNetworkElementRefs);
+            var newWalk = new ValidatedRouteNetworkWalk(walkValidationResult.Value);
+          
+            if (newWalk.FromNodeId == existingWalk.ToNodeId || newWalk.ToNodeId == existingWalk.FromNodeId)
+                newWalk = newWalk.Reverse();
+
             RaiseEvent(
-                new WalkOfInterestRouteNetworkElementsModified(this.Id, walkValidationResult.Value)
+                new WalkOfInterestRouteNetworkElementsModified(this.Id, newWalk.RouteNetworkElementRefs)
                 {
                     CorrelationId = cmdContext.CorrelationId,
                     IncitingCmdId = cmdContext.CmdId,
