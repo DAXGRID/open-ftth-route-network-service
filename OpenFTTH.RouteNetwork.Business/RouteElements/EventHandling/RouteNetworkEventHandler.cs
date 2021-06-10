@@ -134,26 +134,44 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
         {
             if (!_networkState.IsLoadMode)
             {
-                RouteNodeAdded? routeNodeAddedEvent = null;
-                RouteSegmentAdded? fromAddedSegmentEvent = null;
-                RouteSegmentAdded? toAddedSegmentEvent = null;
+                _logger.LogInformation($"Split handler processing split command with id: {command.CmdId}");
+
+                RouteSegmentAdded? firstAddedSegmentEvent = null;
+                RouteSegmentAdded? secondAddedSegmentEvent = null;
                 RouteSegmentRemoved? removedSegmentEvent = null;
+
+                RouteSegmentAdded? fromAddedSegmentEvent;
+                RouteSegmentAdded? toAddedSegmentEvent;
+                
+                Guid? splitNodeId;
 
                 foreach (var routeNetworkEvent in command.RouteNetworkEvents)
                 {
-                    if (routeNetworkEvent is RouteNodeAdded)
-                        routeNodeAddedEvent = routeNetworkEvent as RouteNodeAdded;
-                    else if (routeNetworkEvent is RouteSegmentAdded && routeNodeAddedEvent != null && ((RouteSegmentAdded)routeNetworkEvent).FromNodeId == routeNodeAddedEvent.NodeId)
-                        fromAddedSegmentEvent = routeNetworkEvent as RouteSegmentAdded;
-                    else if (routeNetworkEvent is RouteSegmentAdded && routeNodeAddedEvent != null && ((RouteSegmentAdded)routeNetworkEvent).ToNodeId == routeNodeAddedEvent.NodeId)
-                        toAddedSegmentEvent = routeNetworkEvent as RouteSegmentAdded;
+                    if (routeNetworkEvent is RouteSegmentAdded && firstAddedSegmentEvent == null)
+                        firstAddedSegmentEvent = routeNetworkEvent as RouteSegmentAdded;
+                    else if (routeNetworkEvent is RouteSegmentAdded && firstAddedSegmentEvent != null && secondAddedSegmentEvent == null)
+                        secondAddedSegmentEvent = routeNetworkEvent as RouteSegmentAdded;
                     else if (routeNetworkEvent is RouteSegmentRemoved)
                         removedSegmentEvent = routeNetworkEvent as RouteSegmentRemoved;
                 }
 
+
                 // Only proceed if we manage to get all the needed information from the split command
-                if (routeNodeAddedEvent != null && fromAddedSegmentEvent != null && toAddedSegmentEvent != null && removedSegmentEvent != null)
+                if (firstAddedSegmentEvent != null && secondAddedSegmentEvent != null && removedSegmentEvent != null)
                 {
+                    if (firstAddedSegmentEvent.ToNodeId == secondAddedSegmentEvent.FromNodeId)
+                    {
+                        fromAddedSegmentEvent = firstAddedSegmentEvent;
+                        toAddedSegmentEvent = secondAddedSegmentEvent;
+                        splitNodeId = firstAddedSegmentEvent.ToNodeId;
+                    }
+                    else
+                    {
+                        toAddedSegmentEvent = firstAddedSegmentEvent;
+                        fromAddedSegmentEvent = secondAddedSegmentEvent;
+                        splitNodeId = firstAddedSegmentEvent.FromNodeId;
+                    }
+
                     // Find all interests of the deleted route segment
                     var interestsProjection = _eventStore.Projections.Get<InterestsProjection>();
 
@@ -167,7 +185,15 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
 
                     foreach (var interest in interestRelationsResult.Value)
                     {
-                        var newRouteNetworkElementIdList = CreateNewRouteNetworkElementIdListFromSplit(interest.Item1.RouteNetworkElementRefs, removedSegmentEvent.SegmentId, routeNodeAddedEvent.NodeId, fromAddedSegmentEvent, toAddedSegmentEvent);
+                        var firstAddedSegmentInterestRelationsResult = interestsProjection.GetInterestsByRouteNetworkElementId(firstAddedSegmentEvent.SegmentId);
+
+                        if (firstAddedSegmentInterestRelationsResult.IsFailed)
+                        {
+                            _logger.LogError($"Split handler: Failed with error: {interestRelationsResult.Errors.First().Message} trying to get interest related by added segment with id: {firstAddedSegmentEvent.SegmentId} processing split command: " + JsonConvert.SerializeObject(command));
+                            return;
+                        }
+
+                        var newRouteNetworkElementIdList = CreateNewRouteNetworkElementIdListFromSplit(interest.Item1.RouteNetworkElementRefs, removedSegmentEvent.SegmentId, splitNodeId.Value, fromAddedSegmentEvent, toAddedSegmentEvent);
 
                         var updateWalkOfInterestCommand = new UpdateWalkOfInterest(interest.Item1.Id, newRouteNetworkElementIdList);
                         var updateWalkOfInterestCommandResult = _commandDispatcher.HandleAsync<UpdateWalkOfInterest, Result<RouteNetworkInterest>>(updateWalkOfInterestCommand).Result;
@@ -180,9 +206,8 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
                 }
                 else
                 {
-                    _logger.LogError("Split handler: can't find needed information in event: " + JsonConvert.SerializeObject(command));
+                    _logger.LogError("Split handler: Can't find needed information in event. Expected two RouteSegmentAdded and one RouteSegmentRemoved event. Split command being processed: " + JsonConvert.SerializeObject(command));
                 }
-
             }
         }
 
