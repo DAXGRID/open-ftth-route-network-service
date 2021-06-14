@@ -134,7 +134,9 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
         {
             if (!_networkState.IsLoadMode)
             {
-                _logger.LogInformation($"Split handler processing split command with id: {command.CmdId}");
+                Guid correlationId = Guid.NewGuid();
+
+                _logger.LogInformation($"Route network event handler is processing split, event command id: {command.CmdId}, correlation id: {correlationId}, invoked by user: {request.UserName}");
 
                 RouteSegmentAdded? firstAddedSegmentEvent = null;
                 RouteSegmentAdded? secondAddedSegmentEvent = null;
@@ -196,6 +198,8 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
                         var newRouteNetworkElementIdList = CreateNewRouteNetworkElementIdListFromSplit(interest.Item1.RouteNetworkElementRefs, removedSegmentEvent.SegmentId, splitNodeId.Value, fromAddedSegmentEvent, toAddedSegmentEvent);
 
                         var updateWalkOfInterestCommand = new UpdateWalkOfInterest(Guid.NewGuid(), new UserContext(request.UserName, request.WorkTaskMrid ?? Guid.Empty), interest.Item1.Id, newRouteNetworkElementIdList);
+
+                        _logger.LogInformation($"Route network split handler is invoking {updateWalkOfInterestCommand.GetType().Name} command with id: {updateWalkOfInterestCommand.CmdId}, correlation id: {correlationId}");
 
                         var updateWalkOfInterestCommandResult = _commandDispatcher.HandleAsync<UpdateWalkOfInterest, Result<RouteNetworkInterest>>(updateWalkOfInterestCommand).Result;
 
