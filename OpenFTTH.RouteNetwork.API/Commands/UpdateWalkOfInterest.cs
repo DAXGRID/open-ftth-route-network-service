@@ -13,11 +13,8 @@ namespace OpenFTTH.RouteNetwork.API.Commands
         public RouteNetworkElementIdList WalkIds { get; }
         public string? CustomData { get; }
 
-        public UpdateWalkOfInterest(Guid interestId, RouteNetworkElementIdList walk, string? customData = null)
+        public UpdateWalkOfInterest(Guid correlationId, UserContext userContext, Guid interestId, RouteNetworkElementIdList walk, string? customData = null) : base(correlationId, userContext)
         {
-            this.CmdId = Guid.NewGuid();
-            this.Timestamp = DateTime.UtcNow;
-
             this.InterestId = interestId;
             this.WalkIds = walk;
             this.CustomData = customData;

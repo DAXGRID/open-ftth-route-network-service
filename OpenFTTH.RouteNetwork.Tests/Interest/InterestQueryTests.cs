@@ -29,7 +29,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             var interestId = Guid.NewGuid();
 
             var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S1 };
-            var createInterestCommand = new RegisterWalkOfInterest(interestId, walk);
+            var createInterestCommand = new RegisterWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), interestId, walk);
             
             await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>>(createInterestCommand);
 
@@ -74,7 +74,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             var interestId = Guid.NewGuid();
 
             var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S1 };
-            var createInterestCommand = new RegisterWalkOfInterest(interestId, walk);
+            var createInterestCommand = new RegisterWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), interestId, walk);
 
             await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>>(createInterestCommand);
 
@@ -113,7 +113,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             var interestId = Guid.NewGuid();
 
             var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S1 };
-            var createInterestCommand = new RegisterWalkOfInterest(interestId, walk);
+            var createInterestCommand = new RegisterWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), interestId, walk);
 
             await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>>(createInterestCommand);
 
@@ -145,11 +145,11 @@ namespace OpenFTTH.RouteNetwork.Tests
             // Create two overlapping walk of interests that we can try to query on
             var interest1Id = Guid.NewGuid();
             var walk1 = new RouteNetworkElementIdList() { TestRouteNetwork.S1 };
-            await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>>(new RegisterWalkOfInterest(interest1Id, walk1));
+            await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>>(new RegisterWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), interest1Id, walk1));
 
             var interest2Id = Guid.NewGuid();
             var walk2 = new RouteNetworkElementIdList() { TestRouteNetwork.S2 };
-            await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>>(new RegisterWalkOfInterest(interest2Id, walk2));
+            await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>>(new RegisterWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), interest2Id, walk2));
 
 
             // Act

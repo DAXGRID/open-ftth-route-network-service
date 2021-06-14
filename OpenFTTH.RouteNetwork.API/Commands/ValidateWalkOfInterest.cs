@@ -20,11 +20,8 @@ namespace OpenFTTH.RouteNetwork.API.Commands
         /// <param name="segmentWalk">
         /// A walk in the route network graph specified using segments ids.
         /// </param>
-        public ValidateWalkOfInterest(RouteNetworkElementIdList segmentWalk)
+        public ValidateWalkOfInterest(Guid correlationId, UserContext userContext, RouteNetworkElementIdList segmentWalk) : base(correlationId, userContext)
         {
-            this.CmdId = Guid.NewGuid();
-            this.Timestamp = DateTime.UtcNow;
-
             this.WalkIds = segmentWalk;
         }
     }

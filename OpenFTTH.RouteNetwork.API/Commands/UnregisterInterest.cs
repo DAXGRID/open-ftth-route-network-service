@@ -9,11 +9,8 @@ namespace OpenFTTH.RouteNetwork.API.Commands
         public static string RequestName => typeof(RegisterNodeOfInterest).Name;
         public Guid InterestId { get; }
 
-        public UnregisterInterest(Guid interestId)
+        public UnregisterInterest(Guid correlationId, UserContext userContext, Guid interestId) : base(correlationId, userContext)
         {
-            this.CmdId = Guid.NewGuid();
-            this.Timestamp = DateTime.UtcNow;
-
             this.InterestId = interestId;
         }
     }

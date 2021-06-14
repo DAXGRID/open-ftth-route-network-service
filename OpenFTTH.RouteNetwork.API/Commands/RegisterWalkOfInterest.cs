@@ -27,11 +27,8 @@ namespace OpenFTTH.RouteNetwork.API.Commands
         /// A walk in the route network graph. Can be specified using node ids or segments ids or both.
         /// </param>
         /// <param name="customData">Optional extra data to be save in the interest record</param>
-        public RegisterWalkOfInterest(Guid interestId, RouteNetworkElementIdList walk, string? customData = null)
+        public RegisterWalkOfInterest(Guid correlationId, UserContext userContext, Guid interestId, RouteNetworkElementIdList walk, string? customData = null) : base(correlationId, userContext)
         {
-            this.CmdId = Guid.NewGuid();
-            this.Timestamp = DateTime.UtcNow;
-
             this.InterestId = interestId;
             this.WalkIds = walk;
             this.CustomData = customData;

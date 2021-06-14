@@ -26,7 +26,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         public async void ValidateValidWalk_ShouldSucceed()
         {
             var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S2, TestRouteNetwork.S1, TestRouteNetwork.S4 };
-            var validateInterestCommand = new ValidateWalkOfInterest(walk);
+            var validateInterestCommand = new ValidateWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), walk);
             
             var validateResult = await _commandDispatcher.HandleAsync<ValidateWalkOfInterest, Result<ValidatedRouteNetworkWalk>>(validateInterestCommand);
 
@@ -51,7 +51,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         {
             // There's a hole in this walk
             var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S2, TestRouteNetwork.S1, TestRouteNetwork.S5 };
-            var validateInterestCommand = new ValidateWalkOfInterest(walk);
+            var validateInterestCommand = new ValidateWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), walk);
 
             var validateResult = await _commandDispatcher.HandleAsync<ValidateWalkOfInterest, Result<ValidatedRouteNetworkWalk>>(validateInterestCommand);
 
@@ -65,10 +65,10 @@ namespace OpenFTTH.RouteNetwork.Tests
             // We create two walks. One that goes CO_1 -> HH_1 -> HH_2 -> to CC_1, and one that goes the opposite way.
             // These two walks are to be treated as equal
 
-            var validateInterestForwardCommand = new ValidateWalkOfInterest(new RouteNetworkElementIdList() { TestRouteNetwork.S2, TestRouteNetwork.S1, TestRouteNetwork.S4 });
+            var validateInterestForwardCommand = new ValidateWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), new RouteNetworkElementIdList() { TestRouteNetwork.S2, TestRouteNetwork.S1, TestRouteNetwork.S4 });
             var validateResultForward = await _commandDispatcher.HandleAsync<ValidateWalkOfInterest, Result<ValidatedRouteNetworkWalk>>(validateInterestForwardCommand);
 
-            var validateInterestReversedCommand = new ValidateWalkOfInterest(new RouteNetworkElementIdList() { TestRouteNetwork.S4, TestRouteNetwork.S2, TestRouteNetwork.S1 });
+            var validateInterestReversedCommand = new ValidateWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), new RouteNetworkElementIdList() { TestRouteNetwork.S4, TestRouteNetwork.S2, TestRouteNetwork.S1 });
             var validateResultReversed = await _commandDispatcher.HandleAsync<ValidateWalkOfInterest, Result<ValidatedRouteNetworkWalk>>(validateInterestReversedCommand);
 
 
@@ -90,10 +90,10 @@ namespace OpenFTTH.RouteNetwork.Tests
         public async void ValidatedWalkEqualTest_ShouldFail()
         {
             // We create two walks that are not equal
-            var validateInterestCommand1 = new ValidateWalkOfInterest(new RouteNetworkElementIdList() { TestRouteNetwork.S1, TestRouteNetwork.S2 });
+            var validateInterestCommand1 = new ValidateWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), new RouteNetworkElementIdList() { TestRouteNetwork.S1, TestRouteNetwork.S2 });
             var validateResult1 = await _commandDispatcher.HandleAsync<ValidateWalkOfInterest, Result<ValidatedRouteNetworkWalk>>(validateInterestCommand1);
 
-            var validateInterestCommand2 = new ValidateWalkOfInterest(new RouteNetworkElementIdList() { TestRouteNetwork.S1 });
+            var validateInterestCommand2 = new ValidateWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), new RouteNetworkElementIdList() { TestRouteNetwork.S1 });
             var validateResult2 = await _commandDispatcher.HandleAsync<ValidateWalkOfInterest, Result<ValidatedRouteNetworkWalk>>(validateInterestCommand2);
 
 

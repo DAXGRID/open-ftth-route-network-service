@@ -123,14 +123,14 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
                         // Process eventually splits that might requires updates to route network interests
                         if (command.CmdType == "ExistingRouteSegmentSplitted")
                         {
-                            HandleSplitCommand(command, trans);
+                            HandleSplitCommand(request, command, trans);
                         }
                     }
                 }
             }
         }
 
-        private void HandleSplitCommand(Events.RouteNetworkCommand command, ITransaction trans)
+        private void HandleSplitCommand(RouteNetworkEditOperationOccuredEvent request, Events.RouteNetworkCommand command, ITransaction trans)
         {
             if (!_networkState.IsLoadMode)
             {
@@ -195,7 +195,8 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
 
                         var newRouteNetworkElementIdList = CreateNewRouteNetworkElementIdListFromSplit(interest.Item1.RouteNetworkElementRefs, removedSegmentEvent.SegmentId, splitNodeId.Value, fromAddedSegmentEvent, toAddedSegmentEvent);
 
-                        var updateWalkOfInterestCommand = new UpdateWalkOfInterest(interest.Item1.Id, newRouteNetworkElementIdList);
+                        var updateWalkOfInterestCommand = new UpdateWalkOfInterest(Guid.NewGuid(), new UserContext(request.UserName, request.WorkTaskMrid ?? Guid.Empty), interest.Item1.Id, newRouteNetworkElementIdList);
+
                         var updateWalkOfInterestCommandResult = _commandDispatcher.HandleAsync<UpdateWalkOfInterest, Result<RouteNetworkInterest>>(updateWalkOfInterestCommand).Result;
 
                         if (updateWalkOfInterestCommandResult.IsFailed)

@@ -37,12 +37,12 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
             };
 
             // Act
-            var registerWalkOfInterestCommand = new RegisterWalkOfInterest(interestId, walk);
+            var registerWalkOfInterestCommand = new RegisterWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), interestId, walk);
             var registerWalkOfInterestCommandResult = await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>> (registerWalkOfInterestCommand);
 
             Result<GetRouteNetworkDetailsResult> routeNetworkQueryResultBefore = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkQuery);
 
-            var unregisterWalkOfInterestCommand = new UnregisterInterest(interestId);
+            var unregisterWalkOfInterestCommand = new UnregisterInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), interestId);
             var unregisterWalkOfInterestCommandResult = await _commandDispatcher.HandleAsync<UnregisterInterest, Result>(unregisterWalkOfInterestCommand);
 
             Result<GetRouteNetworkDetailsResult> routeNetworkQueryResultAfter = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkQuery);
@@ -72,12 +72,12 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
             };
 
             // Act
-            var registerNodeOfInterestCommand = new RegisterNodeOfInterest(interestId, TestRouteNetwork.CO_1);
+            var registerNodeOfInterestCommand = new RegisterNodeOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), interestId, TestRouteNetwork.CO_1);
             var registerNodeOfInterestCommandResult = await _commandDispatcher.HandleAsync<RegisterNodeOfInterest, Result<RouteNetworkInterest>>(registerNodeOfInterestCommand);
 
             Result<GetRouteNetworkDetailsResult> routeNetworkQueryResultBefore = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkQuery);
 
-            var unregisterWalkOfInterestCommand = new UnregisterInterest(interestId);
+            var unregisterWalkOfInterestCommand = new UnregisterInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), interestId);
             var unregisterWalkOfInterestCommandResult = await _commandDispatcher.HandleAsync<UnregisterInterest, Result>(unregisterWalkOfInterestCommand);
 
             Result<GetRouteNetworkDetailsResult> routeNetworkQueryResultAfter = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkQuery);

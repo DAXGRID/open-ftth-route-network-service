@@ -44,12 +44,12 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
             };
 
             // Act
-            var registerWalkOfInterestCommand = new RegisterWalkOfInterest(interestId, walk);
+            var registerWalkOfInterestCommand = new RegisterWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), interestId, walk);
             var registerWalkOfInterestCommandResult = await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>> (registerWalkOfInterestCommand);
 
             Result<GetRouteNetworkDetailsResult> routeNetworkQueryResultBefore = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkQuery_CO1);
 
-            var updateWalkOfInterestCommand = new UpdateWalkOfInterest(interestId, updatedWalk);
+            var updateWalkOfInterestCommand = new UpdateWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), interestId, updatedWalk);
             var updateWalkOfInterestCommandResult = await _commandDispatcher.HandleAsync<UpdateWalkOfInterest, Result<RouteNetworkInterest>>(updateWalkOfInterestCommand);
 
             Result<GetRouteNetworkDetailsResult> co1_routeNetworkQueryResultAfter = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkQuery_CO1);
@@ -97,12 +97,12 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
             };
 
             // Act
-            var registerWalkOfInterestCommand = new RegisterWalkOfInterest(interestId, walk);
+            var registerWalkOfInterestCommand = new RegisterWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), interestId, walk);
             var registerWalkOfInterestCommandResult = await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>>(registerWalkOfInterestCommand);
 
             Result<GetRouteNetworkDetailsResult> routeNetworkQueryResultBefore = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkQuery_CO1);
 
-            var updateWalkOfInterestCommand = new UpdateWalkOfInterest(interestId, updatedWalk);
+            var updateWalkOfInterestCommand = new UpdateWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), interestId, updatedWalk);
             var updateWalkOfInterestCommandResult = await _commandDispatcher.HandleAsync<UpdateWalkOfInterest, Result<RouteNetworkInterest>>(updateWalkOfInterestCommand);
 
             Result<GetRouteNetworkDetailsResult> co1_routeNetworkQueryResultAfter = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkQuery_CO1);

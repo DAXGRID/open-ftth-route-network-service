@@ -17,11 +17,8 @@ namespace OpenFTTH.RouteNetwork.API.Commands
         public Guid RouteNetworkElementId { get; }
         public string? CustomData { get; }
 
-        public RegisterNodeOfInterest(Guid interestId, Guid routeNetworkElementId, string? customData = null)
+        public RegisterNodeOfInterest(Guid correlationId, UserContext userContext, Guid interestId, Guid routeNetworkElementId, string? customData = null) : base(correlationId, userContext)
         {
-            this.CmdId = Guid.NewGuid();
-            this.Timestamp = DateTime.UtcNow;
-
             this.InterestId = interestId;
             this.RouteNetworkElementId = routeNetworkElementId;
             this.CustomData = customData;
