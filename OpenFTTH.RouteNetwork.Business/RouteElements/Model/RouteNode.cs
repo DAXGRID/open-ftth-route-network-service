@@ -7,7 +7,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.Model
 {
     public class RouteNode : GraphNode, IRouteNode
     {
-        public string Coordinates { get; }
+        public string Coordinates { get; set; }
         public RouteNodeInfo? RouteNodeInfo { get; set; }
         public NamingInfo? NamingInfo { get; set; }
         public LifecycleInfo? LifecycleInfo { get; set; }

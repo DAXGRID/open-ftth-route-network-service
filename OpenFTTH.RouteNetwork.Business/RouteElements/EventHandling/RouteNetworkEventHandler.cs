@@ -115,6 +115,18 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
                                 case RouteSegmentInfoModified domainEvent:
                                     HandleEvent(domainEvent, trans);
                                     break;
+
+                                case RouteNodeGeometryModified domainEvent:
+                                    HandleEvent(domainEvent, trans);
+                                    break;
+
+                                case RouteSegmentGeometryModified domainEvent:
+                                    HandleEvent(domainEvent, trans);
+                                    break;
+
+                                default:
+                                    _logger.LogWarning($"No handler defined for event: {routeNetworkEvent.GetType().Name}");
+                                    break;
                             }
                         }
 
@@ -436,6 +448,42 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
             {
                 // We don't care about versioning here
                 existingRouteSegment.RouteSegmentInfo = request.RouteSegmentInfo;
+            }
+            else
+            {
+                _logger.LogWarning($"Could not lookup existing route segment by id: {request.SegmentId} processing event: {JsonConvert.SerializeObject(request)}");
+            }
+        }
+
+        private void HandleEvent(RouteNodeGeometryModified request, ITransaction transaction)
+        {
+            _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
+
+            if (AlreadyProcessed(request.EventId))
+                return;
+
+            if (_networkState.GetRouteNetworkElement(request.NodeId) is IRouteNode existingRouteNode)
+            {
+                // We don't care about versioning here
+                existingRouteNode.Coordinates = request.Geometry;
+            }
+            else
+            {
+                _logger.LogWarning($"Could not lookup existing route node by id: {request.NodeId} processing event: {JsonConvert.SerializeObject(request)}");
+            }
+        }
+
+        private void HandleEvent(RouteSegmentGeometryModified request, ITransaction transaction)
+        {
+            _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
+
+            if (AlreadyProcessed(request.EventId))
+                return;
+
+            if (_networkState.GetRouteNetworkElement(request.SegmentId) is IRouteSegment existingRouteSegment)
+            {
+                // We don't care about versioning here
+                existingRouteSegment.Coordinates = request.Geometry;
             }
             else
             {

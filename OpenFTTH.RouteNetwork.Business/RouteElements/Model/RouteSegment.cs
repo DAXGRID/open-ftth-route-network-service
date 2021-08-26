@@ -7,7 +7,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.Model
 {
     public class RouteSegment : GraphEdge, IRouteSegment
     {
-        public string Coordinates { get; }
+        public string Coordinates { get; set; }
         public RouteSegmentInfo? RouteSegmentInfo { get; set; }
         public NamingInfo? NamingInfo { get; set; }
         public LifecycleInfo? LifecycleInfo { get; set; }
