@@ -89,7 +89,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
             if (getRouteNetworkElementsResult.IsFailed)
                 throw new ApplicationException($"Unexpected error querying route elements referenced by interests. All the interest exists and therefore the route network elements must also exists. Validation that route elements having interest cannot be deleted seems not to be working! Initial query:\r\n" + JsonConvert.SerializeObject(query));
 
-            var mappedRouteNetworkElements = MapRouteElementDomainObjectsToQueryObjects(query, getRouteNetworkElementsResult.Value);
+            var mappedRouteNetworkElements = MapRouteElementDomainObjectsToQueryObjects(query.RouteNetworkElementFilter, getRouteNetworkElementsResult.Value);
 
             var queryResult = new GetRouteNetworkDetailsResult(mappedRouteNetworkElements, interestsToReturn.ToArray());
 
@@ -115,7 +115,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
                         WithError(getRouteNetworkElementsResult.Errors.First())
                     );
 
-            var routeNetworkElementsToReturn = MapRouteElementDomainObjectsToQueryObjects(query, getRouteNetworkElementsResult.Value);
+            var routeNetworkElementsToReturn = MapRouteElementDomainObjectsToQueryObjects(query.RouteNetworkElementFilter, getRouteNetworkElementsResult.Value);
 
             var interestsToReturn = Array.Empty<RouteNetworkInterest>();
 
@@ -181,7 +181,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
             return interestsToBeAddedToResult.Values.ToArray();
         }
 
-        private static RouteNetworkElement[] MapRouteElementDomainObjectsToQueryObjects(GetRouteNetworkDetails query, List<IRouteNetworkElement> routeNetworkElements)
+        public static RouteNetworkElement[] MapRouteElementDomainObjectsToQueryObjects(RouteNetworkElementFilterOptions filter, List<IRouteNetworkElement> routeNetworkElements)
         {
             var routeNetworkElementDTOs = new List<RouteNetworkElement>();
 
@@ -192,13 +192,13 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
                 routeNetworkElementDTOs.Add(
                     new RouteNetworkElement(routeNetworkElement.Id, kind)
                     {
-                        Coordinates = query.RouteNetworkElementFilter.IncludeCoordinates ? routeNetworkElement.Coordinates : null,
-                        RouteSegmentInfo = query.RouteNetworkElementFilter.IncludeRouteSegmentInfo && routeNetworkElement is IRouteSegment segment ? segment.RouteSegmentInfo : null,
-                        RouteNodeInfo = query.RouteNetworkElementFilter.IncludeRouteNodeInfo && routeNetworkElement is IRouteNode node ? node.RouteNodeInfo : null,
-                        NamingInfo = query.RouteNetworkElementFilter.IncludeNamingInfo ? routeNetworkElement.NamingInfo : null,
-                        MappingInfo = query.RouteNetworkElementFilter.IncludeMappingInfo ? routeNetworkElement.MappingInfo : null,
-                        LifecycleInfo = query.RouteNetworkElementFilter.IncludeLifecycleInfo ? routeNetworkElement.LifecycleInfo : null,
-                        SafetyInfo = query.RouteNetworkElementFilter.IncludeSafetyInfo ? routeNetworkElement.SafetyInfo : null,
+                        Coordinates = filter.IncludeCoordinates ? routeNetworkElement.Coordinates : null,
+                        RouteSegmentInfo = filter.IncludeRouteSegmentInfo && routeNetworkElement is IRouteSegment segment ? segment.RouteSegmentInfo : null,
+                        RouteNodeInfo = filter.IncludeRouteNodeInfo && routeNetworkElement is IRouteNode node ? node.RouteNodeInfo : null,
+                        NamingInfo = filter.IncludeNamingInfo ? routeNetworkElement.NamingInfo : null,
+                        MappingInfo = filter.IncludeMappingInfo ? routeNetworkElement.MappingInfo : null,
+                        LifecycleInfo = filter.IncludeLifecycleInfo ? routeNetworkElement.LifecycleInfo : null,
+                        SafetyInfo = filter.IncludeSafetyInfo ? routeNetworkElement.SafetyInfo : null,
                     }
                 );
             }
