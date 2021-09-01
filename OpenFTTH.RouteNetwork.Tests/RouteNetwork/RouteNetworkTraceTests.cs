@@ -43,7 +43,9 @@ namespace OpenFTTH.RouteNetwork.Tests
 
             // Check trace for handhole HH_10
             var handHole10Trace = nearestNodeQueryResult.Value.RouteNetworkTraces[TestRouteNetwork.HH_10];
+            handHole10Trace.Name.Should().Be("HH-10");
             handHole10Trace.RouteNetworkSegmentIds.Length.Should().Be(3);
+            handHole10Trace.RouteNetworkSegmentGeometries.Length.Should().Be(3);
             handHole10Trace.RouteNetworkSegmentIds[0].Should().Be(TestRouteNetwork.S13);
             handHole10Trace.RouteNetworkSegmentIds[1].Should().Be(TestRouteNetwork.S5);
             handHole10Trace.RouteNetworkSegmentIds[2].Should().Be(TestRouteNetwork.S6);

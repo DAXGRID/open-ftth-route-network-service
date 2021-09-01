@@ -85,7 +85,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
 
             foreach (var nodeToTrace in nodesToTrace.Values)
             {
-                var shortestPathTrace = ShortestPath(nodeToTrace.Id, sourceRouteNode.Id, graphForTracing);
+                var shortestPathTrace = ShortestPath(nodeToTrace, sourceRouteNode.Id, graphForTracing);
                 nodeTraceResults.Add(shortestPathTrace);
             }
 
@@ -124,16 +124,18 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
         }
 
 
-        private RouteNetworkTrace ShortestPath(Guid fromNodeId, Guid toNodeId, GraphHolder graphHolder)
+        private RouteNetworkTrace ShortestPath(RouteNode fromNode, Guid toNodeId, GraphHolder graphHolder)
         {
             Func<Edge<Guid>, double> lineDistances = e => graphHolder.EdgeLengths[e];
 
-            TryFunc<Guid, IEnumerable<Edge<Guid>>> tryGetPath = graphHolder.Graph.ShortestPathsDijkstra(lineDistances, fromNodeId);
+            TryFunc<Guid, IEnumerable<Edge<Guid>>> tryGetPath = graphHolder.Graph.ShortestPathsDijkstra(lineDistances, fromNode.Id);
 
             IEnumerable<Edge<Guid>> path;
             tryGetPath(toNodeId, out path);
 
             List<Guid> segmentIds = new();
+            List<string> segmentGeometries = new();
+
             double distance = 0;
 
             if (path != null)
@@ -141,10 +143,12 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
                 foreach (var edge in path)
                 {
                     segmentIds.Add(graphHolder.EdgeToSegment[edge].Id);
+                    segmentGeometries.Add(graphHolder.EdgeToSegment[edge].Coordinates);
+
                     distance += graphHolder.EdgeLengths[edge];
                 }
             }
-            return new RouteNetworkTrace(fromNodeId, distance, segmentIds.ToArray());
+            return new RouteNetworkTrace(fromNode.Id, fromNode?.NamingInfo?.Name, distance, segmentIds.ToArray(), segmentGeometries.ToArray());
         }
 
         private static Dictionary<Guid, RouteNode> GetNodesToCheck(HashSet<RouteNodeKindEnum> interestHash, IEnumerable<IGraphObject> traceResult)

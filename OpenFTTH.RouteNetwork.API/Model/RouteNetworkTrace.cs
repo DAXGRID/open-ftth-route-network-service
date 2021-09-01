@@ -6,18 +6,21 @@ namespace OpenFTTH.RouteNetwork.API.Model
     public record RouteNetworkTrace : IIdentifiedObject
     {
         public Guid DestNodeId { get; }
+        public string? Name { get; }
         public double Distance { get; }
         public Guid[] RouteNetworkSegmentIds { get; }
+        public string[] RouteNetworkSegmentGeometries { get; }
 
         public Guid Id => DestNodeId;
-        public string? Name => null;
         public string? Description => null;
 
-        public RouteNetworkTrace(Guid destNodeId, double distance, Guid[] routeNetworkSegmentIds)
+        public RouteNetworkTrace(Guid destNodeId, string? name, double distance, Guid[] routeNetworkSegmentIds, string[] routeNetworkSegmentGeometries)
         {
             DestNodeId = destNodeId;
+            Name = name;
             Distance = distance;
             RouteNetworkSegmentIds = routeNetworkSegmentIds;
+            RouteNetworkSegmentGeometries = routeNetworkSegmentGeometries;
         }
     }
 }
