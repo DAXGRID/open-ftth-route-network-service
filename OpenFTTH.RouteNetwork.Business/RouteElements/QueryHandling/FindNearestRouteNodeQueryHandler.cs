@@ -79,20 +79,26 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
 
             // Find nodes to check/trace shortest path
             var graphForTracing = GetGraphForTracing(version, routeNetworkSubset);
-            var nodesToTrace = GetNodesToCheck(interestHash, routeNetworkSubset);
+            var nodeCandidatesToTrace = GetNodeCandidatesOrderedByDistanceToSourceNode(sourceRouteNode, interestHash, routeNetworkSubset);
 
             List<RouteNetworkTrace> nodeTraceResults = new();
 
-            foreach (var nodeToTrace in nodesToTrace.Values)
+            int nShortestPathTraces = 0;
+
+            foreach (var nodeToTrace in nodeCandidatesToTrace)
             {
-                var shortestPathTrace = ShortestPath(nodeToTrace, sourceRouteNode.Id, graphForTracing);
+                var shortestPathTrace = ShortestPath(nodeToTrace.Item1, sourceRouteNode.Id, graphForTracing);
                 nodeTraceResults.Add(shortestPathTrace);
+                nShortestPathTraces++;
+
+                if (NumberOfShortestPathTracesWithinDistance(nodeTraceResults, nodeToTrace.Item2) >= query.MaxHits)
+                    break;
             }
 
             var nodeTraceResultOrdered = nodeTraceResults.OrderBy(n => n.Distance).ToList();
 
             sw.Stop();
-            _logger.LogInformation($"{nodesToTrace.Values.Count} shortets path trace(s) processed in {sw.ElapsedMilliseconds} milliseconds finding the {query.MaxHits} nearest nodes to source node with id: {sourceRouteNode.Id}");
+            _logger.LogInformation($"{nShortestPathTraces} shortets path trace(s) processed in {sw.ElapsedMilliseconds} milliseconds finding the {query.MaxHits} nearest nodes to source node with id: {sourceRouteNode.Id}");
 
             List<RouteNetworkTrace> tracesToReturn = new();
             List<IRouteNetworkElement> routeNodeElementsToReturn = new();
@@ -123,6 +129,18 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
             );
         }
 
+        private int NumberOfShortestPathTracesWithinDistance(List<RouteNetworkTrace> nodeTraceResults, double distance)
+        {
+            int tracesWithinDistance = 0;
+
+            foreach (var nodeTrace in nodeTraceResults)
+            {
+                if (nodeTrace.Distance <= distance)
+                    tracesWithinDistance++;
+            }
+
+            return tracesWithinDistance;
+        }
 
         private RouteNetworkTrace ShortestPath(RouteNode fromNode, Guid toNodeId, GraphHolder graphHolder)
         {
@@ -151,9 +169,11 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
             return new RouteNetworkTrace(fromNode.Id, fromNode?.NamingInfo?.Name, distance, segmentIds.ToArray(), segmentGeometries.ToArray());
         }
 
-        private static Dictionary<Guid, RouteNode> GetNodesToCheck(HashSet<RouteNodeKindEnum> interestHash, IEnumerable<IGraphObject> traceResult)
+        private static IOrderedEnumerable<(RouteNode, double)> GetNodeCandidatesOrderedByDistanceToSourceNode(RouteNode sourceRouteNode, HashSet<RouteNodeKindEnum> interestHash, IEnumerable<IGraphObject> traceResult)
         {
-            Dictionary<Guid, RouteNode> nodesToCheck = new();
+            var sourceRouteNodePoint = GetPoint(sourceRouteNode.Coordinates);
+
+            List<(RouteNode, double)> nodesToCheck = new();
 
             foreach (var graphObj in traceResult)
             {
@@ -162,12 +182,12 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
                     var routeNode = graphObj as RouteNode;
                     if (routeNode != null && routeNode.RouteNodeInfo != null && routeNode.RouteNodeInfo.Kind != null && interestHash.Contains(routeNode.RouteNodeInfo.Kind.Value))
                     {
-                        nodesToCheck.Add(routeNode.Id, routeNode);
+                        nodesToCheck.Add((routeNode, GetPoint(routeNode.Coordinates).Distance(sourceRouteNodePoint)));
                     }
                 }
             }
 
-            return nodesToCheck;
+            return nodesToCheck.OrderBy(n => n.Item2);
         }
 
         private static double GetLength(string lineStringJson)
@@ -183,7 +203,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
             return new LineString(coordinates.ToArray()).Length;
         }
 
-        private Point GetPoint(string pointGeojson)
+        private static Point GetPoint(string pointGeojson)
         {
             List<Coordinate> coordinates = new();
 
