@@ -79,7 +79,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
 
             // Find nodes to check/trace shortest path
             var graphForTracing = GetGraphForTracing(version, routeNetworkSubset);
-            var nodeCandidatesToTrace = GetNodeCandidatesOrderedByDistanceToSourceNode(sourceRouteNode, interestHash, routeNetworkSubset);
+            var nodeCandidatesToTrace = GetNodesToCheckOrderedByDistanceToSourceNode(sourceRouteNode, interestHash, routeNetworkSubset);
 
             List<RouteNetworkTrace> nodeTraceResults = new();
 
@@ -169,7 +169,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
             return new RouteNetworkTrace(fromNode.Id, fromNode?.NamingInfo?.Name, distance, segmentIds.ToArray(), segmentGeometries.ToArray());
         }
 
-        private static IOrderedEnumerable<(RouteNode, double)> GetNodeCandidatesOrderedByDistanceToSourceNode(RouteNode sourceRouteNode, HashSet<RouteNodeKindEnum> interestHash, IEnumerable<IGraphObject> traceResult)
+        private static IOrderedEnumerable<(RouteNode, double)> GetNodesToCheckOrderedByDistanceToSourceNode(RouteNode sourceRouteNode, HashSet<RouteNodeKindEnum> interestHash, IEnumerable<IGraphObject> traceResult)
         {
             var sourceRouteNodePoint = GetPoint(sourceRouteNode.Coordinates);
 
