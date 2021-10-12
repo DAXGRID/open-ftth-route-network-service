@@ -168,7 +168,7 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
 
             // Assert
             registerWalkOfInterestCommandResult.IsFailed.Should().BeTrue();
-            registerWalkOfInterestCommandResult.Errors.OfType<RegisterWalkOfInterestError>().Should().Contain(e => e.Code == RegisterWalkOfInterestErrorCodes.INVALID_WALK_SHOULD_CONTAIN_ROUTE_SEGMENT_IDS_ONLY);
+            registerWalkOfInterestCommandResult.Errors.OfType<RegisterWalkOfInterestError>().Should().Contain(e => e.Code == RegisterWalkOfInterestErrorCodes.INVALID_WALK_LAST_ROUTE_NETWORK_ELEMENT_MUST_BE_A_NODE);
         }
 
         [Fact]

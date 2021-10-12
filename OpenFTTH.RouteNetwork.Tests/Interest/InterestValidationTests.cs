@@ -47,6 +47,60 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
+        public async void ValidateValidWalkWithBothNodeAndSegmentIds_ShouldSucceed()
+        {
+            var walk = new RouteNetworkElementIdList() { TestRouteNetwork.CO_1, TestRouteNetwork.S1, TestRouteNetwork.HH_1, TestRouteNetwork.S2, TestRouteNetwork.HH_2, TestRouteNetwork.S4, TestRouteNetwork.CC_1};
+            var validateInterestCommand = new ValidateWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), walk);
+
+            var validateResult = await _commandDispatcher.HandleAsync<ValidateWalkOfInterest, Result<ValidatedRouteNetworkWalk>>(validateInterestCommand);
+
+            // Assert
+            validateResult.IsSuccess.Should().BeTrue();
+
+            validateResult.Value.NodeIds.Count.Should().Be(4);
+            validateResult.Value.SegmentIds.Count.Should().Be(3);
+
+            validateResult.Value.NodeIds[0].Should().Be(TestRouteNetwork.CO_1);
+            validateResult.Value.NodeIds[1].Should().Be(TestRouteNetwork.HH_1);
+            validateResult.Value.NodeIds[2].Should().Be(TestRouteNetwork.HH_2);
+            validateResult.Value.NodeIds[3].Should().Be(TestRouteNetwork.CC_1);
+
+            validateResult.Value.SegmentIds[0].Should().Be(TestRouteNetwork.S1);
+            validateResult.Value.SegmentIds[1].Should().Be(TestRouteNetwork.S2);
+            validateResult.Value.SegmentIds[2].Should().Be(TestRouteNetwork.S4);
+        }
+
+        [Fact]
+        public async void ValidateValidWalkWithBothNodeAndSegmentIdsThatOverlap_ShouldSucceed()
+        {
+            var walk = new RouteNetworkElementIdList() { TestRouteNetwork.HH_1, TestRouteNetwork.S1, TestRouteNetwork.CO_1, TestRouteNetwork.S1, TestRouteNetwork.HH_1 };
+            var validateInterestCommand = new ValidateWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), walk);
+
+            var validateResult = await _commandDispatcher.HandleAsync<ValidateWalkOfInterest, Result<ValidatedRouteNetworkWalk>>(validateInterestCommand);
+
+            // Assert
+            validateResult.IsSuccess.Should().BeTrue();
+
+            validateResult.Value.NodeIds.Count.Should().Be(3);
+            validateResult.Value.SegmentIds.Count.Should().Be(2);
+        }
+
+        [Fact]
+        public async void ValidateInvalidWalkWithBothNodeAndSegmentIds_ShouldFail()
+        {
+            // There's a hole in this walk
+            var walk = new RouteNetworkElementIdList() { TestRouteNetwork.HH_1, TestRouteNetwork.S1, TestRouteNetwork.CO_1, TestRouteNetwork.S1, TestRouteNetwork.HH_1, TestRouteNetwork.S4, TestRouteNetwork.CC_1 };
+            var validateInterestCommand = new ValidateWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), walk);
+
+            var validateResult = await _commandDispatcher.HandleAsync<ValidateWalkOfInterest, Result<ValidatedRouteNetworkWalk>>(validateInterestCommand);
+
+            // Assert
+            validateResult.IsFailed.Should().BeTrue();
+        }
+
+
+
+        [Fact]
         public async void ValidateInvalidWalk_ShouldFail()
         {
             // There's a hole in this walk

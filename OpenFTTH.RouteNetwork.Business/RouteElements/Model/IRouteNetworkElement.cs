@@ -1,9 +1,10 @@
-﻿using OpenFTTH.Events.Core.Infos;
+﻿using DAX.ObjectVersioning.Graph;
+using OpenFTTH.Events.Core.Infos;
 using System;
 
 namespace OpenFTTH.RouteNetwork.Business.RouteElements.Model
 {
-    public interface IRouteNetworkElement
+    public interface IRouteNetworkElement : IGraphObject
     {
         Guid Id { get; }
         string Coordinates { get; set; }

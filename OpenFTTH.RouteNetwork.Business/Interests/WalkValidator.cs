@@ -28,15 +28,10 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
             if (lookupRouteNetworkObjectsResult.IsFailed)
                 return Result.Fail<RouteNetworkElementIdList>(lookupRouteNetworkObjectsResult.Errors.First());
 
-            var sortedRouteNetworkObjectsResult = SortRouteSegments(lookupRouteNetworkObjectsResult.Value.OfType<RouteSegment>().ToList(), versionId);
-
-            if (sortedRouteNetworkObjectsResult.IsFailed)
-                return Result.Fail<RouteNetworkElementIdList>(sortedRouteNetworkObjectsResult.Errors.First());
-
             // If only one id is specified, make sure it'a a route segment
-            if (sortedRouteNetworkObjectsResult.Value.Count == 1 && !(sortedRouteNetworkObjectsResult.Value[0] is IRouteSegment))
+            if (lookupRouteNetworkObjectsResult.Value.Count == 1 && !(lookupRouteNetworkObjectsResult.Value[0] is IRouteSegment))
                 return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_WALK_SHOULD_CONTAIN_ROUTE_SEGMENT_IDS_ONLY, "If only one route network id is specified in a walk, it must be a route segment id"));
-
+          
             var routeElementsSummary = GetRouteNetworkElementsListSummary(lookupRouteNetworkObjectsResult.Value);
 
             switch (routeElementsSummary)
@@ -48,11 +43,22 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
                     return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_WALK_SHOULD_CONTAIN_ROUTE_SEGMENT_IDS_ONLY, "A valid walk cannot contain route nodes only."));
 
                 case RouteElementListSummary.RouteSegmentsOnly:
+                    var sortedRouteNetworkObjectsResult = SortRouteSegments(lookupRouteNetworkObjectsResult.Value.OfType<RouteSegment>().ToList(), versionId);
+
+                    if (sortedRouteNetworkObjectsResult.IsFailed)
+                        return Result.Fail<RouteNetworkElementIdList>(sortedRouteNetworkObjectsResult.Errors.First());
+
                     var routeSegments = sortedRouteNetworkObjectsResult.Value.OfType<RouteSegment>().ToList();
                     return ValidateSegmentSequence(routeSegments, versionId);
 
                 case RouteElementListSummary.BothRouteNodesAndSegments:
-                    return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_WALK_SHOULD_CONTAIN_ROUTE_SEGMENT_IDS_ONLY, "A valid walk should contain route segment ids only"));
+                    var validateResult = ValidateNodeSegmentSequence(lookupRouteNetworkObjectsResult.Value, versionId);
+                    if (validateResult.IsSuccess)
+                    {
+                        return Result.Ok(walkIds);
+                    }
+                    else
+                        return Result.Fail(validateResult.Errors.First());
             }
 
             return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_WALK_SHOULD_CONTAIN_ROUTE_SEGMENT_IDS_ONLY, "Unsupported type of route network id sequence"));
@@ -77,6 +83,36 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
             }
 
             return Result.Ok<RouteNetworkElementIdList>(CreateWalkFromSegmentSequence(routeSegments, versionId));
+        }
+
+        private Result ValidateNodeSegmentSequence(List<IRouteNetworkElement> routeNetworkElements, long versionId)
+        {
+            if (!(routeNetworkElements.First() is RouteNode))
+                return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_WALK_FIRST_ROUTE_NETWORK_ELEMENT_MUST_BE_A_NODE, $"First route network element with id: {routeNetworkElements.First().Id} was expected to be a node."));
+
+            if (!(routeNetworkElements.Last() is RouteNode))
+                return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_WALK_LAST_ROUTE_NETWORK_ELEMENT_MUST_BE_A_NODE, $"Last route network element with id: {routeNetworkElements.First().Id} was expected to be a node."));
+
+            var routeElementPosition = 0;
+
+            foreach (var currentRouteNetworkElement in routeNetworkElements)
+            {
+                if (routeElementPosition > 0)
+                {
+                    var prevElement = routeNetworkElements[routeElementPosition - 1];
+
+                    if (!IsAdjacent(prevElement, currentRouteNetworkElement, versionId))
+                        return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_WALK_ROUTE_NETWORK_ELEMENTS_ARE_NOT_ADJACENT, $"Route nodes or segments is out of sequence and/or not adjacent to each other. Route network element with id: {currentRouteNetworkElement.Id} was expected to be adjacent to route network element with id: {prevElement.Id} in the route network graph - but was not."));
+
+                    if (!IsDifferentType(prevElement, currentRouteNetworkElement, versionId))
+                        return Result.Fail(new RegisterWalkOfInterestError(RegisterWalkOfInterestErrorCodes.INVALID_WALK_ADJACENT_ROUTE_NETWORK_ELEMENTS_ARE_OF_SAME_TYPE, $"Route network element with id: {currentRouteNetworkElement.Id} adjacent to route network element with id: {prevElement.Id} is the same type. Expected node->segment->node->segment->node..."));
+
+                }
+
+                routeElementPosition++;
+            }
+
+            return Result.Ok();
         }
 
         private RouteNetworkElementIdList CreateWalkFromSegmentSequence(List<RouteSegment> routeSegments, long versionId)
@@ -150,6 +186,40 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
             foreach (var neighboor in segment1.NeighborElements(versionId))
             {
                 if (neighboor.NeighborElements(versionId).Contains(segment2))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static bool IsAdjacent(IRouteNetworkElement element1, IRouteNetworkElement element2, long versionId)
+        {
+            if (element1 is RouteNode routeNode)
+            {
+                if (routeNode.NeighborElements(versionId).Contains(element2))
+                    return true;
+            }
+
+            if (element1 is RouteSegment routeSegment)
+            {
+                if (routeSegment.NeighborElements(versionId).Contains(element2))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static bool IsDifferentType(IRouteNetworkElement element1, IRouteNetworkElement element2, long versionId)
+        {
+            if (element1 is RouteNode routeNode)
+            {
+                if (element2 is RouteSegment)
+                    return true;
+            }
+
+            if (element1 is RouteSegment routeSegment)
+            {
+                if (element2 is RouteNode)
                     return true;
             }
 
