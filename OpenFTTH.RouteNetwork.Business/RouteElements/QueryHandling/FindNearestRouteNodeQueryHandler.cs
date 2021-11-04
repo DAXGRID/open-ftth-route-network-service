@@ -13,6 +13,7 @@ using OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling;
 using QuikGraph;
 using QuikGraph.Algorithms;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -81,19 +82,22 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
             var graphForTracing = GetGraphForTracing(version, routeNetworkSubset);
             var nodeCandidatesToTrace = GetNodesToCheckOrderedByDistanceToSourceNode(sourceRouteNode, interestHash, routeNetworkSubset);
 
-            List<RouteNetworkTrace> nodeTraceResults = new();
+            ConcurrentBag<RouteNetworkTrace> nodeTraceResults = new();
 
             int nShortestPathTraces = 0;
 
-            foreach (var nodeToTrace in nodeCandidatesToTrace)
+            ParallelOptions po = new ParallelOptions();
+            po.MaxDegreeOfParallelism = Environment.ProcessorCount;
+
+            Parallel.ForEach(nodeCandidatesToTrace, po, (nodeToTrace, loopState) =>
             {
                 var shortestPathTrace = ShortestPath(nodeToTrace.Item1, sourceRouteNode.Id, graphForTracing);
                 nodeTraceResults.Add(shortestPathTrace);
                 nShortestPathTraces++;
 
                 if (NumberOfShortestPathTracesWithinDistance(nodeTraceResults, nodeToTrace.Item2) >= query.MaxHits)
-                    break;
-            }
+                    loopState.Break();
+            });
 
             var nodeTraceResultOrdered = nodeTraceResults.OrderBy(n => n.Distance).ToList();
 
@@ -129,7 +133,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
             );
         }
 
-        private int NumberOfShortestPathTracesWithinDistance(List<RouteNetworkTrace> nodeTraceResults, double distance)
+        private int NumberOfShortestPathTracesWithinDistance(IEnumerable<RouteNetworkTrace> nodeTraceResults, double distance)
         {
             int tracesWithinDistance = 0;
 
