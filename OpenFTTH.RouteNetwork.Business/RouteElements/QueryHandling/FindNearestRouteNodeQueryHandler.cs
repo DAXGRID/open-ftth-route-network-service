@@ -18,6 +18,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Roy_T.AStar.Graphs;
+using Roy_T.AStar.Primitives;
+using Roy_T.AStar.Paths;
 
 namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
 {
@@ -79,9 +82,10 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
             );
 
             // Find nodes to check/trace shortest path
-            var graphForTracing = GetGraphForTracing(version, routeNetworkSubset);
-            var nodeCandidatesToTrace = GetNodesToCheckOrderedByDistanceToSourceNode(sourceRouteNode, interestHash, routeNetworkSubset);
-
+            var nodeCandidates = GetAllNodeCandidates(sourceRouteNode, interestHash, routeNetworkSubset);
+            var graphForTracing = GetGraphForTracing(version, nodeCandidates, routeNetworkSubset);
+            var nodesOfInterest = GetNodesOfInterest(nodeCandidates, interestHash).ToList();
+            
             ConcurrentBag<RouteNetworkTrace> nodeTraceResults = new();
 
             int nShortestPathTraces = 0;
@@ -89,15 +93,16 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
             ParallelOptions po = new ParallelOptions();
             po.MaxDegreeOfParallelism = Environment.ProcessorCount;
 
-            Parallel.ForEach(nodeCandidatesToTrace, po, (nodeToTrace, loopState) =>
+
+            foreach (var nodeToTrace in nodesOfInterest)
             {
-                var shortestPathTrace = ShortestPath(nodeToTrace.Item1, sourceRouteNode.Id, graphForTracing);
+                var shortestPathTrace = ShortestPath(nodeToTrace.Node, sourceRouteNode.Id, graphForTracing);
                 nodeTraceResults.Add(shortestPathTrace);
                 nShortestPathTraces++;
 
-                if (NumberOfShortestPathTracesWithinDistance(nodeTraceResults, nodeToTrace.Item2) >= query.MaxHits)
-                    loopState.Break();
-            });
+                if (NumberOfShortestPathTracesWithinDistance(nodeTraceResults, nodeToTrace.BirdDistanceToSource) >= query.MaxHits)
+                    break;
+            }
 
             var nodeTraceResultOrdered = nodeTraceResults.OrderBy(n => n.Distance).ToList();
 
@@ -146,14 +151,22 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
             return tracesWithinDistance;
         }
 
+        
         private RouteNetworkTrace ShortestPath(RouteNode fromNode, Guid toNodeId, GraphHolder graphHolder)
         {
-            Func<Edge<Guid>, double> lineDistances = e => graphHolder.EdgeLengths[e];
+            // HH 10
+            if (fromNode.Id == Guid.Parse("d0e5ce6a-0d90-4355-a1ff-60db24e5b153"))
+            {
+            }
 
-            TryFunc<Guid, IEnumerable<Edge<Guid>>> tryGetPath = graphHolder.Graph.ShortestPathsDijkstra(lineDistances, fromNode.Id);
+            var pathFinder = new PathFinder();
 
-            IEnumerable<Edge<Guid>> path;
-            tryGetPath(toNodeId, out path);
+            var graphFromNode = graphHolder.Nodes[fromNode.Id];
+            var graphToNode = graphHolder.Nodes[toNodeId];
+
+            var maxAgentSpeed = Velocity.FromKilometersPerHour(1);
+
+            var path = pathFinder.FindPath(graphFromNode, graphToNode, maximumVelocity: maxAgentSpeed);
 
             List<Guid> segmentIds = new();
             List<string> segmentGeometries = new();
@@ -162,37 +175,66 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
 
             if (path != null)
             {
-                foreach (var edge in path)
+                foreach (var edge in path.Edges)
                 {
-                    segmentIds.Add(graphHolder.EdgeToSegment[edge].Id);
-                    segmentGeometries.Add(graphHolder.EdgeToSegment[edge].Coordinates);
-
-                    distance += graphHolder.EdgeLengths[edge];
+                    var segment = graphHolder.EdgeToSegment[edge];
+                    segmentIds.Add(segment.Id);
+                    segmentGeometries.Add(segment.Coordinates);
+                    distance += graphHolder.EdgeLengths[segment];
                 }
             }
             return new RouteNetworkTrace(fromNode.Id, fromNode?.NamingInfo?.Name, distance, segmentIds.ToArray(), segmentGeometries.ToArray());
         }
+        
 
-        private static IOrderedEnumerable<(RouteNode, double)> GetNodesToCheckOrderedByDistanceToSourceNode(RouteNode sourceRouteNode, HashSet<RouteNodeKindEnum> interestHash, IEnumerable<IGraphObject> traceResult)
+        private static IOrderedEnumerable<NodeCandidateHolder> GetNodesOfInterest(IEnumerable<NodeCandidateHolder> nodeCandidates, HashSet<RouteNodeKindEnum> interestHash)
+        {
+            List<NodeCandidateHolder> nodesToCheck = new();
+
+            foreach (var nodeCandidate in nodeCandidates)
+            {
+                var routeNode = nodeCandidate.Node;
+
+                if (routeNode != null && routeNode.RouteNodeInfo != null && routeNode.RouteNodeInfo.Kind != null && interestHash.Contains(routeNode.RouteNodeInfo.Kind.Value))
+                {
+                    nodesToCheck.Add(nodeCandidate);
+                }
+
+            }
+
+            return nodesToCheck.OrderBy(n => n.BirdDistanceToSource);
+        }
+
+        private static IEnumerable<NodeCandidateHolder> GetAllNodeCandidates(RouteNode sourceRouteNode, HashSet<RouteNodeKindEnum> interestHash, IEnumerable<IGraphObject> traceResult)
         {
             var sourceRouteNodePoint = GetPoint(sourceRouteNode.Coordinates);
 
-            List<(RouteNode, double)> nodesToCheck = new();
+            List<NodeCandidateHolder> nodeCandidates = new();
 
             foreach (var graphObj in traceResult)
             {
                 if (graphObj is RouteNode)
                 {
                     var routeNode = graphObj as RouteNode;
-                    if (routeNode != null && routeNode.RouteNodeInfo != null && routeNode.RouteNodeInfo.Kind != null && interestHash.Contains(routeNode.RouteNodeInfo.Kind.Value))
-                    {
-                        nodesToCheck.Add((routeNode, GetPoint(routeNode.Coordinates).Distance(sourceRouteNodePoint)));
-                    }
+
+                    var pnt = GetPoint(routeNode.Coordinates);
+
+                    nodeCandidates.Add(
+                        new NodeCandidateHolder()
+                        {
+                            Node = routeNode,
+                            BirdDistanceToSource = pnt.Distance(sourceRouteNodePoint),
+                            X = (float)pnt.X,
+                            Y = (float)pnt.Y
+                        }
+                    );
+
                 }
             }
 
-            return nodesToCheck.OrderBy(n => n.Item2);
+            return nodeCandidates;
         }
+
 
         private static double GetLength(string lineStringJson)
         {
@@ -216,19 +258,16 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
             return new Point(((JArray)coordPairs)[0].Value<double>(), ((JArray)coordPairs)[1].Value<double>());
         }
 
-
-        private static GraphHolder GetGraphForTracing(long version, IEnumerable<IGraphObject> traceResult)
+        private static GraphHolder GetGraphForTracing(long version, IEnumerable<NodeCandidateHolder> nodeCandidates, IEnumerable<IGraphObject> traceResult)
         {
             GraphHolder result = new();
 
-            foreach (var grapObject in traceResult)
+            var nodeA = new Node(Position.Zero);
+            var nodeB = new Node(new Position(10, 10));
+
+            foreach (var node in nodeCandidates)
             {
-                switch (grapObject)
-                {
-                    case RouteNode node:
-                        result.Graph.AddVertex(node.Id);
-                        break;
-                }
+                result.Nodes.Add(node.Node.Id, new Node(new Position(node.X * 100, node.Y * 100)));
             }
 
             foreach (var grapObject in traceResult)
@@ -236,15 +275,31 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
                 switch (grapObject)
                 {
                     case RouteSegment segment:
-                        var edge = new Edge<Guid>(segment.InV(version).Id, segment.OutV(version).Id);
-                        result.Graph.AddEdge(edge);
+                        var fromNode = result.Nodes[segment.InV(version).Id];
+                        var toNode = result.Nodes[segment.OutV(version).Id];
 
-                        result.EdgeLengths.Add(edge, GetLength(segment.Coordinates));
-                        result.EdgeToSegment.Add(edge, segment);
+                        var edgeForward = new Edge(fromNode, toNode, Velocity.FromKilometersPerHour(100));
+                        var edgeBackward = new Edge(toNode, fromNode, Velocity.FromKilometersPerHour(100));
+
+                        fromNode.Outgoing.Add(edgeForward);
+                        toNode.Incoming.Add(edgeForward);
+
+                        fromNode.Incoming.Add(edgeBackward);
+                        toNode.Outgoing.Add(edgeBackward);
+
+
+                        result.EdgeToSegment.Add(edgeForward, segment);
+                        result.EdgeToSegment.Add(edgeBackward, segment);
+
+                        System.Diagnostics.Debug.WriteLine($"{segment.InV(version).Id}->{segment.Id}->{segment.OutV(version).Id}");
+
+                        var length = GetLength(segment.Coordinates);
+                        result.EdgeLengths.Add(segment, length);
+
+                        //fromNode.Connect(toNode, Velocity.FromKilometersPerHour(100));
                         break;
                 }
             }
-
 
             return result;
         }
@@ -252,17 +307,26 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
 
     }
 
+    class NodeCandidateHolder
+    {
+        public RouteNode Node { get; set; }
+        public double BirdDistanceToSource { get; set; }
+        public float X { get; set; }
+        public float Y { get; set; }
+    }
+
     class GraphHolder
     {
-        public UndirectedGraph<Guid, Edge<Guid>> Graph { get; set; }
-        public Dictionary<object, double> EdgeLengths { get; set; }
-        public Dictionary<object, RouteSegment> EdgeToSegment { get; set; }
+        public Dictionary<Guid, Node> Nodes { get; set; }
+        public Dictionary<IEdge, RouteSegment> EdgeToSegment { get; set; }
+
+        public Dictionary<RouteSegment, double> EdgeLengths { get; set; }
 
         public GraphHolder()
         {
-            Graph = new UndirectedGraph<Guid, Edge<Guid>>();
-            EdgeLengths = new Dictionary<object, double>();
-            EdgeToSegment = new Dictionary<object, RouteSegment>();
+            Nodes = new();
+            EdgeLengths = new();
+            EdgeToSegment = new();
         }
     }
 
