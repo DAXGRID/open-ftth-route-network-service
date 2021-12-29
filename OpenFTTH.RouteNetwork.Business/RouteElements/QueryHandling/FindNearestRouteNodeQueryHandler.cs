@@ -10,8 +10,6 @@ using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.RouteNetwork.Business.RouteElements.Model;
 using OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling;
-using QuikGraph;
-using QuikGraph.Algorithms;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -86,7 +84,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
             var graphForTracing = GetGraphForTracing(version, nodeCandidates, routeNetworkSubset);
             var nodesOfInterest = GetNodesOfInterest(nodeCandidates, interestHash).ToList();
             
-            ConcurrentBag<RouteNetworkTrace> nodeTraceResults = new();
+            ConcurrentBag<NearestRouteNodeTraceResult> nodeTraceResults = new();
 
             int nShortestPathTraces = 0;
 
@@ -109,7 +107,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
             sw.Stop();
             _logger.LogInformation($"{nShortestPathTraces} shortets path trace(s) processed in {sw.ElapsedMilliseconds} milliseconds finding the {query.MaxHits} nearest nodes to source node with id: {sourceRouteNode.Id}");
 
-            List<RouteNetworkTrace> tracesToReturn = new();
+            List<NearestRouteNodeTraceResult> tracesToReturn = new();
             List<IRouteNetworkElement> routeNodeElementsToReturn = new();
 
             for (int i = 0; i < query.MaxHits && i < nodeTraceResultOrdered.Count; i++)
@@ -138,7 +136,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
             );
         }
 
-        private int NumberOfShortestPathTracesWithinDistance(IEnumerable<RouteNetworkTrace> nodeTraceResults, double distance)
+        private int NumberOfShortestPathTracesWithinDistance(IEnumerable<NearestRouteNodeTraceResult> nodeTraceResults, double distance)
         {
             int tracesWithinDistance = 0;
 
@@ -152,7 +150,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
         }
 
         
-        private RouteNetworkTrace ShortestPath(RouteNode fromNode, Guid toNodeId, GraphHolder graphHolder)
+        private NearestRouteNodeTraceResult ShortestPath(RouteNode fromNode, Guid toNodeId, GraphHolder graphHolder)
         {
             // HH 10
             if (fromNode.Id == Guid.Parse("d0e5ce6a-0d90-4355-a1ff-60db24e5b153"))
@@ -183,7 +181,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
                     distance += graphHolder.EdgeLengths[segment];
                 }
             }
-            return new RouteNetworkTrace(fromNode.Id, fromNode?.NamingInfo?.Name, distance, segmentIds.ToArray(), segmentGeometries.ToArray());
+            return new NearestRouteNodeTraceResult(fromNode.Id, fromNode?.NamingInfo?.Name, distance, segmentIds.ToArray(), segmentGeometries.ToArray());
         }
         
 

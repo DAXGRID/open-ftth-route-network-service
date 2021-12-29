@@ -10,13 +10,13 @@ namespace OpenFTTH.RouteNetwork.API.Queries
     {
         public Guid SourceRouteNodeId { get; }
         public LookupCollection<RouteNetworkElement> RouteNetworkElements { get; }
-        public LookupCollection<RouteNetworkTrace> RouteNetworkTraces { get; }
+        public LookupCollection<NearestRouteNodeTraceResult> RouteNetworkTraces { get; }
 
-        public FindNearestRouteNodesResult(Guid sourceRouteNodeId, IEnumerable<RouteNetworkElement> routeNetworkElements, IEnumerable<RouteNetworkTrace> routeNetworkTraces)
+        public FindNearestRouteNodesResult(Guid sourceRouteNodeId, IEnumerable<RouteNetworkElement> routeNetworkElements, IEnumerable<NearestRouteNodeTraceResult> routeNetworkTraces)
         {
             SourceRouteNodeId = sourceRouteNodeId;
             RouteNetworkElements = new LookupCollection<RouteNetworkElement>(routeNetworkElements);
-            RouteNetworkTraces = new LookupCollection<RouteNetworkTrace>(routeNetworkTraces);
+            RouteNetworkTraces = new LookupCollection<NearestRouteNodeTraceResult>(routeNetworkTraces);
         }
     }
 }

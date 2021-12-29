@@ -3,7 +3,7 @@ using System;
 
 namespace OpenFTTH.RouteNetwork.API.Model
 {
-    public record RouteNetworkTrace : IIdentifiedObject
+    public record NearestRouteNodeTraceResult : IIdentifiedObject
     {
         public Guid DestNodeId { get; }
         public string? Name { get; }
@@ -14,7 +14,7 @@ namespace OpenFTTH.RouteNetwork.API.Model
         public Guid Id => DestNodeId;
         public string? Description => null;
 
-        public RouteNetworkTrace(Guid destNodeId, string? name, double distance, Guid[] routeNetworkSegmentIds, string[] routeNetworkSegmentGeometries)
+        public NearestRouteNodeTraceResult(Guid destNodeId, string? name, double distance, Guid[] routeNetworkSegmentIds, string[] routeNetworkSegmentGeometries)
         {
             DestNodeId = destNodeId;
             Name = name;
