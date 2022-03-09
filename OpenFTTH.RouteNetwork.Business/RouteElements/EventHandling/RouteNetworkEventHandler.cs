@@ -259,9 +259,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
             }
 
             var walk = new ValidatedRouteNetworkWalk(result);
-            RouteNetworkElementIdList segmentsOnly = new();
-            segmentsOnly.AddRange(walk.SegmentIds);
-            return segmentsOnly;
+            return walk.RouteNetworkElementRefs;
         }
 
         private void HandleEvent(RouteNodeAdded request, ITransaction transaction)
