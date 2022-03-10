@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using OpenFTTH.CQRS;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenFTTH.RouteNetwork.Service.Controllers
 {
