@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
 WORKDIR /app
 
 COPY ./*sln ./
@@ -15,7 +15,7 @@ WORKDIR /app/OpenFTTH.RouteNetwork.Service
 RUN dotnet publish -c Release -o out --packages ./packages
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0
 WORKDIR /app
 
 COPY --from=build-env /app/OpenFTTH.RouteNetwork.Service/out .

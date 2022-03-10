@@ -1,16 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="FluentResults" Version="2.3.0" />
-    <PackageReference Include="OpenFTTH.Core" Version="1.0.1" />
-    <PackageReference Include="OpenFTTH.CQRS" Version="1.5.2" />
-    <PackageReference Include="OpenFTTH.Events" Version="2.8.0" />
-    <PackageReference Include="OpenFTTH.EventSourcing" Version="1.3.0" />
+    <PackageReference Include="OpenFTTH.Core" Version="2.0.0" />
+    <PackageReference Include="OpenFTTH.CQRS" Version="2.0.1" />
+    <PackageReference Include="OpenFTTH.Events" Version="3.0.0" />
+    <PackageReference Include="OpenFTTH.EventSourcing" Version="2.0.0" />
   </ItemGroup>
 
 </Project>
