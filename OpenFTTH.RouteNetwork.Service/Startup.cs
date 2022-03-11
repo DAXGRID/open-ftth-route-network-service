@@ -45,6 +45,5 @@ namespace OpenFTTH.RouteNetwork.Service
                 endpoints.MapControllers();
             });
         }
-       
     }
 }
