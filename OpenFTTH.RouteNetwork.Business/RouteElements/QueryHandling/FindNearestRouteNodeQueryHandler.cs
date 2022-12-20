@@ -152,11 +152,6 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
         
         private NearestRouteNodeTraceResult ShortestPath(RouteNode fromNode, Guid toNodeId, GraphHolder graphHolder)
         {
-            // HH 10
-            if (fromNode.Id == Guid.Parse("d0e5ce6a-0d90-4355-a1ff-60db24e5b153"))
-            {
-            }
-
             var pathFinder = new PathFinder();
 
             var graphFromNode = graphHolder.Nodes[fromNode.Id];
@@ -303,31 +298,30 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
         }
 
 
-    }
-
-    class NodeCandidateHolder
-    {
-        public RouteNode Node { get; set; }
-        public double BirdDistanceToSource { get; set; }
-        public float X { get; set; }
-        public float Y { get; set; }
-    }
-
-    class GraphHolder
-    {
-        public Dictionary<Guid, Node> Nodes { get; set; }
-        public Dictionary<IEdge, RouteSegment> EdgeToSegment { get; set; }
-
-        public Dictionary<RouteSegment, double> EdgeLengths { get; set; }
-
-        public GraphHolder()
+        class NodeCandidateHolder
         {
-            Nodes = new();
-            EdgeLengths = new();
-            EdgeToSegment = new();
+            public RouteNode Node { get; set; }
+            public double BirdDistanceToSource { get; set; }
+            public float X { get; set; }
+            public float Y { get; set; }
         }
-    }
 
+        class GraphHolder
+        {
+            public Dictionary<Guid, Node> Nodes { get; set; }
+            public Dictionary<IEdge, RouteSegment> EdgeToSegment { get; set; }
+
+            public Dictionary<RouteSegment, double> EdgeLengths { get; set; }
+
+            public GraphHolder()
+            {
+                Nodes = new();
+                EdgeLengths = new();
+                EdgeToSegment = new();
+            }
+        }
+
+    }
 
 }
 

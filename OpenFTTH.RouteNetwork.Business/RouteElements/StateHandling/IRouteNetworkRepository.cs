@@ -10,5 +10,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling
         Result<List<IRouteNetworkElement>> GetRouteElements(RouteNetworkElementIdList guids, bool createSubstitudesForMissingRouteNetworkElements = false);
 
         IRouteNetworkState NetworkState { get; }
+
+        IEnumerable<IRouteNetworkElement> GetByEnvelope(long version, Envelope extent);
     }
 }

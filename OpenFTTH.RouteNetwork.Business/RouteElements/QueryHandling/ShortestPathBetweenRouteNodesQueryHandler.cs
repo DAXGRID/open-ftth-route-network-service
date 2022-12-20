@@ -61,24 +61,222 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
 
             return Task.FromResult(
                 Result.Ok<ShortestPathBetweenRouteNodesResult>(
-                    null
+                    AStartShortestPath(query.SourceRouteNodeId, query.DestRouteNodeId)
                 )
             );
         }
 
-        private int NumberOfShortestPathTracesWithinDistance(IEnumerable<NearestRouteNodeTraceResult> nodeTraceResults, double distance)
+        private ShortestPathBetweenRouteNodesResult AStartShortestPath(Guid sourceRouteNodeId, Guid destRouteNodeId)
         {
-            int tracesWithinDistance = 0;
+            Stopwatch st = new Stopwatch();
 
-            foreach (var nodeTrace in nodeTraceResults)
-            {
-                if (nodeTrace.Distance <= distance)
-                    tracesWithinDistance++;
-            }
+            st.Start();
+            
+            var graph = GetGraphForTracing(sourceRouteNodeId, destRouteNodeId);
 
-            return tracesWithinDistance;
+            var shortestPathResult = graph.ShortestPath(sourceRouteNodeId, destRouteNodeId);
+
+            st.Stop();
+
+            return new ShortestPathBetweenRouteNodesResult(shortestPathResult, st.ElapsedMilliseconds);
         }
 
+
+        private GraphHolder GetGraphForTracing(Guid sourceRouteNodeId, Guid destRouteNodeId)
+        {
+            var extent = new Model.Envelope();
+
+            IRouteNode sourceNode = GetNode(sourceRouteNodeId);
+            extent.ExpandToInclude(sourceNode.X, sourceNode.Y);
+
+            IRouteNode destNode = GetNode(destRouteNodeId);
+            extent.ExpandToInclude(destNode.X, destNode.Y);
+
+            // Expand at least 50 meter to prevent small branch cables etc. to be out of extent
+            extent.Expand(50);
+
+            // Expand 20 percent
+            extent.ExpandPercent(20);
+
+            GraphHolder graph = new();
+
+            var version = _routeNetworkState.GetLatestCommitedVersion();
+
+            var routeNetworkCandidates = _routeNetworkRepository.GetByEnvelope(version, extent).ToList();
+
+            foreach (var routeNetworkElement in routeNetworkCandidates)
+            {
+                if (routeNetworkElement is IRouteNode node)
+                {
+                    var shortestPathNode = new Node(new Position((float)node.X, (float)node.Y));
+                    graph.Nodes.Add(routeNetworkElement.Id, shortestPathNode);
+                    graph.NodeToRouteNodeId.Add(shortestPathNode, routeNetworkElement.Id);
+                }
+            }
+
+            foreach (var routeNetworkElement in routeNetworkCandidates)
+            {
+                if (routeNetworkElement is RouteSegment segment)
+                {
+                    var fromNodeId = segment.InV(version).Id;
+                    var toNodeId = segment.OutV(version).Id;
+
+                    if (graph.Nodes.TryGetValue(fromNodeId, out Node fromNode))
+                    {
+                        if (graph.Nodes.TryGetValue(toNodeId, out Node toNode))
+                        {
+                            var edgeForward = new Edge(fromNode, toNode, Velocity.FromKilometersPerHour(1000));
+                            graph.EdgeToRouteSegmentId.Add(edgeForward, segment.Id);
+
+                            var edgeBackward = new Edge(toNode, fromNode, Velocity. FromKilometersPerHour(1000));
+                            graph.EdgeToRouteSegmentId.Add(edgeBackward, segment.Id);
+
+                            fromNode.Outgoing.Add(edgeForward);
+                            toNode.Incoming.Add(edgeForward);
+
+                            fromNode.Incoming.Add(edgeBackward);
+                            toNode.Outgoing.Add(edgeBackward);
+                        }
+                    }
+                }
+            }
+
+            return graph;
+        }
+
+        private IRouteNode GetNode(Guid nodeId)
+        {
+            var sourceNode = _routeNetworkState.GetRouteNetworkElement(nodeId) as IRouteNode;
+
+            if (sourceNode == null)
+                throw new ApplicationException($"Cannot find any route node with id: {nodeId} in route network state.");
+
+            return sourceNode;
+        }
+
+
+        class GraphHolder
+        {
+            public Dictionary<Guid, Node> Nodes = new();
+            public Dictionary<IEdge, Guid> EdgeToRouteSegmentId = new();
+            public Dictionary<INode, Guid> NodeToRouteNodeId = new();
+
+            public List<Guid> ShortestPath(Guid fromNodeId, Guid toNodeId)
+            {
+                List<Guid> routeNetworkElementIdsResult = new();
+
+                var pathFinder = new PathFinder();
+
+                var graphFromNode = Nodes[fromNodeId];
+                var graphToNode = Nodes[toNodeId];
+
+                var maxAgentSpeed = Velocity.FromKilometersPerHour(1);
+
+                var path = pathFinder.FindPath(graphFromNode, graphToNode, maximumVelocity: maxAgentSpeed);
+
+                if (path != null)
+                {
+                    IEdge? prevEdge = null;
+
+                    bool first = true;
+
+                    foreach (var currentEdge in path.Edges)
+                    {
+                        if (prevEdge != null)
+                        {
+                            var currentStartNodeId = NodeToRouteNodeId[currentEdge.Start];
+                            var currentEndNodeId = NodeToRouteNodeId[currentEdge.End];
+
+                            var prevStartNodeId = NodeToRouteNodeId[prevEdge.Start];
+                            var prevEndNodeId = NodeToRouteNodeId[prevEdge.End];
+
+                            // (s)prev(e)->(s)current(e)
+                            if (prevEndNodeId == currentStartNodeId)
+                            {
+                                if (first)
+                                {
+                                    routeNetworkElementIdsResult.Add(prevStartNodeId);
+                                    routeNetworkElementIdsResult.Add(EdgeToRouteSegmentId[prevEdge]);
+                                    routeNetworkElementIdsResult.Add(currentStartNodeId);
+
+                                    first = false;
+                                }
+
+                                routeNetworkElementIdsResult.Add(EdgeToRouteSegmentId[currentEdge]);
+                                routeNetworkElementIdsResult.Add(currentEndNodeId);
+                            }
+                            // (e)prev(s)->(s)current(e)
+                            else if (prevStartNodeId == currentStartNodeId)
+                            {
+                                if (first)
+                                {
+                                    routeNetworkElementIdsResult.Add(prevEndNodeId);
+                                    routeNetworkElementIdsResult.Add(EdgeToRouteSegmentId[prevEdge]);
+                                    routeNetworkElementIdsResult.Add(currentStartNodeId);
+                                    first = false;
+                                }
+
+                                routeNetworkElementIdsResult.Add(EdgeToRouteSegmentId[currentEdge]);
+                                routeNetworkElementIdsResult.Add(currentEndNodeId);
+                            }
+                            // (s)prev(e)->(e)current(s)
+                            else if (prevEndNodeId == currentEndNodeId)
+                            {
+                                if (first)
+                                {
+                                    routeNetworkElementIdsResult.Add(prevStartNodeId);
+                                    routeNetworkElementIdsResult.Add(EdgeToRouteSegmentId[prevEdge]);
+                                    routeNetworkElementIdsResult.Add(currentEndNodeId);
+                                    first = false;
+                                }
+
+                                routeNetworkElementIdsResult.Add(EdgeToRouteSegmentId[currentEdge]);
+                                routeNetworkElementIdsResult.Add(currentStartNodeId);
+                            }
+                            // (e)prev(s)->(e)current(s)
+                            else if (prevStartNodeId == currentEndNodeId)
+                            {
+                                if (first)
+                                {
+                                    routeNetworkElementIdsResult.Add(prevEndNodeId);
+                                    routeNetworkElementIdsResult.Add(EdgeToRouteSegmentId[prevEdge]);
+                                    routeNetworkElementIdsResult.Add(currentEndNodeId);
+                                    first = false;
+                                }
+
+                                routeNetworkElementIdsResult.Add(EdgeToRouteSegmentId[currentEdge]);
+                                routeNetworkElementIdsResult.Add(currentStartNodeId);
+                            }
+
+                        }
+
+
+                        prevEdge = currentEdge;
+                    }
+
+                    if (routeNetworkElementIdsResult.Count == 0 && prevEdge != null)
+                    {
+                        var prevStartNodeId = NodeToRouteNodeId[prevEdge.Start];
+                        var prevEndNodeId = NodeToRouteNodeId[prevEdge.End];
+
+                        if (prevStartNodeId == fromNodeId)
+                        {
+                            routeNetworkElementIdsResult.Add(prevStartNodeId);
+                            routeNetworkElementIdsResult.Add(EdgeToRouteSegmentId[prevEdge]);
+                            routeNetworkElementIdsResult.Add(prevEndNodeId);
+                        }
+                        else
+                        {
+                            routeNetworkElementIdsResult.Add(prevEndNodeId);
+                            routeNetworkElementIdsResult.Add(EdgeToRouteSegmentId[prevEdge]);
+                            routeNetworkElementIdsResult.Add(prevStartNodeId);
+                        }
+                    }
+                }
+
+                return routeNetworkElementIdsResult;
+            }
+        }
     }
 
 }

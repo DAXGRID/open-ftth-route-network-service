@@ -39,6 +39,12 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.Model
             }
         }
 
+        public double[] CoordArray
+        {
+            get {
+                return new double[] { X, Y };
+            }
+        }
 
         private static double[] DoubleArrayFromCoordinateString(string coordinates)
         {

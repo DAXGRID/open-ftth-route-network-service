@@ -1,4 +1,6 @@
-﻿namespace OpenFTTH.RouteNetwork.Business.RouteElements.Model
+﻿using System;
+
+namespace OpenFTTH.RouteNetwork.Business.RouteElements.Model
 {
     public record class Envelope
     {
@@ -22,6 +24,11 @@
             MinY = minY;
             MaxX = maxX;
             MaxY = maxY;
+        }
+
+        public double Width
+        {
+            get { return MaxX - MinX; }
         }
 
         public void ExpandToInclude(double x, double y)
@@ -64,6 +71,29 @@
                 return true;
             else
                 return false;
+        }
+
+        public void Expand(double v)
+        {
+            MinX -= v;
+            MinY -= v;
+            MaxX += v;
+            MaxY += v;
+        }
+
+        public void ExpandPercent(double percent)
+        {
+            if (percent <= 0)
+            {
+                throw new ApplicationException("Percent value must be greated than 0");
+            }
+
+            var extraMargin = (Width * percent) / 100 / 2;
+
+            MinX -= extraMargin;
+            MinY -= extraMargin;
+            MaxX += extraMargin;
+            MaxY += extraMargin;
         }
     }
 }

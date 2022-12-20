@@ -160,6 +160,18 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling
             return _cmdTransaction;
         }
 
+        public IEnumerable<IRouteNetworkElement> GetByEnvelope(long version, Envelope extent)
+        {
+            foreach (var obj in _objectManager.GetObjects(version))
+            {
+                if (obj is IRouteNetworkElement networkElement)
+                {
+                    if (extent.IsWithin(networkElement.CoordArray))
+                        yield return networkElement;
+                }
+            }
+        }
+
         public bool IsLoadMode => _loadMode;
     }
 }
