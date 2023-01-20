@@ -3,60 +3,63 @@ using FluentResults;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using OpenFTTH.CQRS;
+using OpenFTTH.EventSourcing;
 using OpenFTTH.Events.Core;
 using OpenFTTH.Events.RouteNetwork;
-using OpenFTTH.EventSourcing;
 using OpenFTTH.RouteNetwork.API.Commands;
 using OpenFTTH.RouteNetwork.API.Model;
-using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.RouteNetwork.Business.Interest.Projections;
 using OpenFTTH.RouteNetwork.Business.RouteElements.Model;
 using OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
-namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
+namespace OpenFTTH.RouteNetwork.Business.RouteElements.Projection
 {
-    public class RouteNetworkEventHandler : IObserver<RouteNetworkEditOperationOccuredEvent>
+    public class RouteNetworkProjection : ProjectionBase
     {
-        private readonly ILogger<RouteNetworkEventHandler> _logger;
+        private readonly ILogger<RouteNetworkProjection> _logger;
         private readonly IRouteNetworkState _networkState;
         private readonly IEventStore _eventStore;
         private readonly ICommandDispatcher _commandDispatcher;
         private readonly IQueryDispatcher _queryDispatcher;
 
-        private HashSet<Guid> _alreadyProcessed = new HashSet<Guid>();
-
-        public void OnCompleted()
-        {
-        }
-
-        public void OnError(Exception error)
-        {
-        }
-
-        public void OnNext(RouteNetworkEditOperationOccuredEvent @event)
-        {
-            HandleEvent(@event);
-        }
-
-        public RouteNetworkEventHandler(ILoggerFactory loggerFactory, IRouteNetworkState networkState, IEventStore eventStore, ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher)
+        public RouteNetworkProjection(
+            ILoggerFactory loggerFactory,
+            IRouteNetworkState networkState,
+            IEventStore eventStore,
+            ICommandDispatcher commandDispatcher,
+            IQueryDispatcher queryDispatcher)
         {
             if (null == loggerFactory)
             {
                 throw new ArgumentNullException("loggerFactory is null");
             }
 
-            _logger = loggerFactory.CreateLogger<RouteNetworkEventHandler>();
+            _logger = loggerFactory.CreateLogger<RouteNetworkProjection>();
 
             _networkState = networkState;
             _eventStore = eventStore;
             _commandDispatcher = commandDispatcher;
             _queryDispatcher = queryDispatcher;
+
+            ProjectEvent<RouteNetworkEditOperationOccuredEvent>(Project);
         }
 
-        public void HandleEvent(RouteNetworkEditOperationOccuredEvent request)
+        private void Project(IEventEnvelope eventEnvelope)
+        {
+            switch (eventEnvelope.Data)
+            {
+                case (RouteNetworkEditOperationOccuredEvent @event):
+                    HandleEvent(@event);
+                    break;
+                default:
+                    throw new ArgumentException(
+                        $"Could not handle event of type '{eventEnvelope.GetType().Name}'.");
+            }
+        }
+
+        internal void HandleEvent(RouteNetworkEditOperationOccuredEvent request)
         {
             _logger.LogDebug("Got route network edit opreation occured message:");
 
@@ -156,7 +159,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
 
                 RouteSegmentAdded? fromAddedSegmentEvent;
                 RouteSegmentAdded? toAddedSegmentEvent;
-                
+
                 Guid? splitNodeId;
 
                 foreach (var routeNetworkEvent in command.RouteNetworkEvents)
@@ -168,7 +171,6 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
                     else if (routeNetworkEvent is RouteSegmentRemoved)
                         removedSegmentEvent = routeNetworkEvent as RouteSegmentRemoved;
                 }
-
 
                 // Only proceed if we manage to get all the needed information from the split command
                 if (firstAddedSegmentEvent != null && secondAddedSegmentEvent != null && removedSegmentEvent != null)
@@ -192,7 +194,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
                     var interestRelationsResult = interestsProjection.GetInterestsByRouteNetworkElementId(removedSegmentEvent.SegmentId);
 
                     if (interestRelationsResult.IsFailed)
-                    { 
+                    {
                         _logger.LogError($"Split handler: Failed with error: {interestRelationsResult.Errors.First().Message} trying to get interest related by removed segment with id: {removedSegmentEvent.SegmentId} processing split command: " + JsonConvert.SerializeObject(command));
                         return;
                     }
@@ -234,7 +236,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
 
             for (int i = 0; i < existingRouteNetworkElementIds.Count; i++)
             {
-                var existingId = existingRouteNetworkElementIds[i]; 
+                var existingId = existingRouteNetworkElementIds[i];
 
                 if (existingId == removedSegmentId)
                 {
@@ -266,9 +268,6 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
         {
             _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
 
-            if (AlreadyProcessed(request.EventId))
-                return;
-
             var routeNode = new RouteNode(request.NodeId, request.Geometry)
             {
                 RouteNodeInfo = request.RouteNodeInfo,
@@ -284,10 +283,6 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
         private void HandleEvent(RouteSegmentAdded request, ITransaction transaction)
         {
             _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
-
-            if (AlreadyProcessed(request.EventId))
-                return;
-
 
             if (!(_networkState.GetRouteNetworkElement(request.FromNodeId) is RouteNode fromNode))
             {
@@ -318,9 +313,6 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
         {
             _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
 
-            if (AlreadyProcessed(request.EventId))
-                return;
-
             transaction.Delete(request.SegmentId, ignoreDublicates: true);
         }
 
@@ -328,19 +320,12 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
         {
             _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
 
-            if (AlreadyProcessed(request.EventId))
-                return;
-
             transaction.Delete(request.SegmentId, ignoreDublicates: true);
         }
-
 
         private void HandleEvent(RouteNodeMarkedForDeletion request, ITransaction transaction)
         {
             _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
-
-            if (AlreadyProcessed(request.EventId))
-                return;
 
             transaction.Delete(request.NodeId, ignoreDublicates: true);
         }
@@ -348,9 +333,6 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
         private void HandleEvent(NamingInfoModified request, ITransaction transaction)
         {
             _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
-
-            if (AlreadyProcessed(request.EventId))
-                return;
 
             if (_networkState.GetRouteNetworkElement(request.AggregateId) is IRouteNetworkElement existingRouteNetworkElement)
             {
@@ -367,9 +349,6 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
         {
             _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
 
-            if (AlreadyProcessed(request.EventId))
-                return;
-
             if (_networkState.GetRouteNetworkElement(request.AggregateId) is IRouteNetworkElement existingRouteNetworkElement)
             {
                 // We don't care about versioning
@@ -384,9 +363,6 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
         private void HandleEvent(MappingInfoModified request, ITransaction transaction)
         {
             _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
-
-            if (AlreadyProcessed(request.EventId))
-                return;
 
             if (_networkState.GetRouteNetworkElement(request.AggregateId) is IRouteNetworkElement existingRouteNetworkElement)
             {
@@ -403,9 +379,6 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
         {
             _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
 
-            if (AlreadyProcessed(request.EventId))
-                return;
-
             if (_networkState.GetRouteNetworkElement(request.AggregateId) is IRouteNetworkElement existingRouteNetworkElement)
             {
                 // We don't care about versioning
@@ -420,9 +393,6 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
         private void HandleEvent(RouteNodeInfoModified request, ITransaction transaction)
         {
             _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
-
-            if (AlreadyProcessed(request.EventId))
-                return;
 
             if (_networkState.GetRouteNetworkElement(request.NodeId) is IRouteNode existingRouteNode)
             {
@@ -439,9 +409,6 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
         {
             _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
 
-            if (AlreadyProcessed(request.EventId))
-                return;
-
             if (_networkState.GetRouteNetworkElement(request.SegmentId) is IRouteSegment existingRouteSegment)
             {
                 // We don't care about versioning here
@@ -456,9 +423,6 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
         private void HandleEvent(RouteNodeGeometryModified request, ITransaction transaction)
         {
             _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
-
-            if (AlreadyProcessed(request.EventId))
-                return;
 
             if (_networkState.GetRouteNetworkElement(request.NodeId) is IRouteNode existingRouteNode)
             {
@@ -475,9 +439,6 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
         {
             _logger.LogDebug($"Handler got {request.GetType().Name} event seq no: {request.EventSequenceNumber}");
 
-            if (AlreadyProcessed(request.EventId))
-                return;
-
             if (_networkState.GetRouteNetworkElement(request.SegmentId) is IRouteSegment existingRouteSegment)
             {
                 // We don't care about versioning here
@@ -486,17 +447,6 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling
             else
             {
                 _logger.LogWarning($"Could not lookup existing route segment by id: {request.SegmentId} processing event: {JsonConvert.SerializeObject(request)}");
-            }
-        }
-
-        private bool AlreadyProcessed(Guid id)
-        {
-            if (_alreadyProcessed.Contains(id))
-                return true;
-            else
-            {
-                _alreadyProcessed.Add(id);
-                return false;
             }
         }
     }

@@ -6,7 +6,7 @@ using Newtonsoft.Json.Serialization;
 using OpenFTTH.CQRS;
 using OpenFTTH.Events.RouteNetwork;
 using OpenFTTH.EventSourcing;
-using OpenFTTH.RouteNetwork.Business.RouteElements.EventHandling;
+using OpenFTTH.RouteNetwork.Business.RouteElements.Projection;
 using OpenFTTH.RouteNetwork.Business.RouteElements.Model;
 using System;
 using System.Collections.Generic;
@@ -74,7 +74,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling
 
             var editOperationEvents = JsonConvert.DeserializeObject<List<RouteNetworkEditOperationOccuredEvent>>(json);
 
-            var routeNetworkEventHandler = new RouteNetworkEventHandler(_loggerFactory, this, _eventStore, _commandDispatcher, _queryDispatcher);
+            var routeNetworkEventHandler = new RouteNetworkProjection(_loggerFactory, this, _eventStore, _commandDispatcher, _queryDispatcher);
 
             foreach (var editOperationEvent in editOperationEvents)
                 routeNetworkEventHandler.HandleEvent(editOperationEvent);
