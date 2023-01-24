@@ -1,13 +1,12 @@
-﻿using OpenFTTH.CQRS;
+﻿using FluentAssertions;
+using FluentResults;
+using OpenFTTH.CQRS;
 using OpenFTTH.RouteNetwork.API.Commands;
 using OpenFTTH.RouteNetwork.API.Model;
-using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.RouteNetwork.Tests.Fixtures;
 using System;
+using System.Threading.Tasks;
 using Xunit;
-using FluentAssertions;
-using FluentResults;
-using System.Linq;
 
 namespace OpenFTTH.RouteNetwork.Tests
 {
@@ -23,11 +22,11 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void ValidateValidWalk_ShouldSucceed()
+        public async Task ValidateValidWalk_ShouldSucceed()
         {
             var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S2, TestRouteNetwork.S1, TestRouteNetwork.S4 };
             var validateInterestCommand = new ValidateWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), walk);
-            
+
             var validateResult = await _commandDispatcher.HandleAsync<ValidateWalkOfInterest, Result<ValidatedRouteNetworkWalk>>(validateInterestCommand);
 
             // Assert
@@ -47,9 +46,9 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void ValidateValidWalkWithBothNodeAndSegmentIds_ShouldSucceed()
+        public async Task ValidateValidWalkWithBothNodeAndSegmentIds_ShouldSucceed()
         {
-            var walk = new RouteNetworkElementIdList() { TestRouteNetwork.CO_1, TestRouteNetwork.S1, TestRouteNetwork.HH_1, TestRouteNetwork.S2, TestRouteNetwork.HH_2, TestRouteNetwork.S4, TestRouteNetwork.CC_1};
+            var walk = new RouteNetworkElementIdList() { TestRouteNetwork.CO_1, TestRouteNetwork.S1, TestRouteNetwork.HH_1, TestRouteNetwork.S2, TestRouteNetwork.HH_2, TestRouteNetwork.S4, TestRouteNetwork.CC_1 };
             var validateInterestCommand = new ValidateWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), walk);
 
             var validateResult = await _commandDispatcher.HandleAsync<ValidateWalkOfInterest, Result<ValidatedRouteNetworkWalk>>(validateInterestCommand);
@@ -71,7 +70,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void ValidateValidWalkWithBothNodeAndSegmentIdsThatOverlap_ShouldSucceed()
+        public async Task ValidateValidWalkWithBothNodeAndSegmentIdsThatOverlap_ShouldSucceed()
         {
             var walk = new RouteNetworkElementIdList() { TestRouteNetwork.HH_1, TestRouteNetwork.S1, TestRouteNetwork.CO_1, TestRouteNetwork.S1, TestRouteNetwork.HH_1 };
             var validateInterestCommand = new ValidateWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), walk);
@@ -86,7 +85,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void ValidateInvalidWalkWithBothNodeAndSegmentIds_ShouldFail()
+        public async Task ValidateInvalidWalkWithBothNodeAndSegmentIds_ShouldFail()
         {
             // There's a hole in this walk
             var walk = new RouteNetworkElementIdList() { TestRouteNetwork.HH_1, TestRouteNetwork.S1, TestRouteNetwork.CO_1, TestRouteNetwork.S1, TestRouteNetwork.HH_1, TestRouteNetwork.S4, TestRouteNetwork.CC_1 };
@@ -101,7 +100,7 @@ namespace OpenFTTH.RouteNetwork.Tests
 
 
         [Fact]
-        public async void ValidateInvalidWalk_ShouldFail()
+        public async Task ValidateInvalidWalk_ShouldFail()
         {
             // There's a hole in this walk
             var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S2, TestRouteNetwork.S1, TestRouteNetwork.S5 };
@@ -114,7 +113,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void ValidatedWalkEqualTest_ShouldSucceed()
+        public async Task ValidatedWalkEqualTest_ShouldSucceed()
         {
             // We create two walks. One that goes CO_1 -> HH_1 -> HH_2 -> to CC_1, and one that goes the opposite way.
             // These two walks are to be treated as equal
@@ -138,10 +137,8 @@ namespace OpenFTTH.RouteNetwork.Tests
             walk1.Equals(walk2).Should().BeTrue();
         }
 
-
-
         [Fact]
-        public async void ValidatedWalkEqualTest_ShouldFail()
+        public async Task ValidatedWalkEqualTest_ShouldFail()
         {
             // We create two walks that are not equal
             var validateInterestCommand1 = new ValidateWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), new RouteNetworkElementIdList() { TestRouteNetwork.S1, TestRouteNetwork.S2 });
@@ -160,6 +157,5 @@ namespace OpenFTTH.RouteNetwork.Tests
 
             walk1.Equals(walk2).Should().BeFalse();
         }
-
     }
 }

@@ -5,6 +5,7 @@ using OpenFTTH.Events.RouteNetwork.Infos;
 using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.RouteNetwork.Tests.Fixtures;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace OpenFTTH.RouteNetwork.Tests
@@ -20,9 +21,8 @@ namespace OpenFTTH.RouteNetwork.Tests
             _queryDispatcher = queryDispatcher;
         }
 
-        
         [Fact]
-        public async void QueryHandHoles100MeterRadiusFromJ1_ShouldReturn4HandHandholes()
+        public async Task QueryHandHoles100MeterRadiusFromJ1_ShouldReturn4HandHandholes()
         {
             // Setup
             var stops = new RouteNodeKindEnum[] { RouteNodeKindEnum.CentralOfficeSmall };
@@ -50,11 +50,10 @@ namespace OpenFTTH.RouteNetwork.Tests
             handHole10Trace.RouteNetworkSegmentIds[1].Should().Be(TestRouteNetwork.S5);
             handHole10Trace.RouteNetworkSegmentIds[2].Should().Be(TestRouteNetwork.S6);
             handHole10Trace.Distance.Should().BeInRange(94, 96);
-
         }
 
         [Fact]
-        public async void QueryHandHoles30MeterRadiusFromJ1_ShouldReturn3HandHandholes()
+        public async Task QueryHandHoles30MeterRadiusFromJ1_ShouldReturn3HandHandholes()
         {
             // Setup
             var stops = new RouteNodeKindEnum[] { RouteNodeKindEnum.CentralOfficeSmall };

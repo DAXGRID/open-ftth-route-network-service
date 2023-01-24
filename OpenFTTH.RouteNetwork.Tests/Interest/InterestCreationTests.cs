@@ -1,13 +1,14 @@
-﻿using OpenFTTH.CQRS;
+﻿using FluentAssertions;
+using FluentResults;
+using OpenFTTH.CQRS;
 using OpenFTTH.RouteNetwork.API.Commands;
 using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.RouteNetwork.Tests.Fixtures;
 using System;
-using Xunit;
-using FluentAssertions;
-using FluentResults;
 using System.Linq;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace OpenFTTH.RouteNetworkService.Tests.Interest
 {
@@ -23,7 +24,7 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
         }
 
         [Fact]
-        public async void CreateValidWalkOfInterestUsingOneSegmentIdOnly_ShouldReturnSuccess()
+        public async Task CreateValidWalkOfInterestUsingOneSegmentIdOnly_ShouldReturnSuccess()
         {
             // Route network subset used in this test:
             // (CO_1) <- (S1) -> (HH_1)
@@ -33,14 +34,14 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
 
             // Act
             var registerWalkOfInterestCommand = new RegisterWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), interestId, walk);
-            var registerWalkOfInterestCommandResult = await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>> (registerWalkOfInterestCommand);
+            var registerWalkOfInterestCommandResult = await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>>(registerWalkOfInterestCommand);
 
             var routeNetworkQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1 })
             {
                 RelatedInterestFilter = RelatedInterestFilterOptions.ReferencesFromRouteElementAndInterestObjects
             };
 
-            Result<GetRouteNetworkDetailsResult> routeNetworkQueryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>> (routeNetworkQuery);
+            Result<GetRouteNetworkDetailsResult> routeNetworkQueryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkQuery);
 
             // Assert command result
             registerWalkOfInterestCommandResult.IsSuccess.Should().BeTrue();
@@ -60,7 +61,7 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
         }
 
         [Fact]
-        public async void CreateValidWalkOfInterestUsingThreeSegments_ShouldReturnSuccess()
+        public async Task CreateValidWalkOfInterestUsingThreeSegments_ShouldReturnSuccess()
         {
             // Route network subset used in this test:
             // (CO_1) <- (S1) -> (HH_1) <- (S2) -> (HH_2) <- (S4) -> (CC_1)
@@ -94,7 +95,7 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
         }
 
         [Fact]
-        public async void CreateValidNodeOfInterest_ShouldReturnSuccess()
+        public async Task CreateValidNodeOfInterest_ShouldReturnSuccess()
         {
             var interestId = Guid.NewGuid();
             var routeNodeId = TestRouteNetwork.CC_1;
@@ -124,7 +125,7 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
         }
 
         [Fact]
-        public async void CreateValidWalkOfWithNonAjacentSegments_ShouldReturnSuccess()
+        public async Task CreateValidWalkOfWithNonAjacentSegments_ShouldReturnSuccess()
         {
             // Route network subset used in this test:
             // S5-S6-S9-S11
@@ -154,7 +155,7 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
 
 
         [Fact]
-        public async void CreateInvalidWalkOfInterestUsingOneNodeAndOneSegments_ShouldReturnFaliour()
+        public async Task CreateInvalidWalkOfInterestUsingOneNodeAndOneSegments_ShouldReturnFaliour()
         {
             // Route network subset used in this test:
             // (CO_1) <-> (S1)
@@ -172,7 +173,7 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
         }
 
         [Fact]
-        public async void CreateInvalidWalkOfInterestUsingTwoSeparatedSegments_ShouldReturnFaliour()
+        public async Task CreateInvalidWalkOfInterestUsingTwoSeparatedSegments_ShouldReturnFaliour()
         {
             // Route network subset used in this test:
             // (CO_1) <- (S1) -> (HH_1) hole in the walk here (HH_2) -> (S4) -> (CC_1)
@@ -190,7 +191,7 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
         }
 
         [Fact]
-        public async void CreateInvalidWalkOfInterestWithNonExistingRouteNetworkElement_ShouldReturnFaliour()
+        public async Task CreateInvalidWalkOfInterestWithNonExistingRouteNetworkElement_ShouldReturnFaliour()
         {
             var interestId = Guid.NewGuid();
 

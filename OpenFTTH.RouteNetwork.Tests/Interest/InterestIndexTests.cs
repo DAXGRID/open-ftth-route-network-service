@@ -7,7 +7,6 @@ namespace OpenFTTH.RouteNetwork.Tests
 {
     public class InterestIndexTests
     {
-
         [Fact]
         public void TestIndexingSingleWalkOfInterest()
         {
@@ -93,7 +92,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             var routeElement4 = Guid.NewGuid();
 
             // Create walk of interest spanning route element 1,2,3
-            var walkOfInterest1 = new RouteNetworkInterest(Guid.NewGuid(), RouteNetworkInterestKindEnum.WalkOfInterest,  new RouteNetworkElementIdList() { routeElement1, routeElement2, routeElement3 });
+            var walkOfInterest1 = new RouteNetworkInterest(Guid.NewGuid(), RouteNetworkInterestKindEnum.WalkOfInterest, new RouteNetworkElementIdList() { routeElement1, routeElement2, routeElement3 });
             index.Add(walkOfInterest1);
 
             // Create walk of interest spanning route element 2,3,4
@@ -139,7 +138,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             var routeElement4 = Guid.NewGuid();
 
             // Create a walk of interest spanning the first 3 route network elements
-            var walkOfInterest = new RouteNetworkInterest(Guid.NewGuid(), RouteNetworkInterestKindEnum.WalkOfInterest, new RouteNetworkElementIdList() { routeElement1, routeElement2, routeElement3 } );
+            var walkOfInterest = new RouteNetworkInterest(Guid.NewGuid(), RouteNetworkInterestKindEnum.WalkOfInterest, new RouteNetworkElementIdList() { routeElement1, routeElement2, routeElement3 });
             index.Add(walkOfInterest);
 
             // Create a walk of interest spanning the last 3 route network elements

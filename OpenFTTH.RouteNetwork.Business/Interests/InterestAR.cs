@@ -78,7 +78,7 @@ namespace OpenFTTH.RouteNetwork.Business.Interest
             // Reverse walk if one of its ends are opposite of existing walk ends
             var existingWalk = new ValidatedRouteNetworkWalk(_interest.RouteNetworkElementRefs);
             var newWalk = new ValidatedRouteNetworkWalk(walkValidationResult.Value);
-          
+
             if (newWalk.FromNodeId == existingWalk.ToNodeId || newWalk.ToNodeId == existingWalk.FromNodeId)
                 newWalk = newWalk.Reverse();
 

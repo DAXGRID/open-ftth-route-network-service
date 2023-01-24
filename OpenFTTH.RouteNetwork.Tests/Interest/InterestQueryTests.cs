@@ -1,13 +1,14 @@
-﻿using OpenFTTH.CQRS;
+﻿using FluentAssertions;
+using FluentResults;
+using OpenFTTH.CQRS;
 using OpenFTTH.RouteNetwork.API.Commands;
 using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.RouteNetwork.Tests.Fixtures;
 using System;
-using Xunit;
-using FluentAssertions;
-using FluentResults;
 using System.Linq;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace OpenFTTH.RouteNetwork.Tests
 {
@@ -23,14 +24,14 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void QueryReferencesFromRouteElementAndInterestObjects_ShouldReturnAllInterestInformation()
+        public async Task QueryReferencesFromRouteElementAndInterestObjects_ShouldReturnAllInterestInformation()
         {
             // Create interest (CO_1) <- (S1) -> (HH_1) that we can then try query
             var interestId = Guid.NewGuid();
 
             var walk = new RouteNetworkElementIdList() { TestRouteNetwork.S1 };
             var createInterestCommand = new RegisterWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), interestId, walk);
-            
+
             await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>>(createInterestCommand);
 
             // Act: Query CO_1, S1, HH_1 and HH_2
@@ -38,7 +39,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             {
                 RelatedInterestFilter = RelatedInterestFilterOptions.ReferencesFromRouteElementAndInterestObjects
             };
-            
+
             Result<GetRouteNetworkDetailsResult> queryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkQuery);
 
             // Assert that we got information back on all 4 network elements queried
@@ -68,7 +69,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void QueryReferencesFromRouteElementOnly_ShouldReturnInterestReferencesOnly()
+        public async Task QueryReferencesFromRouteElementOnly_ShouldReturnInterestReferencesOnly()
         {
             // Create interest (CO_1) <- (S1) -> (HH_1) that we can then try query
             var interestId = Guid.NewGuid();
@@ -107,7 +108,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void QueryExplicitlyRequestingNoInterestInformation_ShouldReturnNoInterestInformation()
+        public async Task QueryExplicitlyRequestingNoInterestInformation_ShouldReturnNoInterestInformation()
         {
             // Create interest (CO_1) <- (S1) -> (HH_1) that we can then try query
             var interestId = Guid.NewGuid();
@@ -140,7 +141,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void QueryByInterestId_ShouldSucced()
+        public async Task QueryByInterestId_ShouldSucced()
         {
             // Create two overlapping walk of interests that we can try to query on
             var interest1Id = Guid.NewGuid();
@@ -187,7 +188,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void QueryByNonExistingInterestId_ShouldFail()
+        public async Task QueryByNonExistingInterestId_ShouldFail()
         {
             // Act
             var routeNetworkQuery = new GetRouteNetworkDetails(new InterestIdList() { Guid.NewGuid() })
