@@ -13,7 +13,6 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling
         private readonly ILogger<InMemRouteNetworkRepository> _logger;
         private readonly IRouteNetworkState _routeNetworkState;
 
-
         public InMemRouteNetworkRepository(ILoggerFactory loggerFactory, IRouteNetworkState routeNetworkState)
         {
             if (null == loggerFactory)
@@ -59,6 +58,5 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling
 
             return Result.Ok<List<IRouteNetworkElement>>(routeNetworkElementFetched);
         }
-
     }
 }

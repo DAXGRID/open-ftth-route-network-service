@@ -8,6 +8,7 @@ using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.RouteNetwork.Tests.Fixtures;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace OpenFTTH.RouteNetwork.Tests
@@ -23,9 +24,8 @@ namespace OpenFTTH.RouteNetwork.Tests
             _queryDispatcher = queryDispatcher;
         }
 
-        
         [Fact]
-        public async void QueryRouteElement_ThatDontExists_ShouldReturnFailure()
+        public async Task QueryRouteElement_ThatDontExists_ShouldReturnFailure()
         {
             // Setup
             var nonExistingRouteNetworkElementId = Guid.NewGuid();
@@ -37,18 +37,15 @@ namespace OpenFTTH.RouteNetwork.Tests
 
             // Assert
             Assert.True(routeNodeQueryResult.IsFailed);
-
-            // Assert that the error msg contains the id of route network element that the service could not lookup
-            //Assert.Contains(nonExistingRouteNetworkElementId.ToString(), routeNodeQueryResult.Errors);
         }
 
         [Fact]
-        public async void QueryRouteElement_ThatExists_ShouldReturnSuccessAndAllRouteElementProperties()
+        public async Task QueryRouteElement_ThatExists_ShouldReturnSuccessAndAllRouteElementProperties()
         {
             // Setup
             var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1 });
 
-           // Act
+            // Act
             var routeNodeQueryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNodeQuery);
 
             // Assert
@@ -67,10 +64,9 @@ namespace OpenFTTH.RouteNetwork.Tests
             Assert.NotNull(theRouteNodeObjectReturned.LifecycleInfo);
             Assert.NotNull(theRouteNodeObjectReturned.SafetyInfo);
         }
-               
 
         [Fact]
-        public async void QueryMultiRouteElement_ShouldReturnSuccess()
+        public async Task QueryMultiRouteElement_ShouldReturnSuccess()
         {
             // Setup
             var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1, TestRouteNetwork.S13, TestRouteNetwork.S5 });
@@ -81,7 +77,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             // Assert
             Assert.True(queryResult.IsSuccess);
             Assert.Equal(3, queryResult.Value.RouteNetworkElements.Count);
-                        
+
             Assert.Equal(TestRouteNetwork.CO_1, queryResult.Value.RouteNetworkElements[TestRouteNetwork.CO_1].Id);
             Assert.Equal(RouteNetworkElementKindEnum.RouteNode, queryResult.Value.RouteNetworkElements[TestRouteNetwork.CO_1].Kind);
 
@@ -93,7 +89,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void ExplicitlyQueryCoordinatesOnly_ShouldReturnCoordinatesOnly()
+        public async Task ExplicitlyQueryCoordinatesOnly_ShouldReturnCoordinatesOnly()
         {
             // Setup
             var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1, TestRouteNetwork.S13 })
@@ -132,7 +128,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void ExplicitlyQueryRouteNodeInfoOnly_ShouldReturnRouteNodeInfoOnly()
+        public async Task ExplicitlyQueryRouteNodeInfoOnly_ShouldReturnRouteNodeInfoOnly()
         {
             // Setup
             var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1 })
@@ -150,7 +146,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             // Assert
             Assert.True(queryResult.IsSuccess);
             Assert.Single(queryResult.Value.RouteNetworkElements);
-            
+
             var nodeFromQueryResult = queryResult.Value.RouteNetworkElements[TestRouteNetwork.CO_1];
 
             // Assert that route node info is returned
@@ -168,7 +164,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void ExplicitlyQueryRouteSegmentInfoOnly_ShouldReturnRouteSegmentInfoOnly()
+        public async Task ExplicitlyQueryRouteSegmentInfoOnly_ShouldReturnRouteSegmentInfoOnly()
         {
             // Setup
             var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.S1 })
@@ -203,7 +199,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void ExplicitlyQueryNamingInfoOnly_ShouldReturnNamingInfoOnly()
+        public async Task ExplicitlyQueryNamingInfoOnly_ShouldReturnNamingInfoOnly()
         {
             // Setup
             var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1 })
@@ -215,6 +211,7 @@ namespace OpenFTTH.RouteNetwork.Tests
                 RelatedInterestFilter = RelatedInterestFilterOptions.None
             };
 
+            Console.WriteLine("Was here!");
             // Act
             var queryResult = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNodeQuery);
 
@@ -239,7 +236,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void ExplicitlyQueryMappingInfoOnly_ShouldReturnMappingInfoOnly()
+        public async Task ExplicitlyQueryMappingInfoOnly_ShouldReturnMappingInfoOnly()
         {
             // Setup
             var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1 })
@@ -274,7 +271,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void ExplicitlyQueryLifecyleInfoOnly_ShouldReturnLifecyleInfoOnly()
+        public async Task ExplicitlyQueryLifecyleInfoOnly_ShouldReturnLifecyleInfoOnly()
         {
             // Setup
             var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1 })
@@ -309,7 +306,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void ExplicitlyQuerySaftyInfoOnly_ShouldReturnSaftyInfoOnly()
+        public async Task ExplicitlyQuerySaftyInfoOnly_ShouldReturnSaftyInfoOnly()
         {
             // Setup
             var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { TestRouteNetwork.CO_1 })
@@ -344,7 +341,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void QueryNonExistingRouteNetworkElement_ShouldFail()
+        public async Task QueryNonExistingRouteNetworkElement_ShouldFail()
         {
             // Setup
             var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { Guid.NewGuid() })
@@ -365,10 +362,10 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void QueryWithNoInterestOrRouteElementIds_ShouldFail()
+        public async Task QueryWithNoInterestOrRouteElementIds_ShouldFail()
         {
             // Setup
-            var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() {})
+            var routeNodeQuery = new GetRouteNetworkDetails(new RouteNetworkElementIdList() { })
             {
                 RouteNetworkElementFilter = new RouteNetworkElementFilterOptions()
                 {

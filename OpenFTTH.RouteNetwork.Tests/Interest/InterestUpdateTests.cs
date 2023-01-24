@@ -1,13 +1,13 @@
-﻿using OpenFTTH.CQRS;
+﻿using FluentAssertions;
+using FluentResults;
+using OpenFTTH.CQRS;
 using OpenFTTH.RouteNetwork.API.Commands;
 using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.RouteNetwork.Tests.Fixtures;
 using System;
+using System.Threading.Tasks;
 using Xunit;
-using FluentAssertions;
-using FluentResults;
-using System.Linq;
 
 namespace OpenFTTH.RouteNetworkService.Tests.Interest
 {
@@ -23,7 +23,7 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
         }
 
         [Fact]
-        public async void UpdateInterestWithWalidWalk_ShouldReturnSuccess()
+        public async Task UpdateInterestWithWalidWalk_ShouldReturnSuccess()
         {
             // Route network subset used in this test:
             // (CO_1) <- (S1) -> (HH_1)
@@ -45,7 +45,7 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
 
             // Act
             var registerWalkOfInterestCommand = new RegisterWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), interestId, walk);
-            var registerWalkOfInterestCommandResult = await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>> (registerWalkOfInterestCommand);
+            var registerWalkOfInterestCommandResult = await _commandDispatcher.HandleAsync<RegisterWalkOfInterest, Result<RouteNetworkInterest>>(registerWalkOfInterestCommand);
 
             Result<GetRouteNetworkDetailsResult> routeNetworkQueryResultBefore = await _queryDispatcher.HandleAsync<GetRouteNetworkDetails, Result<GetRouteNetworkDetailsResult>>(routeNetworkQuery_CO1);
 
@@ -75,7 +75,7 @@ namespace OpenFTTH.RouteNetworkService.Tests.Interest
         }
 
         [Fact]
-        public async void UpdateInterestWithInvalidWalk_ShouldFail()
+        public async Task UpdateInterestWithInvalidWalk_ShouldFail()
         {
             // Route network subset used in this test:
             // (CO_1) <- (S1) -> (HH_1)

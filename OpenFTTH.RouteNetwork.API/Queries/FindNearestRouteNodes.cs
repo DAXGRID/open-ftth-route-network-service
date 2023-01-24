@@ -1,7 +1,6 @@
 ﻿using FluentResults;
 using OpenFTTH.CQRS;
 using OpenFTTH.Events.RouteNetwork.Infos;
-using OpenFTTH.RouteNetwork.API.Model;
 using System;
 
 namespace OpenFTTH.RouteNetwork.API.Queries

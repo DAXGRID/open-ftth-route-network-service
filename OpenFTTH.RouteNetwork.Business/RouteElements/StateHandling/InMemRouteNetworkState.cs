@@ -4,10 +4,10 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using OpenFTTH.CQRS;
-using OpenFTTH.Events.RouteNetwork;
 using OpenFTTH.EventSourcing;
-using OpenFTTH.RouteNetwork.Business.RouteElements.Projection;
+using OpenFTTH.Events.RouteNetwork;
 using OpenFTTH.RouteNetwork.Business.RouteElements.Model;
+using OpenFTTH.RouteNetwork.Business.RouteElements.Projection;
 using System;
 using System.Collections.Generic;
 
@@ -25,7 +25,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling
         private readonly IQueryDispatcher _queryDispatcher;
 
         private InMemoryObjectManager _objectManager = new InMemoryObjectManager();
-        
+
         private bool _loadMode = true;
         private ITransaction? _loadModeTransaction;
         private ITransaction? _cmdTransaction;
@@ -36,7 +36,12 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling
         public DateTime LastEventRecievedTimestamp => __lastEventRecievedTimestamp;
         public long NumberOfObjectsLoaded => _numberOfObjectsLoaded;
 
-        public InMemRouteNetworkState(ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IEventStore eventStore, ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher)
+        public InMemRouteNetworkState(
+            ILoggerFactory loggerFactory,
+            IServiceProvider serviceProvider,
+            IEventStore eventStore,
+            ICommandDispatcher commandDispatcher,
+            IQueryDispatcher queryDispatcher)
         {
             if (null == loggerFactory)
             {
@@ -77,7 +82,9 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling
             var routeNetworkEventHandler = new RouteNetworkProjection(_loggerFactory, this, _eventStore, _commandDispatcher, _queryDispatcher);
 
             foreach (var editOperationEvent in editOperationEvents)
+            {
                 routeNetworkEventHandler.HandleEvent(editOperationEvent);
+            }
 
             FinishLoadMode();
         }

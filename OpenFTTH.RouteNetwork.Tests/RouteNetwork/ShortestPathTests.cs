@@ -4,6 +4,7 @@ using OpenFTTH.CQRS;
 using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.RouteNetwork.Tests.Fixtures;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace OpenFTTH.RouteNetwork.Tests
@@ -19,11 +20,9 @@ namespace OpenFTTH.RouteNetwork.Tests
             _queryDispatcher = queryDispatcher;
         }
 
-        
         [Fact]
-        public async void ShortestPathBetweenHH10AndJ2()
+        public async Task ShortestPathBetweenHH10AndJ2()
         {
-
             var shortestPathQuery = new ShortestPathBetweenRouteNodes(TestRouteNetwork.HH_10, TestRouteNetwork.J_2);
 
             // Act
@@ -47,9 +46,8 @@ namespace OpenFTTH.RouteNetwork.Tests
 
 
         [Fact]
-        public async void ShortestPathBetweenJ1AndJ2()
+        public async Task ShortestPathBetweenJ1AndJ2()
         {
-
             var shortestPathQuery = new ShortestPathBetweenRouteNodes(TestRouteNetwork.J_1, TestRouteNetwork.J_2);
 
             // Act
@@ -66,9 +64,8 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void ShortestPathBetweenJ2AndJ1()
+        public async Task ShortestPathBetweenJ2AndJ1()
         {
-
             var shortestPathQuery = new ShortestPathBetweenRouteNodes(TestRouteNetwork.J_2, TestRouteNetwork.J_1);
 
             // Act
@@ -85,9 +82,8 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void ShortestPathBetweenJ1AndSDU3()
+        public async Task ShortestPathBetweenJ1AndSDU3()
         {
-
             var shortestPathQuery = new ShortestPathBetweenRouteNodes(TestRouteNetwork.J_1, TestRouteNetwork.SDU_3);
 
             // Act
@@ -107,9 +103,8 @@ namespace OpenFTTH.RouteNetwork.Tests
 
 
         [Fact]
-        public async void ShortestPathBetweenSDU3AndJ1()
+        public async Task ShortestPathBetweenSDU3AndJ1()
         {
-
             var shortestPathQuery = new ShortestPathBetweenRouteNodes(TestRouteNetwork.SDU_3, TestRouteNetwork.J_1);
 
             // Act
@@ -128,7 +123,7 @@ namespace OpenFTTH.RouteNetwork.Tests
         }
 
         [Fact]
-        public async void ShortestPathBetweenJ1AndJ1()
+        public async Task ShortestPathBetweenJ1AndJ1()
         {
             var shortestPathQuery = new ShortestPathBetweenRouteNodes(TestRouteNetwork.J_1, TestRouteNetwork.J_1);
 
