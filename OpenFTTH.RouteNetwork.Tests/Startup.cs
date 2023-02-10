@@ -2,7 +2,6 @@
 using OpenFTTH.CQRS;
 using OpenFTTH.EventSourcing;
 using OpenFTTH.EventSourcing.InMem;
-using OpenFTTH.RouteNetwork.Business.Interest.Projections;
 using OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling;
 using OpenFTTH.RouteNetwork.Tests.Fixtures;
 using System;
@@ -28,10 +27,7 @@ namespace OpenFTTH.RouteNetworkService.Tests
             };
 
             services.AddCQRS(businessAssembly);
-
-            // We take a seperate assembly, because we do not want to register 'RouteNetworkProjection'.
-            // Since it can cause issues doing testing.
-            services.AddSingleton<IProjection, InterestsProjection>();
+            services.AddProjections(businessAssembly);
 
             // Test Route Network Data
             services.AddSingleton<ITestRouteNetworkData, TestRouteNetwork>();
