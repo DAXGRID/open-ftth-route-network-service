@@ -3,6 +3,7 @@ using FluentResults;
 using OpenFTTH.CQRS;
 using OpenFTTH.Events.Core.Infos;
 using OpenFTTH.Events.RouteNetwork.Infos;
+using OpenFTTH.EventSourcing;
 using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.RouteNetwork.Tests.Fixtures;
@@ -18,10 +19,14 @@ namespace OpenFTTH.RouteNetwork.Tests
         private ICommandDispatcher _commandDispatcher;
         private IQueryDispatcher _queryDispatcher;
 
-        public RouteNetworksQueryTests(ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher)
+        public RouteNetworksQueryTests(
+            ICommandDispatcher commandDispatcher,
+            IQueryDispatcher queryDispatcher,
+            IEventStore eventStore)
         {
             _commandDispatcher = commandDispatcher;
             _queryDispatcher = queryDispatcher;
+            eventStore.ScanForProjections();
         }
 
         [Fact]

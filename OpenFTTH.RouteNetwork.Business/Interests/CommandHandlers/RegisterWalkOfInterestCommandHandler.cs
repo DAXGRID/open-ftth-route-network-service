@@ -15,10 +15,13 @@ namespace OpenFTTH.RouteNetwork.Business.MutationHandling
         private readonly IEventStore _eventStore;
         private readonly IRouteNetworkRepository _routeNetworkRepository;
 
-        public RegisterWalkOfInterestCommandHandler(IEventStore eventStore, IRouteNetworkRepository routeNodeRepository)
+        public RegisterWalkOfInterestCommandHandler(
+            IEventStore eventStore,
+            IRouteNetworkRepository routeNodeRepository)
         {
             _eventStore = eventStore;
             _routeNetworkRepository = routeNodeRepository;
+            eventStore.ScanForProjections();
         }
 
         public Task<Result<RouteNetworkInterest>> HandleAsync(RegisterWalkOfInterest command)
