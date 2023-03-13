@@ -1,8 +1,11 @@
 ﻿using FluentAssertions;
 using FluentResults;
 using OpenFTTH.CQRS;
+using OpenFTTH.RouteNetwork.API.Commands;
+using OpenFTTH.RouteNetwork.API.Model;
 using OpenFTTH.RouteNetwork.API.Queries;
 using OpenFTTH.RouteNetwork.Tests.Fixtures;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -120,6 +123,16 @@ namespace OpenFTTH.RouteNetwork.Tests
             nearestNodeQueryResult.Value.RouteNetworkElementIds[2].Should().Be(TestRouteNetwork.J_2);
             nearestNodeQueryResult.Value.RouteNetworkElementIds[1].Should().Be(TestRouteNetwork.S10);
             nearestNodeQueryResult.Value.RouteNetworkElementIds[0].Should().Be(TestRouteNetwork.SDU_3);
+
+            RouteNetworkElementIdList list = new();
+            list.AddRange(nearestNodeQueryResult.Value.RouteNetworkElementIds);
+
+            var validatorQuery = new ValidateWalkOfInterest(Guid.NewGuid(), new UserContext("test", Guid.Empty), list);
+
+            var validatoresult = await _commandDispatcher.HandleAsync<ValidateWalkOfInterest, Result<ValidatedRouteNetworkWalk>>(validatorQuery);
+            validatoresult.IsSuccess.Should().BeTrue();
+            
+
         }
 
         [Fact]

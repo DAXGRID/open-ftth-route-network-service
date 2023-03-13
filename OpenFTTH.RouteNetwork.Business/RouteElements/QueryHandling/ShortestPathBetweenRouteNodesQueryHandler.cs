@@ -118,24 +118,28 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
             {
                 if (routeNetworkElement is RouteSegment segment)
                 {
-                    var fromNodeId = segment.InV(version).Id;
-                    var toNodeId = segment.OutV(version).Id;
-
-                    if (graph.Nodes.TryGetValue(fromNodeId, out Node fromNode))
+                    // Only add segment if it has never been deleted
+                    if (routeNetworkElement.DeletionVersion == null)
                     {
-                        if (graph.Nodes.TryGetValue(toNodeId, out Node toNode))
+                        var fromNodeId = segment.InV(version).Id;
+                        var toNodeId = segment.OutV(version).Id;
+
+                        if (graph.Nodes.TryGetValue(fromNodeId, out Node fromNode))
                         {
-                            var edgeForward = new Edge(fromNode, toNode, Velocity.FromKilometersPerHour(1000));
-                            graph.EdgeToRouteSegmentId.Add(edgeForward, segment.Id);
+                            if (graph.Nodes.TryGetValue(toNodeId, out Node toNode))
+                            {
+                                var edgeForward = new Edge(fromNode, toNode, Velocity.FromKilometersPerHour(1000));
+                                graph.EdgeToRouteSegmentId.Add(edgeForward, segment.Id);
 
-                            var edgeBackward = new Edge(toNode, fromNode, Velocity. FromKilometersPerHour(1000));
-                            graph.EdgeToRouteSegmentId.Add(edgeBackward, segment.Id);
+                                var edgeBackward = new Edge(toNode, fromNode, Velocity.FromKilometersPerHour(1000));
+                                graph.EdgeToRouteSegmentId.Add(edgeBackward, segment.Id);
 
-                            fromNode.Outgoing.Add(edgeForward);
-                            toNode.Incoming.Add(edgeForward);
+                                fromNode.Outgoing.Add(edgeForward);
+                                toNode.Incoming.Add(edgeForward);
 
-                            fromNode.Incoming.Add(edgeBackward);
-                            toNode.Outgoing.Add(edgeBackward);
+                                fromNode.Incoming.Add(edgeBackward);
+                                toNode.Outgoing.Add(edgeBackward);
+                            }
                         }
                     }
                 }
