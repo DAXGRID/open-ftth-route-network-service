@@ -58,21 +58,48 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
                  );
             }
 
+            var destNode = _routeNetworkRepository.NetworkState.GetRouteNetworkElement(query.DestRouteNodeId) as RouteNode;
+
+            if (destNode == null)
+            {
+                return Task.FromResult(
+                     Result.Fail<ShortestPathBetweenRouteNodesResult>(new FindNearestRouteNodesError(FindNearestRouteNodesErrorCodes.INVALID_QUERY_ARGUMENT_ERROR_LOOKING_UP_SPECIFIED_ROUTE_NETWORK_ELEMENT_BY_ID, $"Error looking up route network node with id: {query.DestRouteNodeId}"))
+                 );
+            }
+
+            double expandPercent = 20;
+
+            for (int i = 0; i < 10; i++)
+            {
+                var result = AStartShortestPath(query.SourceRouteNodeId, query.DestRouteNodeId, expandPercent);
+
+                // If just got some of the way to the destination, try again doubling up expand percent
+                if (result.RouteNetworkElementIds.Count > 1 && result.RouteNetworkElementIds.First() == query.SourceRouteNodeId && result.RouteNetworkElementIds.Last() != query.DestRouteNodeId)
+                {
+                    expandPercent = expandPercent * 2;
+                }
+                else
+                {
+                    return Task.FromResult(
+                        Result.Ok<ShortestPathBetweenRouteNodesResult>(
+                            result
+                        )
+                    );
+                }
+            }
 
             return Task.FromResult(
-                Result.Ok<ShortestPathBetweenRouteNodesResult>(
-                    AStartShortestPath(query.SourceRouteNodeId, query.DestRouteNodeId)
-                )
+                    Result.Fail<ShortestPathBetweenRouteNodesResult>(new FindNearestRouteNodesError(FindNearestRouteNodesErrorCodes.ERROR_REACHING_DESTINATION, $"Giving up finding path between node with id: {query.SourceRouteNodeId} and {query.DestRouteNodeId}"))
             );
         }
 
-        private ShortestPathBetweenRouteNodesResult AStartShortestPath(Guid sourceRouteNodeId, Guid destRouteNodeId)
+        private ShortestPathBetweenRouteNodesResult AStartShortestPath(Guid sourceRouteNodeId, Guid destRouteNodeId, double expandPercent)
         {
             Stopwatch st = new Stopwatch();
 
             st.Start();
             
-            var graph = GetGraphForTracing(sourceRouteNodeId, destRouteNodeId);
+            var graph = GetGraphForTracing(sourceRouteNodeId, destRouteNodeId, expandPercent);
 
             var shortestPathResult = graph.ShortestPath(sourceRouteNodeId, destRouteNodeId);
 
@@ -82,7 +109,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
         }
 
 
-        private GraphHolder GetGraphForTracing(Guid sourceRouteNodeId, Guid destRouteNodeId)
+        private GraphHolder GetGraphForTracing(Guid sourceRouteNodeId, Guid destRouteNodeId, double expandPercent)
         {
             var extent = new Model.Envelope();
 
@@ -96,7 +123,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
             extent.Expand(50);
 
             // Expand 20 percent
-            extent.ExpandPercent(20);
+            extent.ExpandPercent(expandPercent);
 
             GraphHolder graph = new();
 
