@@ -73,19 +73,16 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
             {
                 var result = AStartShortestPath(query.SourceRouteNodeId, query.DestRouteNodeId, expandPercent);
 
-                // If just got some of the way to the destination, try again doubling up expand percent
-                if (result.RouteNetworkElementIds.Count > 1 && result.RouteNetworkElementIds.First() == query.SourceRouteNodeId && result.RouteNetworkElementIds.Last() != query.DestRouteNodeId)
-                {
-                    expandPercent = expandPercent * 2;
-                }
-                else
+                if (result.RouteNetworkElementIds.Count > 1 && result.RouteNetworkElementIds.First() == query.SourceRouteNodeId && result.RouteNetworkElementIds.Last() == query.DestRouteNodeId)
                 {
                     return Task.FromResult(
-                        Result.Ok<ShortestPathBetweenRouteNodesResult>(
-                            result
-                        )
-                    );
+                       Result.Ok<ShortestPathBetweenRouteNodesResult>(
+                           result
+                       )
+                   );
                 }
+
+                expandPercent = expandPercent * 2;
             }
 
             return Task.FromResult(
@@ -119,10 +116,20 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.QueryHandlers
             IRouteNode destNode = GetNode(destRouteNodeId);
             extent.ExpandToInclude(destNode.X, destNode.Y);
 
+
+            if (extent.Width < extent.Height)
+            {
+                extent.ExpandWidth((extent.Height - extent.Width) / 2);
+            }
+            else if (extent.Width > extent.Height)
+            {
+                extent.ExpandHeight((extent.Width - extent.Height) / 2);
+            }
+
             // Expand at least 50 meter to prevent small branch cables etc. to be out of extent
             extent.Expand(50);
 
-            // Expand 20 percent
+            // Expand percentage
             extent.ExpandPercent(expandPercent);
 
             GraphHolder graph = new();

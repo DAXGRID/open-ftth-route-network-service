@@ -144,9 +144,7 @@ namespace OpenFTTH.RouteNetwork.Tests
             var nearestNodeQueryResult = await _queryDispatcher.HandleAsync<ShortestPathBetweenRouteNodes, Result<ShortestPathBetweenRouteNodesResult>>(shortestPathQuery);
 
             // Assert
-            nearestNodeQueryResult.IsSuccess.Should().BeTrue();
-
-            nearestNodeQueryResult.Value.RouteNetworkElementIds.Count().Should().Be(0);
+            nearestNodeQueryResult.IsSuccess.Should().BeFalse();
         }
     }
 }

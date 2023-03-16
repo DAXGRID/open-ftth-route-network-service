@@ -31,6 +31,11 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.Model
             get { return MaxX - MinX; }
         }
 
+        public double Height
+        {
+            get { return MaxY - MinY; }
+        }
+
         public void ExpandToInclude(double x, double y)
         {
             if (MinX > x)
@@ -80,6 +85,19 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.Model
             MaxX += v;
             MaxY += v;
         }
+
+        public void ExpandWidth(double v)
+        {
+            MinX -= v;
+            MaxX += v;
+        }
+
+        public void ExpandHeight(double v)
+        {
+            MinY -= v;
+            MaxY += v;
+        }
+
 
         public void ExpandPercent(double percent)
         {
