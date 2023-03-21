@@ -13,6 +13,7 @@ using OpenFTTH.RouteNetwork.Business.RouteElements.Model;
 using OpenFTTH.RouteNetwork.Business.RouteElements.StateHandling;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace OpenFTTH.RouteNetwork.Business.RouteElements.Projection
 {
@@ -43,10 +44,10 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.Projection
             _commandDispatcher = commandDispatcher;
             _queryDispatcher = queryDispatcher;
 
-            ProjectEvent<RouteNetworkEditOperationOccuredEvent>(Project);
+            ProjectEventAsync<RouteNetworkEditOperationOccuredEvent>(ProjectAsync);
         }
 
-        private void Project(IEventEnvelope eventEnvelope)
+        private Task ProjectAsync(IEventEnvelope eventEnvelope)
         {
             switch (eventEnvelope.Data)
             {
@@ -57,6 +58,8 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.Projection
                     throw new ArgumentException(
                         $"Could not handle event of type '{eventEnvelope.GetType().Name}'.");
             }
+
+            return Task.CompletedTask;
         }
 
         internal void HandleEvent(RouteNetworkEditOperationOccuredEvent request)
@@ -141,6 +144,7 @@ namespace OpenFTTH.RouteNetwork.Business.RouteElements.Projection
                             HandleSplitCommand(request, command, trans);
                         }
                     }
+
                 }
             }
         }
