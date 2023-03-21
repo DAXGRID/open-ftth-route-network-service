@@ -6,6 +6,7 @@ using OpenFTTH.RouteNetwork.Business.StateHandling.Interest;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace OpenFTTH.RouteNetwork.Business.Interest.Projections
 {
@@ -16,10 +17,10 @@ namespace OpenFTTH.RouteNetwork.Business.Interest.Projections
 
         public InterestsProjection()
         {
-            ProjectEvent<WalkOfInterestRegistered>(Project);
-            ProjectEvent<WalkOfInterestRouteNetworkElementsModified>(Project);
-            ProjectEvent<NodeOfInterestRegistered>(Project);
-            ProjectEvent<InterestUnregistered>(Project);
+            ProjectEventAsync<WalkOfInterestRegistered>(ProjectAsync);
+            ProjectEventAsync<WalkOfInterestRouteNetworkElementsModified>(ProjectAsync);
+            ProjectEventAsync<NodeOfInterestRegistered>(ProjectAsync);
+            ProjectEventAsync<InterestUnregistered>(ProjectAsync);
         }
 
         public Result<RouteNetworkInterest> GetInterest(Guid interestId)
@@ -49,7 +50,7 @@ namespace OpenFTTH.RouteNetwork.Business.Interest.Projections
         }
 
 
-        private void Project(IEventEnvelope eventEnvelope)
+        private Task ProjectAsync(IEventEnvelope eventEnvelope)
         {
             switch (eventEnvelope.Data)
             {
@@ -80,6 +81,8 @@ namespace OpenFTTH.RouteNetwork.Business.Interest.Projections
                     }
                     break;
             }
+
+            return Task.CompletedTask;
         }
     }
 }
